@@ -17,7 +17,7 @@ window.TAROT = {
     "meaning": "新的开始、纯真、冒险、自由",
     "reversed": "鲁莽、冒险失控、天真、未准备就绪",
     "detail": "站在悬崖边缘的旅人，脚边是万丈深渊，却仰头望天毫无畏惧。愚人代表旅程的起点——一个全新的开始，带著纯真的勇气跃入未知。它提醒我们，有时候不需要知道目的地，只需信任直觉与生命的流动。",
-    "img": "assets/cards/tarot/0.jpg",
+    "img": "assets/cards/tarot/0.svg",
     "art": true
   },
   {
@@ -30,7 +30,7 @@ window.TAROT = {
     "meaning": "创造、行动、显化、资源",
     "reversed": "操纵、欺骗、天赋未发挥、行动受阻",
     "detail": "魔术师手握四元素工具，一手指天一手指地，宣告「如在上，如在下」。他代表意志力与显化能力——你拥有一切所需资源，关键在于是否善加运用。正位时行动果决，将想法化为现实。",
-    "img": "assets/cards/tarot/1.jpg",
+    "img": "assets/cards/tarot/1.svg",
     "art": true
   },
   {
@@ -43,7 +43,7 @@ window.TAROT = {
     "meaning": "直觉、潜意识、神秘、内在智慧",
     "reversed": "秘密被揭露、直觉失准、内在失衡、疏离",
     "detail": "女祭司端坐于两根柱子之间——黑暗与光明、意识与潜意识。她手持卷轴，象征隐秘的智慧。这张牌邀请你安静下来，倾听内在的声音，有些答案无法从外在寻得，只能从深处浮现。",
-    "img": "assets/cards/tarot/2.jpg",
+    "img": "assets/cards/tarot/2.svg",
     "art": true
   },
   {
@@ -56,7 +56,7 @@ window.TAROT = {
     "meaning": "丰饶、母性、滋养、创造力",
     "reversed": "过度依赖、窒息感、创造力受阻、挥霍",
     "detail": "皇后是大地之母，坐于丰饶的花园中。她代表创造力、母性与自然的丰盛。正位时生命如百花绽放，合作与孕育带来收获。她提醒你滋养自己也滋养他人，在柔软中找到力量。",
-    "img": "assets/cards/tarot/3.jpg",
+    "img": "assets/cards/tarot/3.svg",
     "art": true
   },
   {
@@ -69,7 +69,7 @@ window.TAROT = {
     "meaning": "权威、结构、掌控、父性",
     "reversed": "滥权、僵化、控制欲过强、弱势地位",
     "detail": "皇帝端坐石椅，铠甲之下是秩序的守护者。他代表结构、权威与父性法则。正位时建立稳固根基，以规则与纪律推动事物前进。他的力量不在蛮横，而在为混沌带来可预测的框架。",
-    "img": "assets/cards/tarot/4.jpg",
+    "img": "assets/cards/tarot/4.svg",
     "art": true
   },
   {
@@ -82,7 +82,7 @@ window.TAROT = {
     "meaning": "传统、信仰、指引、教导",
     "reversed": "叛逆、挑战传统、精神空虚、教条束䌸",
     "detail": "教皇头戴三重冠，手持权杖，是信仰与传统的守门人。他代表从体系中获得指引，也可能意味遵从社会期待的价值路径。正位时在制度中找到意义与归属，借助前人智慧站稳脚步。",
-    "img": "assets/cards/tarot/5.jpg",
+    "img": "assets/cards/tarot/5.svg",
     "art": true
   },
   {
@@ -95,7 +95,7 @@ window.TAROT = {
     "meaning": "爱、选择、结合、价值观",
     "reversed": "失衡、价值冲突、分离、错误抉择",
     "detail": "恋人牌中天使祝福著一对赤裸的男女，代表灵魂层面的结合。它不只是爱情——更是价值观的选择。正位时两颗心彼此呼应，在做决定时跟随内心真实的渴望，而非理性的权衡。",
-    "img": "assets/cards/tarot/6.jpg",
+    "img": "assets/cards/tarot/6.svg",
     "art": true
   },
   {
@@ -108,7 +108,7 @@ window.TAROT = {
     "meaning": "意志、胜利、前进、自律",
     "reversed": "失控、方向不明、力量分散、挫折",
     "detail": "战车驾驭者站在车上，两匹马一黑一白，象征对立力量的统合。他代表意志力与自律——在内在矛盾中找到方向并奋勇前进。胜利属于能驾驭自我的人，冲劲与控制缺一不可。",
-    "img": "assets/cards/tarot/7.jpg",
+    "img": "assets/cards/tarot/7.svg",
     "art": true
   },
   {
@@ -121,7 +121,7 @@ window.TAROT = {
     "meaning": "勇气、温和、内在力量、耐心",
     "reversed": "自我怀疑、懦弱、愤怒失控、失去耐心",
     "detail": "一个女子温柔地合拢狮子的嘴——不是靠蛮力，而是靠内在的平静与坚韧。力量牌提醒真正的强大不是压制，而是驯服。你拥有比想像中更多的勇气，用爱而非恐惧面对挑战。",
-    "img": "assets/cards/tarot/8.jpg",
+    "img": "assets/cards/tarot/8.svg",
     "art": true
   },
   {
@@ -134,7 +134,7 @@ window.TAROT = {
     "meaning": "内省、孤独、指引、智慧",
     "reversed": "隔离、退缩、固执、拒绝指引",
     "detail": "隐士提著灯笼站在雪山之巅，孤独却从容。他代表向内探索的旅程——在独处中找到智慧，在沉默中看清真相。有时候离开喧嚣不是逃避，而是为了听见自己灵魂的声音。",
-    "img": "assets/cards/tarot/9.jpg",
+    "img": "assets/cards/tarot/9.svg",
     "art": true
   },
   {
@@ -147,7 +147,7 @@ window.TAROT = {
     "meaning": "转变、机遇、循环、命运",
     "reversed": "逆转、运气低落、循环停滞、抗拒变化",
     "detail": "命运之轮在云中旋转，四方位的神兽见证著循环。它代表转变的到来——有些事情超出你的掌控，但正位时顺势而行便能乘上上升的浪潮。接受变化，因为命运的齿轮从不停止。",
-    "img": "assets/cards/tarot/10.jpg",
+    "img": "assets/cards/tarot/10.svg",
     "art": true
   },
   {
@@ -160,7 +160,7 @@ window.TAROT = {
     "meaning": "公平、真理、因果、平衡",
     "reversed": "不公、偏颇、逃避责任、失衡的因果",
     "detail": "正义女神手持天秤与剑，目光清明不偏不倚。她代表因果平衡——你所种下的因终将收获相应的果。正位时真相大白，公平的裁决带来秩序。这张牌提醒你，诚实面对自己就是最大的公正。",
-    "img": "assets/cards/tarot/11.jpg",
+    "img": "assets/cards/tarot/11.svg",
     "art": true
   },
   {
@@ -173,7 +173,7 @@ window.TAROT = {
     "meaning": "牺牲、转念、等待、臣服",
     "reversed": "无谓的牺牲、拖延、僵持、抗拒转变",
     "detail": "倒吊人头下脚上悬挂于树上，面容却安详。他代表自愿的牺牲与视角的翻转——有时候放手比挣扎更有力量。正位时在臣服中获得洞察，换个角度看世界，一切突然豁然开朗。",
-    "img": "assets/cards/tarot/12.jpg",
+    "img": "assets/cards/tarot/12.svg",
     "art": true
   },
   {
@@ -186,7 +186,7 @@ window.TAROT = {
     "meaning": "结束、转变、重生、放下",
     "reversed": "抗拒结束、拖延、恐惧变化、无法放下",
     "detail": "死神骑著白马，国王倒地，太阳在远方升起。它不代表字面意义的死亡——而是转变的必然。旧的结构必须崩塌，新的生命才能生长。正位时拥抱结束，因为每一次终点都是另一个起点。",
-    "img": "assets/cards/tarot/13.jpg",
+    "img": "assets/cards/tarot/13.svg",
     "art": true
   },
   {
@@ -199,7 +199,7 @@ window.TAROT = {
     "meaning": "平衡、耐心、调和、中庸",
     "reversed": "失衡、过度、急躁、调和失败",
     "detail": "节制天使一脚踏水一脚踏陆，将两杯水来回倾倒而不溢出。她代表调和与中庸——在对立之间找到平衡点。正位时耐心调配生活的各个层面，不偏不倚地前进，好的事物需要时间酝酿。",
-    "img": "assets/cards/tarot/14.jpg",
+    "img": "assets/cards/tarot/14.svg",
     "art": true
   },
   {
@@ -212,7 +212,7 @@ window.TAROT = {
     "meaning": "束缚、欲望、执著、阴影",
     "reversed": "解放、断瘾、觉醒束缚、看清执著",
     "detail": "恶魔链住一男一女，但锁链其实很松——束缚来自他们自己。这张牌揭露执著与欲望的陷阱。正位时它映照你不愿面对的阴影：物质依赖、有害的关系或自我设限。看清枷锁，就是挣脱的第一步。",
-    "img": "assets/cards/tarot/15.jpg",
+    "img": "assets/cards/tarot/15.svg",
     "art": true
   },
   {
@@ -225,7 +225,7 @@ window.TAROT = {
     "meaning": "突变、崩塌、觉醒、释放",
     "reversed": "避免崩塌、抗拒真相、恐惧突变、延缓觉醒",
     "detail": "高塔被闪电劈中，两人从窗口坠落。它是塔罗中最令人畏惧的牌——也是最必要的。虚假的根基必须崩塌，真正的重建才能开始。正位时突变虽然痛苦，却带来不可替代的觉醒。",
-    "img": "assets/cards/tarot/16.jpg",
+    "img": "assets/cards/tarot/16.svg",
     "art": true
   },
   {
@@ -238,7 +238,7 @@ window.TAROT = {
     "meaning": "希望、疗愈、灵感、宁静",
     "reversed": "失望、希望渺茫、灵感枯竭、失去信心",
     "detail": "一颗大星照耀著跪在水边的女子，她将水倒入池塘与大地。星星代表风暴后的希望与疗愈——当高塔的震撼褪去，宁静的光芒重新出现。正位时灵感涌现，伤口正在愈合，信任宇宙的馈赠。",
-    "img": "assets/cards/tarot/17.jpg",
+    "img": "assets/cards/tarot/17.svg",
     "art": true
   },
   {
@@ -251,7 +251,7 @@ window.TAROT = {
     "meaning": "幻象、直觉、不安、潜意识",
     "reversed": "迷雾散去、看清幻象、不安消退、直觉回稳",
     "detail": "月亮高悬，两只犬吠，一只蝾螈从水中爬出。月亮代表潜意识的幻象与不安——那些在黑暗中放大恐惧的想像。正位时直觉敏锐但需辨别真假，有些恐惧只是影子的游戏，不必全盘相信。",
-    "img": "assets/cards/tarot/18.jpg",
+    "img": "assets/cards/tarot/18.svg",
     "art": true
   },
   {
@@ -264,7 +264,7 @@ window.TAROT = {
     "meaning": "喜悦、成功、活力、清晰",
     "reversed": "乌云、自我膨胀、短暂喜悦、信心不足",
     "detail": "一个孩童骑在白马上，向日葵在身后绽放，太阳光芒四射。太阳牌是塔罗中最温暖的祝福——喜悦、成功与纯粹的活力。正位时一切宛如黎明般清晰，幸福不需要理由，光明本身就是答案。",
-    "img": "assets/cards/tarot/19.jpg",
+    "img": "assets/cards/tarot/19.svg",
     "art": true
   },
   {
@@ -277,7 +277,7 @@ window.TAROT = {
     "meaning": "觉醒、重生、召唤、宽恕",
     "reversed": "自我谴责、错过召唤、重蹈覆辙、拒绝成长",
     "detail": "天使吹响号角，亡者从棺木中升起迎接召唤。审判代表一个关键时刻——过去的作为决定此刻的清算。正位时觉醒到自己的选择力量，重生不是恩赐，而是你亲手挣来的。",
-    "img": "assets/cards/tarot/20.jpg",
+    "img": "assets/cards/tarot/20.svg",
     "art": true
   },
   {
@@ -290,7 +290,7 @@ window.TAROT = {
     "meaning": "圆满、完成、统合、成就",
     "reversed": "未完成、循环未闭、停滞不前、缺乏收尾",
     "detail": "一个舞者花环中跳跃，四方位的活物在旁见证。世界牌代表圆满与完成——一个长期的旅程抵达终点。正位时感受统合的成就，你已将所有碎片拼成完整拼图。庆祝，然后准备展开下一章。",
-    "img": "assets/cards/tarot/21.jpg",
+    "img": "assets/cards/tarot/21.svg",
     "art": true
   },
   {
