@@ -593,9 +593,13 @@
     (function () {
       var T = window.TAROT;
       if (!T || !T.cards || !T.cards.length) return;
-      var idx = seed % T.cards.length;
-      var upright = (Math.floor(seed / T.cards.length) % 2) === 0;
-      var card = T.cards[idx];
+      /* 仅从大牌（art:true 且有图）中抽每日一牌，确保画面可见 */
+      var artCards = T.cards.filter(function(c){ return c.art && c.img && c.img.length > 0; });
+      if (!artCards.length) artCards = T.cards.filter(function(c){ return c.img && c.img.length > 0; });
+      if (!artCards.length) return;
+      var idx = seed % artCards.length;
+      var upright = (Math.floor(seed / artCards.length) % 2) === 0;
+      var card = artCards[idx];
       if (!card) return;
       var img = $('hmCardImg');
       if (img && card.img) { img.src = card.img; }

@@ -99,13 +99,13 @@
     }
     function buildDeckOrder(){ deckOrder = shuffleArray(DATA.cards.map(function(_,i){ return i; })); }
 
-    // 建立正面内容：有图（art 或 img）则 <img>，无图则占位卡
+    // 建立正面内容：有图（art 或 img 非空）则 <img>，无图则占位卡
     function buildFront(card){
-      if(card.art || card.img){
+      if(card.art || (card.img && card.img.length > 0)){
         var f = document.createElement('img');
         f.alt = (card.name || '卡牌') + ' 正面';
         f.loading = 'lazy';
-        if(card.img && !card.art){ f.src = card.img; } // 雷诺曼：图即档案，立即载入
+        if(card.img && card.img.length > 0 && !card.art){ f.src = card.img; } // 雷诺曼：图即档案，立即载入
         return f;
       }
       var d = document.createElement('div');
@@ -328,7 +328,7 @@
       var slot = document.createElement('div'); slot.className = 'slot';
       var rc = document.createElement('div'); rc.className = 'read-card' + (rev ? ' rev' : '');
 
-      if(card.art || card.img){
+      if(card.art || (card.img && card.img.length > 0)){
         var im = document.createElement('img'); im.loading = 'lazy'; im.decoding = 'async';
         im.alt = (card.name || '卡牌') + (rev ? ' 逆位' : ' 正面');
         im.src = card.img;

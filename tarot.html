@@ -335,8 +335,11 @@
 
     function draw(){
       var q = (qInput.value || '').trim();
-      var idx = Math.floor(Math.random() * T.total);
-      var c = T.cards[idx];
+      /* 仅从有图的牌中随机抽取，避免抽到无图小牌 */
+      var artCards = T.cards.filter(function(c){ return c.img && c.img.length > 0; });
+      var pool = artCards.length ? artCards : T.cards;
+      var idx = Math.floor(Math.random() * pool.length);
+      var c = pool[idx];
       if(!c) return;
       img.src = c.img || '';
       img.alt = c.nameCn || '塔罗牌';
