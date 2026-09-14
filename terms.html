@@ -1,244 +1,108 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>用户协议 · Upon Star</title>
-<style>
-@font-face { font-family: 'CrimsonPro'; src: url('./_shared/fonts/CrimsonPro-Regular.ttf') format('truetype'); font-weight: 400; }
-@font-face { font-family: 'CrimsonPro'; src: url('./_shared/fonts/CrimsonPro-Bold.ttf') format('truetype'); font-weight: 700; }
-@font-face { font-family: 'Outfit'; src: url('./_shared/fonts/Outfit-Regular.ttf') format('truetype'); font-weight: 400; }
-@font-face { font-family: 'Outfit'; src: url('./_shared/fonts/Outfit-Bold.ttf') format('truetype'); font-weight: 700; }
-@font-face { font-family: 'Italiana'; src: url('./_shared/fonts/Italiana-Regular.ttf') format('truetype'); font-weight: 400; }
-@font-face { font-family: 'PoiretOne'; src: url('./_shared/fonts/PoiretOne-Regular.ttf') format('truetype'); font-weight: 400; }
-
-:root {
-  --bg: #040408; --bg2: #08080e; --surface: #0c0c14; --surface-light: #12121e;
-  --ink: #f0ece4; --ink-dim: #a09888; --muted: #605850;
-  --rule: rgba(200,164,92,0.12); --rule-bright: rgba(200,164,92,0.25);
-  --gold: #c8a45c; --gold-light: #e0c078; --gold-dim: #8a7040;
-  --east: #b06040; --west: #5078a0; --green: #6aad7a; --red: #c0605a;
-  --radius: 6px; --radius-card: 10px;
-  --font-serif: 'CrimsonPro', Georgia, 'Songti SC', serif;
-  --font-sans: 'Outfit', 'SF Pro Text', 'PingFang SC', system-ui, sans-serif;
-  --font-display: 'Italiana', 'CrimsonPro', Georgia, serif;
-  --font-mono: 'SF Mono', 'Monaco', 'Cascadia Code', 'Courier New', monospace;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--ink); font: 400 15px/1.8 var(--font-sans); -webkit-font-smoothing: antialiased; min-height: 100vh; }
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
-
-.sacred-light { position: fixed; top: -30%; left: 50%; transform: translateX(-50%); width: 1400px; height: 900px; background: radial-gradient(ellipse at center, rgba(200,164,92,0.05) 0%, transparent 65%); pointer-events: none; z-index: 1; }
-.sticky-nav { position: sticky; top: 0; z-index: 100; background: rgba(4,4,8,0.88); backdrop-filter: blur(16px); border-bottom: 1px solid var(--rule); padding: 14px 0; }
-.nav-inner { max-width: 900px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
-.logo { font: 400 20px var(--font-display); color: var(--gold); letter-spacing: 4px; text-transform: uppercase; text-decoration: none; }
-.logo span { color: var(--ink-dim); font-size: 14px; }
-.nav-back { color: var(--ink-dim); text-decoration: none; font: 400 12px var(--font-sans); letter-spacing: 1.5px; text-transform: uppercase; transition: color 0.3s; }
-.nav-back:hover { color: var(--gold); }
-
-.legal-wrap { position: relative; z-index: 2; max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
-.legal-hero { text-align: center; margin-bottom: 48px; }
-.legal-hero h1 { font: 400 40px/1.2 var(--font-display); letter-spacing: 2px; margin-bottom: 12px; }
-.legal-hero p { color: var(--ink-dim); font: 400 14px var(--font-sans); letter-spacing: 1px; }
-.gold-line { width: 80px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent); margin: 24px auto; opacity: 0.5; }
-
-.toc { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius-card); padding: 24px 28px; margin-bottom: 48px; }
-.toc h3 { font: 500 14px var(--font-sans); color: var(--gold); letter-spacing: 2px; margin-bottom: 16px; text-transform: uppercase; }
-.toc ol { margin-left: 20px; }
-.toc li { margin-bottom: 8px; }
-.toc li a { color: var(--ink-dim); text-decoration: none; transition: color 0.3s; font-size: 14px; }
-.toc li a:hover { color: var(--gold); }
-.toc li::marker { color: var(--gold-dim); }
-
-.section { margin-bottom: 48px; }
-.section h2 { font: 400 26px/1.3 var(--font-display); letter-spacing: 1.5px; color: var(--gold-light); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
-.section h3 { font: 600 16px var(--font-sans); color: var(--ink); margin: 24px 0 10px; letter-spacing: 0.5px; }
-.section p { margin-bottom: 14px; color: var(--ink); font-size: 15px; line-height: 1.8; }
-.section strong { color: var(--gold-light); font-weight: 700; }
-.section ul { margin: 12px 0 16px 20px; }
-.section li { margin-bottom: 8px; font-size: 14px; line-height: 1.7; color: var(--ink); }
-.section li::marker { color: var(--gold-dim); }
-
-.info-box { margin: 20px 0; padding: 16px 20px; border-radius: var(--radius); border: 1px solid var(--rule); font: 400 14px/1.7 var(--font-sans); }
-.info-box.tip { background: rgba(200,164,92,0.04); border-color: var(--rule-bright); }
-.info-box.tip strong { color: var(--gold); }
-.info-box.warn { background: rgba(176,96,64,0.06); border-color: rgba(176,96,64,0.2); }
-.info-box.warn strong { color: var(--east); }
-.info-box.danger { background: rgba(192,96,90,0.06); border-color: rgba(192,96,90,0.2); }
-.info-box.danger strong { color: var(--red); }
-
-.legal-footer { text-align: center; padding: 40px 24px; border-top: 1px solid var(--rule); position: relative; z-index: 2; }
-.legal-footer p { font: 400 12px var(--font-sans); color: var(--muted); letter-spacing: 1px; }
-.legal-footer .updated { color: var(--ink-dim); margin-bottom: 8px; }
-
-@media (max-width: 600px) {
-  .legal-hero h1 { font-size: 28px; }
-  .section h2 { font-size: 22px; }
-  .nav-inner { flex-direction: column; gap: 8px; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>使用条款 · Upon Star</title>
+  <meta name="description" content="Upon Star 平台使用条款：文化研究与心理探索参考，不构成专业建议。">
+  <meta property="og:title" content="使用条款 · Upon Star">
+  <meta property="og:type" content="website">
+  <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="assets/base.css?v=20260914c">
+  <style>
+    .legal{max-width:780px;margin:var(--space-xl) auto 0;}
+    .legal h1{font-family:var(--font-display);color:var(--text);text-align:center;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:6px;}
+    .legal .updated{text-align:center;color:var(--text-dim);font-family:var(--font-decor);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:var(--space-md);}
+    .legal h2{font-family:var(--font-display);color:var(--gold-light);font-size:1.2rem;margin:var(--space-lg) 0 8px;border-left:3px solid var(--gold);padding-left:10px;}
+    .legal p{font-family:var(--font-serif);font-size:.95rem;color:var(--text);line-height:1.85;margin-bottom:var(--space-sm);}
+    .legal ul{font-family:var(--font-serif);font-size:.92rem;color:var(--text);line-height:1.85;padding-left:22px;}
+    .legal li{margin-bottom:6px;}
+  </style>
+  <link rel="canonical" href="https://upon-star.com/terms.html">
+  <meta property="og:url" content="https://upon-star.com/terms.html">
+  <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="使用条款 · Upon Star">
+  <meta name="twitter:description" content="Upon Star 平台使用条款：文化研究与心理探索参考，不构成专业建议。">
 </head>
 <body>
+  <div class="sacred-light" aria-hidden="true"></div>
 
-<div class="sacred-light"></div>
+  <header class="site-nav">
+    <a class="brand" href="divination-homepage.html">Upon Star<small>UPON STAR</small></a>
+    <nav class="nav-tabs" aria-label="分类导航">
+      <a href="east.html">东方</a><a href="west.html">西方</a><a href="fusion.html">融合</a>
+      <a href="mbti.html">人格</a>
+      <a href="pair.html">配对</a>
+      <a href="today.html">今日</a>
+      <a href="user.html">我的</a>
+    </nav></header>
 
-<div class="sticky-nav">
-  <div class="nav-inner">
-    <a href="./divination-homepage.html" class="logo">Upon Star <span>·</span> 协议</a>
-    <a href="./divination-homepage.html" class="nav-back">← 返回首页</a>
-  </div>
-</div>
+  <main class="container">
+    <nav class="breadcrumb" aria-label="面包屑"><a href="divination-homepage.html">首页</a> / 使用条款</nav>
 
-<div class="legal-wrap">
+    <section class="legal">
+      <h1>使用条款</h1>
+      <div class="updated">最后更新：2026 年 8 月</div>
 
-  <div class="legal-hero">
-    <h1>用户协议与服务条款</h1>
-    <p>Upon Star · 最后更新：2026年8月</p>
-    <div class="gold-line"></div>
-  </div>
+      <p>欢迎使用 Upon Star（以下简称「本平台」）。请仔细阅读以下使用条款。当您开始使用本平台的任何工具，即视为同意以下条款。</p>
 
-  <div class="toc">
-    <h3>目录</h3>
-    <ol>
-      <li><a href="#nature">服务性质声明</a></li>
-      <li><a href="#disclaimer">免责声明</a></li>
-      <li><a href="#user">用户行为规范</a></li>
-      <li><a href="#paid">付费服务条款</a></li>
-      <li><a href="#ip">知识产权</a></li>
-      <li><a href="#data">用户数据</a></li>
-      <li><a href="#change">服务变更与终止</a></li>
-      <li><a href="#dispute">争议解决</a></li>
-    </ol>
-  </div>
+      <h2>一、平台定位</h2>
+      <p>Upon Star 是一处<strong>文化研究与心理探索参考</strong>的静心探索空间。我们融合东方易卦八字与西方塔罗占星，提供免费工具以协助用户进行自我探索与文化学习。</p>
+      <p><strong>本平台所有探索工具结果不构成任何专业建议</strong>，包括但不限于：医疗、法律、财务、心理治疗、人生重大决策等领域的指导。</p>
 
-  <!-- 1 -->
-  <div class="section" id="nature">
-    <h2>1. 服务性质声明</h2>
-    <p>Upon Star（以下简称"本站"）是一个<strong>传统文化研究与心理探索</strong>主题的网站，提供六爻、八字、塔罗、雷诺曼、星盘等东西方命理学的排盘工具与文化解读内容。</p>
-    <p><strong>本站所有内容均为文化研究与心理探索参考，不构成任何预测、决策、医疗、法律或投资建议。</strong>占卜结果仅供参考娱乐与自我反思，用户不应将其作为重大生活决策的依据。</p>
-    <p>本站不提供"算命""改运""消灾""转运"等服务，不承诺占卜结果的准确性或有效性。本站定位为命理学文化研究与心理探索平台，而非迷信活动或预测服务。</p>
-    <div class="info-box tip">
-      <strong>特别声明：</strong>用户在本站进行的所有占卜活动，应理解为对传统文化符号的探索性体验，而非对未来的预测或承诺。
-    </div>
-  </div>
+      <h2>二、工具性质</h2>
+      <ul>
+        <li>所有工具（六爻、八字、塔罗、雷诺曼、占星、融合比对、月度指引、公共指引、每日运势）均为<strong>本地算法</strong>，不涉及命运预测、超自然力量或神秘学主张。</li>
+        <li>塔罗牌意、八字格局、占星相位等内容均基于<strong>传统符号体系</strong>与<strong>心理原型</strong>，非个人命运的科学预测。</li>
+        <li>解读结果的可信度取决于用户自身的心理投射与符号解读，平台不为其准确性背书。</li>
+      </ul>
 
-  <!-- 2 -->
-  <div class="section" id="disclaimer">
-    <h2>2. 免责声明</h2>
-    <p>在法律允许的最大范围内，本站不对以下情况承担责任：</p>
-    <ul>
-      <li><strong>占卜结果的不准确性：</strong>所有占卜内容基于传统文化体系的符号推演，本站不对其准确性、完整性或适用性做出任何保证</li>
-      <li><strong>用户决策后果：</strong>用户基于本站内容做出的任何决策（包括但不限于感情、事业、财务、健康相关决定），后果由用户自行承担</li>
-      <li><strong>服务中断：</strong>因服务器维护、网络故障、不可抗力等原因导致的服务中断或数据丢失</li>
-      <li><strong>解读内容的主观性：</strong>付费深度解读内容由解读师个人提供，属于主观文化分析，不代表本站立场</li>
-    </ul>
-    <div class="info-box danger">
-      <strong>重要提示：</strong>如果您正在经历心理健康问题、医疗问题或法律纠纷，请寻求专业医师、律师或相关专业人士的帮助，<strong>切勿依赖占卜结果</strong>。本站内容不能替代专业医疗服务。
-    </div>
-  </div>
+      <h2>三、用户行为</h2>
+      <p>使用本平台时，请遵守中华人民共和国相关法律法规，不得：</p>
+      <ul>
+        <li>利用本平台进行任何<strong>迷信宣传</strong>、诈骗、误导他人，或冒充专业人士从事收费服务。</li>
+        <li>将本平台结果用于<strong>医疗诊断、法律纠纷、财经投资等专业领域</strong>的依据。</li>
+        <li>对本平台进行<strong>反向工程、批量爬取、商业转售</strong>，或将本平台作为其他服务的核心组件。</li>
+        <li>利用本平台从事任何违反公序良俗的活动。</li>
+      </ul>
 
-  <!-- 3 -->
-  <div class="section" id="user">
-    <h2>3. 用户行为规范</h2>
-    <p>使用本站服务时，用户应遵守以下规范：</p>
-    <ul>
-      <li>不得将本站内容用于任何违法或侵权目的</li>
-      <li>不得以本站内容为基础，向他人提供有偿"算命""预测"服务</li>
-      <li>不得利用本站内容进行欺诈、恐吓或诱导他人消费</li>
-      <li>不得对本站进行恶意攻击、数据爬取或反向工程</li>
-      <li>不得传播本站的付费解读内容（侵犯版权）</li>
-      <li>在留言板中不得发布违法、色情、暴力、广告或人身攻击内容</li>
-    </ul>
-    <p>违反上述规范的用户，本站有权限制或终止其访问权限，并保留追究法律责任的权利。</p>
-  </div>
+      <h2>四、知识产权</h2>
+      <p>本平台的卡牌图像、文字内容、算法代码、UI 设计均为本平台或授权方所有，<strong>未经书面许可不得复制、转载、修改或商业使用</strong>。</p>
+      <p>个别引用本平台内容（如截图、卦象记录）作个人非商业使用，请注明出处「Upon Star」即可。</p>
 
-  <!-- 4 -->
-  <div class="section" id="paid">
-    <h2>4. 付费服务条款</h2>
-    <h3>4.1 服务内容</h3>
-    <p>本站提供大部分占卜功能免费使用（排盘、牌阵展示、基础解读），以及付费深度解读服务。所有公共领域可获取的占卜知识内容均为<strong>免费开放</strong>。</p>
-    <p>唯一付费服务为<strong>「深度解读牌面」</strong>（Deep Reading），由专业解读师根据您的卦象/牌面提供一对一深度分析，结合东方易理与西方神秘学，为您呈现个性化解读。服务价格为<strong>¥88/次</strong>。</p>
+      <h2>五、费用</h2>
+      <p>本平台为<strong>个人非经营性网站</strong>，所有工具与内容<strong>完全免费开放</strong>，不设会员、内购与付费解锁，<strong>不销售任何商品或服务</strong>，亦不接受赞赏、打赏或赞助等任何形式的付款。详见<a href="refund.html">费用说明</a>。</p>
 
-    <h3>4.2 服务获取方式</h3>
-    <ul>
-      <li>深度解读服务通过<strong>微信客服</strong>渠道预约（微信号：uponstar_wx）</li>
-      <li>用户在占卜结果页点击「微信客服 获取深度解读」按钮，扫码添加微信</li>
-      <li>与解读师沟通确认问题后，通过微信支付完成付款</li>
-      <li>解读师在约定时间内提供一对一深度解读服务</li>
-    </ul>
+      <h2>六、责任限制</h2>
+      <p>本平台不对因使用本工具结果而作出的任何决定承担责任。如因本平台内容导致的损失（包括但不限于经济、健康、人际关系等），本平台不承担赔偿责任。</p>
+      <p>如您面临<strong>现实困境</strong>（心理困扰、人际冲突、财务危机等），请寻求专业人士（心理咨询师、律师、财务顾问、医师）协助。</p>
 
-    <h3>4.3 服务说明</h3>
-    <p>深度解读服务由解读师通过微信客服渠道提供。本站作为信息展示和预约引导平台，不对解读师的具体服务质量做出保证。</p>
-    <p>解读内容为<strong>主观文化分析</strong>，效果因人而异，本站不承诺解读结果的满意度。如对解读内容有异议，可通过微信客服与解读师沟通。</p>
-    <div class="info-box warn">
-      <strong>注意：</strong>购买付费服务前，请仔细阅读<a href="./refund.html">退款政策</a>。深度解读服务开始后视为服务已交付，原则上不支持退款。
-    </div>
-  </div>
+      <h2>七、条款修改</h2>
+      <p>本平台保留随时修改本条款的权利。修改后的条款将于本页公布，继续使用本平台即视为接受修改后的条款。</p>
 
-  <!-- 5 -->
-  <div class="section" id="ip">
-    <h2>5. 知识产权</h2>
-    <p>本站的所有内容，包括但不限于：</p>
-    <ul>
-      <li>网站设计、界面布局、视觉风格</li>
-      <li>占卜算法实现代码（六爻排盘、八字推算、星盘计算）</li>
-      <li>解读文本内容（免费与付费）</li>
-      <li>品牌名称"Upon Star"及相关标识</li>
-    </ul>
-    <p>均受知识产权法保护，未经本站书面许可，不得复制、转载、传播或用于商业目的。</p>
-    <p>本站使用的开源软件（@openfate/bazi-engine、lunar-javascript 等）遵循其各自的 MIT 开源协议。星盘计算基于公共领域的 VSOP87 行星理论。</p>
-  </div>
+      <h2>八、联系方式</h2>
+      <p>如对本条款有疑问，请通过微信 <strong>uponstar_wx</strong> 联系我们。</p>
+    </section>
 
-  <!-- 6 -->
-  <div class="section" id="data">
-    <h2>6. 用户数据</h2>
-    <p>本站高度重视用户隐私，详细的个人信息处理方式请参阅<a href="./privacy.html">隐私政策</a>。</p>
-    <p>基本原则：</p>
-    <ul>
-      <li>占卜过程中输入的个人信息（出生日期、姓名等）<strong>仅在前端浏览器中计算，不上传至服务器存储</strong></li>
-      <li>留言板数据存储在用户本地浏览器中（LocalStorage），不上传至服务器</li>
-      <li>本站<strong>不收集、不存储</strong>任何用户个人身份信息</li>
-      <li>深度解读服务中的沟通内容仅存于微信聊天记录中，本站服务器不留存</li>
-    </ul>
-  </div>
+    <hr class="gold-line">
 
-  <!-- 7 -->
-  <div class="section" id="change">
-    <h2>7. 服务变更与终止</h2>
-    <p>本站保留以下权利：</p>
-    <ul>
-      <li>随时修改、暂停或终止部分或全部服务，无需提前通知</li>
-      <li>调整付费服务的价格和内容</li>
-      <li>修改本协议条款，修改后的条款自发布之日起生效</li>
-    </ul>
-    <p>如本站终止运营，已预约但未开始的深度解读服务将全额退款。</p>
-  </div>
+    <section class="section">
+      <p class="disclaimer" style="text-align:center;max-width:680px;margin:0 auto;font-size:.85rem;">
+        免责声明：本平台内容仅用于文化研究与心理探索参考，不构成任何专业建议。 本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+    </section>
+  </main>
 
-  <!-- 8 -->
-  <div class="section" id="dispute">
-    <h2>8. 争议解决</h2>
-    <p>如因本站服务产生争议，双方应首先通过友好协商解决。协商不成的，可通过以下途径：</p>
-    <ul>
-      <li>通过微信客服渠道与本站运营者沟通</li>
-      <li>通过微信支付的交易纠纷处理机制</li>
-      <li>向本站运营者所在地有管辖权的人民法院提起诉讼</li>
-    </ul>
-    <p>本协议的订立、效力、解释、履行及争议解决均适用中华人民共和国法律。</p>
-  </div>
-
-  <div class="info-box tip">
-    <strong>联系我们：</strong>如有任何关于本协议的疑问，请通过微信客服（uponstar_wx）与我们联系。
-  </div>
-
-</div>
-
-<div class="legal-footer">
-  <p class="updated">最后更新：2026年8月</p>
-  <p>Upon Star · 用户协议与服务条款 · wish upon a star</p>
-</div>
-
+  <footer class="site-footer">
+    <nav class="links" aria-label="页脚导航">
+      <a href="about.html">关于</a><a href="faq.html">常见问题</a><a href="guestbook.html">画廊</a>
+      <a href="terms.html">条款</a><a href="privacy.html">隐私</a><a href="refund.html">费用</a>
+    </nav>
+    <p class="disclaimer">本平台内容仅用于文化研究与心理探索参考。所有推演计算均在您的设备本地完成。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+  </footer>
+  <script src="assets/site-util.js?v=20260914a"></script>
 </body>
 </html>

@@ -1,646 +1,272 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>留言板 · Upon Star</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>画廊 · 壁纸与头像 · Upon Star</title>
+  <meta name="description" content="Upon Star 画廊：经作者授权收录的星空主题壁纸与头像，可自由取用。每张均标注图源作者。">
+  <meta property="og:title" content="画廊 · 壁纸与头像 · Upon Star">
+  <meta property="og:type" content="website">
+  <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="assets/base.css?v=20260914c">
+  <style>
+    .gl-wrap{max-width:1080px;margin:var(--space-xl) auto 0;}
+    .gl-h{text-align:center;margin-bottom:var(--space-md);}
+    .gl-h h1{font-family:var(--font-display);color:var(--text);font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:6px;}
+    .gl-h p{font-family:var(--font-serif);color:var(--text-dim);max-width:620px;margin:0 auto;line-height:1.85;}
 
-<style>
-@font-face { font-family:'CrimsonPro'; src:url('./_shared/fonts/CrimsonPro-Regular.ttf') format('truetype'); font-weight:400; }
-@font-face { font-family:'CrimsonPro'; src:url('./_shared/fonts/CrimsonPro-Bold.ttf') format('truetype'); font-weight:700; }
-@font-face { font-family:'Outfit'; src:url('./_shared/fonts/Outfit-Regular.ttf') format('truetype'); font-weight:400; }
-@font-face { font-family:'Outfit'; src:url('./_shared/fonts/Outfit-Bold.ttf') format('truetype'); font-weight:700; }
-@font-face { font-family:'Italiana'; src:url('./_shared/fonts/Italiana-Regular.ttf') format('truetype'); font-weight:400; }
-@font-face { font-family:'PoiretOne'; src:url('./_shared/fonts/PoiretOne-Regular.ttf') format('truetype'); font-weight:400; }
+    /* 分区切换 */
+    .gl-tabs{display:flex;justify-content:center;gap:10px;margin-bottom:var(--space-md);}
+    .gl-tabs button{font-family:var(--font-sans);font-size:.86rem;padding:9px 24px;border-radius:999px;
+      border:1px solid var(--line);background:transparent;color:var(--text-dim);cursor:pointer;transition:.25s;}
+    .gl-tabs button:hover{border-color:var(--gold);color:var(--gold-light);}
+    .gl-tabs button[aria-selected="true"]{border-color:var(--gold);color:var(--gold);background:rgba(200,164,92,.08);}
 
-:root {
-  --bg:#040408; --bg2:#08080e; --surface:#0c0c14; --surface-light:#12121e;
-  --ink:#f0ece4; --ink-dim:#a09888; --muted:#605850;
-  --rule:rgba(200,164,92,0.12); --rule-bright:rgba(200,164,92,0.25);
-  --gold:#c8a45c; --gold-light:#e0c078; --gold-dim:#8a7040;
-  --east:#b06040; --west:#5078a0; --fusion:#7858a0;
-  --radius:6px; --radius-card:10px; --radius-full:999px;
-  --font-serif:'CrimsonPro',Georgia,'Songti SC',serif;
-  --font-sans:'Outfit','SF Pro Text','PingFang SC',system-ui,sans-serif;
-  --font-display:'Italiana','CrimsonPro',Georgia,serif;
-}
+    .gl-panel[hidden]{display:none;}
 
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; }
-body {
-  background:var(--bg); color:var(--ink);
-  font:400 15px/1.7 var(--font-sans); -webkit-font-smoothing:antialiased;
-  min-height:100vh; overflow-x:hidden;
-}
-::-webkit-scrollbar { width:5px; }
-::-webkit-scrollbar-track { background:var(--bg); }
-::-webkit-scrollbar-thumb { background:var(--gold-dim); border-radius:3px; }
+    /* 壁纸网格：竖屏卡更高，横屏卡跨两列 */
+    .gl-grid{display:grid;gap:var(--space-md);grid-template-columns:repeat(auto-fill,minmax(200px,1fr));}
+    .gl-card{position:relative;display:flex;flex-direction:column;
+      background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+      overflow:hidden;transition:.3s;}
+    .gl-card:hover{border-color:var(--gold);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.5);}
+    .gl-thumb{position:relative;width:100%;aspect-ratio:9/16;cursor:zoom-in;overflow:hidden;}
+    .gl-card.is-wide .gl-thumb{aspect-ratio:16/9;grid-column:span 1;}
+    .gl-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+    /* 占位样张：无真图时的示意底 */
+    .gl-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:8px;color:var(--gold-dim);font-family:var(--font-decor);letter-spacing:.2em;font-size:.72rem;text-align:center;padding:0 12px;}
+    .gl-card.is-phone .gl-thumb .gl-ph{background:
+      radial-gradient(ellipse at 50% 30%, rgba(200,164,92,.16) 0%, transparent 60%),
+      linear-gradient(200deg,#141225 0%,#0c0c16 60%,#191426 100%);}
+    .gl-card.is-wide  .gl-thumb .gl-ph{background:
+      radial-gradient(ellipse at 70% 40%, rgba(80,120,160,.18) 0%, transparent 60%),
+      linear-gradient(160deg,#10141f 0%,#0c0c16 55%,#131a2a 100%);}
+    .gl-card.is-ava   .gl-thumb .gl-ph{background:
+      radial-gradient(ellipse at 50% 38%, rgba(200,164,92,.20) 0%, transparent 62%),
+      linear-gradient(180deg,#161322 0%,#0d0d17 100%);}
+    .gl-meta{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line);}
+    .gl-txt{flex:1;min-width:0;}
+    .gl-title{font-family:var(--font-display);color:var(--gold-light);font-size:.98rem;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .gl-author{font-family:var(--font-serif);color:var(--text-dim);font-size:.76rem;margin-top:2px;}
+    .gl-dl{flex:none;font-family:var(--font-sans);font-size:.72rem;letter-spacing:.08em;
+      padding:6px 14px;border-radius:999px;border:1px solid var(--line);
+      color:var(--text-dim);text-decoration:none;transition:.25s;}
+    .gl-dl:hover{border-color:var(--gold);color:var(--gold-light);}
+    .gl-dl.is-ph{pointer-events:none;opacity:.45;}
 
-.sacred-light {
-  position:fixed; top:-30%; left:50%; transform:translateX(-50%);
-  width:1400px; height:900px;
-  background:radial-gradient(ellipse at center, rgba(200,164,92,0.05) 0%, transparent 65%);
-  pointer-events:none; z-index:1;
-}
+    /* 头像网格用方形 */
+    .gl-ava-grid{display:grid;gap:var(--space-md);grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+    .gl-ava-grid .gl-thumb{aspect-ratio:1;}
 
-.container { max-width:760px; margin:0 auto; padding:0 24px; }
+    /* 空态 */
+    .gl-empty{padding:var(--space-lg);text-align:center;font-family:var(--font-serif);
+      color:var(--text-dim);line-height:2;border:1px dashed var(--line);border-radius:var(--radius);}
 
-.sticky-nav {
-  position:sticky; top:0; z-index:100;
-  background:rgba(4,4,8,0.88); backdrop-filter:blur(16px) saturate(1.2);
-  border-bottom:1px solid var(--rule); padding:12px 0 10px;
-}
-.nav-inner {
-  max-width:1100px; margin:0 auto; padding:0 24px;
-  display:flex; flex-direction:column; align-items:center; gap:8px;
-}
-.logo { font:400 20px var(--font-display); color:var(--gold); letter-spacing:4px; text-transform:uppercase; text-decoration:none; }
-.logo span { color:var(--ink-dim); font-size:14px; }
-.nav-links { display:flex; gap:24px; align-items:center; justify-content:center; }
-.nav-links a { color:var(--ink-dim); text-decoration:none; font:400 12px var(--font-sans); letter-spacing:1.5px; text-transform:uppercase; transition:color 0.3s; }
-.nav-links a:hover { color:var(--gold); }
-.nav-links a.active { color:var(--gold); }
+    /* 灯箱 */
+    .gl-lb{position:fixed;inset:0;z-index:99;display:none;align-items:center;justify-content:center;
+      background:rgba(4,4,8,.9);padding:24px;}
+    .gl-lb.show{display:flex;}
+    .gl-lb-img{max-width:min(92vw,520px);max-height:82vh;border-radius:10px;border:1px solid var(--line);
+      box-shadow:0 24px 80px rgba(0,0,0,.8);}
+    .gl-lb-bar{position:absolute;top:18px;right:22px;display:flex;gap:12px;align-items:center;}
+    .gl-lb-bar a,.gl-lb-bar button{font-family:var(--font-sans);font-size:.8rem;padding:8px 18px;
+      border-radius:999px;border:1px solid var(--line);background:rgba(12,12,20,.8);
+      color:var(--text-dim);cursor:pointer;text-decoration:none;transition:.25s;}
+    .gl-lb-bar a:hover,.gl-lb-bar button:hover{border-color:var(--gold);color:var(--gold-light);}
+    .gl-lb-cap{position:absolute;bottom:20px;left:0;right:0;text-align:center;
+      font-family:var(--font-serif);color:var(--text-dim);font-size:.84rem;}
 
-/* Fortune circle */
-.nav-links a.fortune-circle {
-  width:40px; height:40px; border-radius:50%;
-  border:1px solid var(--rule-bright); background:rgba(200,164,92,0.06);
-  box-shadow:0 0 18px rgba(200,164,92,0.08), inset 0 0 12px rgba(200,164,92,0.03);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  color:var(--gold-light); font:600 10px/1.3 var(--font-sans); letter-spacing:1px;
-  text-decoration:none; transition:all 0.3s; -webkit-tap-highlight-color:transparent;
-  position:relative; flex-shrink:0; text-align:center;
-}
-.nav-links a.fortune-circle span { display:block; line-height:1.3; }
-.nav-links a.fortune-circle:hover {
-  border-color:var(--gold); color:var(--gold-light);
-  box-shadow:0 0 28px rgba(200,164,92,0.18), inset 0 0 16px rgba(200,164,92,0.06);
-  transform:translateY(-1px);
-}
+    .src-note{margin-top:var(--space-md);padding:var(--space-md);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);}
+    .src-note h3{font-family:var(--font-decor);color:var(--gold-light);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;margin:0 0 var(--space-sm);}
+    .src-note p{font-family:var(--font-serif);color:var(--text-dim);font-size:.9rem;line-height:1.85;margin:0 0 6px;}
+    .src-note p:last-child{margin-bottom:0;}
+    .meta-note{text-align:center;color:var(--text-dim);font-size:.74rem;margin-top:var(--space-md);font-family:var(--font-serif);font-style:italic;}
 
-/* HERO */
-.guest-hero { position:relative; text-align:center; padding:60px 24px 32px; z-index:2; }
-.guest-hero .label { font:400 11px var(--font-sans); color:var(--gold); letter-spacing:5px; text-transform:uppercase; margin-bottom:20px; }
-.guest-hero h1 { font:400 42px/1.2 var(--font-display); letter-spacing:3px; margin-bottom:16px; }
-.guest-hero h1 em {
-  font-style:normal;
-  background:linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
-}
-.guest-hero .subtitle { font:400 14px/1.8 var(--font-sans); color:var(--ink-dim); max-width:480px; margin:0 auto; }
-.gold-line { width:100px; height:1px; background:linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent); margin:28px auto; opacity:0.5; }
-
-/* Form */
-.guest-form-wrap { position:relative; z-index:2; padding:24px 0; }
-.form-card {
-  background:var(--surface); border:1px solid var(--rule);
-  border-radius:var(--radius-card); padding:32px 28px; position:relative;
-}
-.form-card .card-corner { position:absolute; width:28px; height:28px; pointer-events:none; z-index:3; }
-.form-card .card-corner.tl { top:8px; left:8px; }
-.form-card .card-corner.tr { top:8px; right:8px; transform:scaleX(-1); }
-.form-card .card-corner.bl { bottom:8px; left:8px; transform:scaleY(-1); }
-.form-card .card-corner.br { bottom:8px; right:8px; transform:scale(-1); }
-.form-card .card-corner svg { width:100%; height:100%; opacity:0.25; }
-
-.form-group { margin-bottom:20px; }
-.form-label {
-  display:block; font:500 12px var(--font-sans);
-  color:var(--gold); letter-spacing:1.5px; text-transform:uppercase;
-  margin-bottom:8px;
-}
-.form-label .optional { color:var(--muted); font-weight:400; font-size:11px; }
-
-.form-input, .form-textarea, .form-select {
-  width:100%; padding:12px 16px;
-  background:rgba(4,4,8,0.6); border:1px solid var(--rule);
-  border-radius:var(--radius); color:var(--ink);
-  font:400 14px var(--font-sans); transition:border-color 0.3s;
-  outline:none;
-}
-.form-input:focus, .form-textarea:focus, .form-select:focus {
-  border-color:var(--gold-dim);
-  box-shadow:0 0 16px rgba(200,164,92,0.04);
-}
-.form-textarea { min-height:100px; resize:vertical; line-height:1.7; }
-.form-input::placeholder, .form-textarea::placeholder { color:var(--muted); }
-
-.form-select { cursor:pointer; appearance:none; -webkit-appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238a7040' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-position:right 14px center; padding-right:36px;
-}
-.form-select option { background:var(--surface); color:var(--ink); }
-
-/* Rating */
-.rating-wrap { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-.rating-star {
-  width:36px; height:36px; border-radius:50%;
-  border:1px solid var(--rule); background:rgba(4,4,8,0.4);
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; transition:all 0.3s; font-size:16px; color:var(--muted);
-}
-.rating-star:hover { border-color:var(--gold-dim); color:var(--gold-dim); }
-.rating-star.active {
-  border-color:var(--gold); color:var(--gold);
-  background:rgba(200,164,92,0.08);
-  box-shadow:0 0 16px rgba(200,164,92,0.06);
-}
-.rating-text { font:400 13px var(--font-sans); color:var(--ink-dim); margin-left:8px; }
-
-/* Submit */
-.form-submit {
-  display:inline-flex; align-items:center; gap:8px;
-  padding:14px 32px; border:none; border-radius:var(--radius-full);
-  background:linear-gradient(135deg, var(--gold-dim), var(--gold));
-  color:#040408; font:700 13px var(--font-sans); letter-spacing:1.5px;
-  cursor:pointer; transition:all 0.3s; text-transform:uppercase;
-}
-.form-submit:hover {
-  box-shadow:0 0 28px rgba(200,164,92,0.2); transform:translateY(-2px);
-}
-.form-submit:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-
-.form-hint { font:400 12px var(--font-sans); color:var(--muted); margin-top:12px; line-height:1.6; }
-
-/* Stats bar */
-.guest-stats {
-  display:flex; gap:24px; justify-content:center;
-  padding:24px 0; border-top:1px solid var(--rule);
-  border-bottom:1px solid var(--rule); margin:32px 0;
-}
-.stat-item { text-align:center; }
-.stat-item .num {
-  font:400 28px var(--font-display); color:var(--gold-light);
-}
-.stat-item .label {
-  font:400 11px var(--font-sans); color:var(--muted);
-  letter-spacing:1.5px; text-transform:uppercase; margin-top:2px;
-}
-
-/* Messages */
-.messages-wrap { position:relative; z-index:2; padding-bottom:48px; }
-.messages-header {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:24px;
-}
-.messages-header h2 { font:400 24px var(--font-display); color:var(--gold-light); letter-spacing:2px; }
-.messages-header .count { font:400 13px var(--font-sans); color:var(--muted); }
-
-.msg-card {
-  background:var(--surface); border:1px solid var(--rule);
-  border-radius:var(--radius-card); padding:20px 24px;
-  margin-bottom:16px; transition:all 0.4s; position:relative;
-}
-.msg-card:hover { border-color:var(--rule-bright); }
-.msg-card.highlight {
-  border-color:rgba(200,164,92,0.15);
-  box-shadow:0 0 24px rgba(200,164,92,0.04);
-}
-
-.msg-header {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:12px;
-}
-.msg-user {
-  display:flex; align-items:center; gap:10px;
-}
-.msg-avatar {
-  width:36px; height:36px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font:700 14px var(--font-sans); color:#040408;
-  flex-shrink:0;
-}
-.msg-avatar.east { background:var(--east); }
-.msg-avatar.west { background:var(--west); }
-.msg-avatar.fusion { background:var(--fusion); }
-.msg-avatar.gold { background:var(--gold); }
-.msg-info { display:flex; flex-direction:column; }
-.msg-name { font:500 14px var(--font-sans); color:var(--ink); }
-.msg-meta { font:400 11px var(--font-sans); color:var(--muted); letter-spacing:0.5px; }
-.msg-tag {
-  display:inline-block; font:500 10px var(--font-sans);
-  padding:3px 10px; border-radius:999px;
-  letter-spacing:0.5px; margin-left:6px;
-}
-.msg-tag.east { background:rgba(176,96,64,0.1); border:1px solid rgba(176,96,64,0.2); color:var(--east); }
-.msg-tag.west { background:rgba(80,120,160,0.1); border:1px solid rgba(80,120,160,0.2); color:var(--west); }
-.msg-tag.fusion { background:rgba(120,88,160,0.1); border:1px solid rgba(120,88,160,0.2); color:var(--fusion); }
-
-.msg-rating {
-  display:flex; gap:2px; align-items:center;
-}
-.msg-rating .star { font-size:14px; color:var(--muted); }
-.msg-rating .star.filled { color:var(--gold); }
-.msg-rating-text { font:400 11px var(--font-sans); color:var(--gold-dim); margin-left:6px; }
-
-.msg-body {
-  font:400 15px/1.8 var(--font-serif); color:var(--ink);
-  margin-bottom:8px;
-}
-.msg-footer {
-  display:flex; align-items:center; gap:16px;
-  padding-top:8px; border-top:1px solid rgba(200,164,92,0.06);
-}
-.msg-date { font:400 11px var(--font-sans); color:var(--muted); }
-
-/* Empty state */
-.empty-state {
-  text-align:center; padding:48px 24px;
-  color:var(--muted);
-}
-.empty-state .icon { font-size:48px; opacity:0.3; margin-bottom:16px; }
-.empty-state p { font:400 14px var(--font-sans); }
-
-/* Toast */
-.toast {
-  position:fixed; bottom:32px; left:50%;
-  transform:translateX(-50%) translateY(20px);
-  z-index:9999; padding:14px 28px;
-  background:rgba(12,12,20,0.95); border:1px solid var(--gold-dim);
-  border-radius:8px; color:var(--gold); font:400 13px var(--font-sans);
-  letter-spacing:1px; opacity:0; transition:all 0.4s;
-  backdrop-filter:blur(12px);
-  box-shadow:0 8px 32px rgba(0,0,0,0.5), 0 0 40px rgba(200,164,92,0.08);
-  pointer-events:none;
-}
-.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-/* Filter */
-.filter-bar { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
-.filter-btn {
-  padding:8px 16px; border:1px solid var(--rule);
-  border-radius:999px; background:rgba(12,12,20,0.6);
-  color:var(--ink-dim); font:500 12px var(--font-sans);
-  letter-spacing:0.5px; cursor:pointer; transition:all 0.3s;
-}
-.filter-btn:hover { border-color:var(--rule-bright); color:var(--gold); }
-.filter-btn.active {
-  border-color:var(--gold-dim); color:var(--gold-light);
-  background:rgba(200,164,92,0.06);
-}
-
-/* Footer */
-footer { text-align:center; padding:40px 24px; border-top:1px solid var(--rule); position:relative; z-index:2; }
-footer p { font:400 12px var(--font-sans); color:var(--muted); letter-spacing:1px; }
-footer .footer-links { margin-bottom:16px; display:flex; gap:24px; justify-content:center; }
-footer .footer-links a { color:var(--muted); text-decoration:none; font:400 12px var(--font-sans); transition:color 0.3s; }
-footer .footer-links a:hover { color:var(--gold); }
-
-@media (max-width:600px) {
-  .guest-hero h1 { font-size:30px; }
-  .guest-stats { flex-direction:column; gap:16px; }
-  .nav-inner { padding:0 16px; }
-  .logo { font-size:16px; letter-spacing:2px; }
-  .logo span { font-size:11px; }
-  .nav-links { flex-wrap:wrap; justify-content:center; gap:14px; }
-  .nav-links a { font-size:10px; }
-  .nav-links a.fortune-circle { width:34px; height:34px; font-size:8px; }
-  .form-card { padding:20px 16px; }
-}
-</style>
+    @media (max-width:640px){
+      .gl-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+      .gl-ava-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
+    }
+  </style>
+  <link rel="canonical" href="https://upon-star.com/guestbook.html">
+  <meta property="og:url" content="https://upon-star.com/guestbook.html">
+  <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="画廊 · 壁纸与头像 · Upon Star">
+  <meta name="twitter:description" content="经作者授权收录的星空主题壁纸与头像，每张均标注图源作者。">
 </head>
 <body>
+  <div class="sacred-light" aria-hidden="true"></div>
 
-<div class="sacred-light"></div>
+  <header class="site-nav">
+    <a class="brand" href="divination-homepage.html">Upon Star<small>UPON STAR</small></a>
+    <nav class="nav-tabs" aria-label="分类导航">
+      <a href="east.html">东方</a><a href="west.html">西方</a><a href="fusion.html">融合</a>
+      <a href="mbti.html">人格</a>
+      <a href="pair.html">配对</a>
+      <a href="today.html">今日</a>
+      <a href="user.html">我的</a>
+    </nav></header>
 
-<!-- NAV -->
-<div class="sticky-nav">
-  <div class="nav-inner">
-    <a href="./divination-homepage.html" class="logo">Upon Star <span>·</span> 留言板</a>
-    <nav class="nav-links">
-      <a href="./daily-fortune.html" class="fortune-circle" aria-label="每日运势"><span>每日</span><span>运势</span></a>
-      <a href="./liuyao.html">六爻</a>
-      <a href="./tarot.html">塔罗</a>
+  <main class="container">
+    <nav class="breadcrumb" aria-label="面包屑"><a href="divination-homepage.html">首页</a> / 画廊</nav>
+
+    <section class="gl-wrap">
+      <div class="gl-h">
+        <h1>画廊 · 壁纸与头像</h1>
+        <p>与星有关的图，经作者授权后收录于此，供你换上手机、摆上桌面。每张都标注了图源作者——喜欢就去看看他们的更多作品。</p>
+      </div>
+
+      <div class="gl-tabs" role="tablist" aria-label="画廊分区">
+        <button type="button" id="tabWp" role="tab" aria-selected="true" aria-controls="panelWp">壁纸</button>
+        <button type="button" id="tabAva" role="tab" aria-selected="false" aria-controls="panelAva">头像</button>
+      </div>
+
+      <!-- 壁纸 -->
+      <div class="gl-panel" id="panelWp" role="tabpanel" aria-labelledby="tabWp">
+        <div class="gl-grid" id="wpGrid"></div>
+      </div>
+
+      <!-- 头像 -->
+      <div class="gl-panel" id="panelAva" role="tabpanel" aria-labelledby="tabAva" hidden>
+        <div class="gl-ava-grid" id="avaGrid"></div>
+      </div>
+
+      <div class="src-note">
+        <h3>关于图片来源</h3>
+        <p>本页所有图片均为<strong>经创作者授权后收录</strong>，每张卡片下方都保留了原作者署名；授权记录由平台留存备查。</p>
+        <p>如果你是图源作者、希望补充署名信息或调整收录，或发现收录内容存在授权争议，请通过页脚的联系方式告诉我们，我们会在确认后第一时间处理。</p>
+        <p>图片仅供个人设备使用（壁纸、头像等），请勿去除署名后二次分发或用于商业用途。</p>
+      </div>
+
+      <p class="meta-note">内容由平台整理收录 · 每张图片均标注图源作者</p>
+    </section>
+
+    <hr class="gold-line">
+
+    <section class="section">
+      <p class="disclaimer" style="text-align:center;max-width:680px;margin:0 auto;font-size:.85rem;">
+        免责声明：本页图片归各自创作者所有，仅经授权在本站展示与取用；页面其余内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+    </section>
+  </main>
+
+  <!-- 灯箱 -->
+  <div class="gl-lb" id="glLb" role="dialog" aria-modal="true" aria-label="图片预览">
+    <div class="gl-lb-bar">
+      <a id="glLbDl" href="#" download>保存图片</a>
+      <button type="button" id="glLbClose">关闭</button>
+    </div>
+    <img class="gl-lb-img" id="glLbImg" src="" alt="">
+    <p class="gl-lb-cap" id="glLbCap"></p>
+  </div>
+
+  <footer class="site-footer">
+    <nav class="links" aria-label="页脚导航">
+      <a href="about.html">关于</a><a href="faq.html">常见问题</a><a href="guestbook.html">画廊</a>
+      <a href="terms.html">条款</a><a href="privacy.html">隐私</a><a href="refund.html">费用</a>
     </nav>
-  </div>
-</div>
+    <p class="disclaimer">本平台内容仅用于文化研究与心理探索参考。所有推演计算均在您的设备本地完成。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+  </footer>
 
-<!-- HERO -->
-<section class="guest-hero">
-  <div class="label">guestbook</div>
-  <h1>匿名<em>留言</em></h1>
-  <div class="gold-line"></div>
-  <p class="subtitle">
-    测过之后觉得准？想说什么都可以留。<br>
-    完全匿名，不收集任何个人信息。
-  </p>
-</section>
+  <script src="assets/gallery-data.js"></script>
+  <script>
+  (function(){
+    'use strict';
+    var G = window.GALLERY || { wallpapers: [], avatars: [] };
+    function esc(s){
+      return String(s).replace(/[&<>"']/g, function(c){
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
+    }
 
-<!-- FORM -->
-<section class="guest-form-wrap">
-  <div class="container">
-    <div class="form-card">
-      <div class="card-corner tl"><svg viewBox="0 0 32 32" fill="none"><path d="M0 0 L22 0 Q18 4 15 11 Q13 19 0 26 L0 22 Q11 17 13 11 Q14 6 18 3 L0 3 Z" fill="#c8a45c"/><circle cx="6" cy="6" r="2.2" fill="#c8a45c" opacity="0.6"/></svg></div>
-      <div class="card-corner tr"><svg viewBox="0 0 32 32" fill="none"><path d="M0 0 L22 0 Q18 4 15 11 Q13 19 0 26 L0 22 Q11 17 13 11 Q14 6 18 3 L0 3 Z" fill="#c8a45c"/><circle cx="6" cy="6" r="2.2" fill="#c8a45c" opacity="0.6"/></svg></div>
+    /* ---------- 卡片渲染 ---------- */
+    function cardHTML(item, kind){
+      var wide = kind === 'wp' && item.ratio === 'wide';
+      var ph = '<div class="gl-ph"><span>' + esc(item.title || '占位样张') + '</span><span>'
+             + esc(item.note || '样张待上架') + '</span></div>';
+      var img = item.src
+        ? '<img loading="lazy" src="' + esc(item.src) + '" alt="' + esc(item.title || '画廊图片') + '">'
+        : ph;
+      var dl = item.src
+        ? '<a class="gl-dl" href="' + esc(item.src) + '" download title="保存图片">保存</a>'
+        : '<span class="gl-dl is-ph">待上架</span>';
+      return '<figure class="gl-card ' + (kind === 'ava' ? 'is-ava' : (wide ? 'is-wide' : 'is-phone')) + '"'
+        + (item.src ? ' data-src="' + esc(item.src) + '" data-title="' + esc(item.title || '') + '" data-author="' + esc(item.author || '') + '"' : '')
+        + '>'
+        + '<div class="gl-thumb">' + img + '</div>'
+        + '<figcaption class="gl-meta"><span class="gl-txt">'
+        + '<span class="gl-title">' + esc(item.title || '未命名') + '</span>'
+        + '<span class="gl-author">图 · ' + esc(item.author || '佚名') + '</span>'
+        + '</span>' + dl + '</figcaption>'
+        + '</figure>';
+    }
 
-      <div class="form-group">
-        <label class="form-label">昵称 <span class="optional">（可选，留空则匿名）</span></label>
-        <input type="text" class="form-input" id="msgName" placeholder="例如：星空旅人 / 匿名" maxlength="20">
-      </div>
+    var wpGrid = document.getElementById('wpGrid');
+    var avaGrid = document.getElementById('avaGrid');
+    wpGrid.innerHTML = G.wallpapers.length
+      ? G.wallpapers.map(function(x){ return cardHTML(x, 'wp'); }).join('')
+      : '<p class="gl-empty">壁纸整理中，敬请期待。</p>';
+    avaGrid.innerHTML = G.avatars.length
+      ? G.avatars.map(function(x){ return cardHTML(x, 'ava'); }).join('')
+      : '<p class="gl-empty">头像整理中，敬请期待。</p>';
 
-      <div class="form-group">
-        <label class="form-label">测了哪种占卜</label>
-        <select class="form-select" id="msgType">
-          <option value="六爻">六爻纳甲</option>
-          <option value="塔罗">塔罗牌</option>
-          <option value="雷诺曼">雷诺曼</option>
-          <option value="八字">八字排盘</option>
-          <option value="星盘">星盘排盘</option>
-          <option value="中西对照">中西对照</option>
-          <option value="每日运势">每日运势</option>
-        </select>
-      </div>
+    /* ---------- 分区切换 ---------- */
+    var tabWp = document.getElementById('tabWp');
+    var tabAva = document.getElementById('tabAva');
+    var panelWp = document.getElementById('panelWp');
+    var panelAva = document.getElementById('panelAva');
+    function switchTab(toWp){
+      tabWp.setAttribute('aria-selected', toWp ? 'true' : 'false');
+      tabAva.setAttribute('aria-selected', toWp ? 'false' : 'true');
+      panelWp.hidden = !toWp;
+      panelAva.hidden = toWp;
+    }
+    tabWp.addEventListener('click', function(){ switchTab(true); });
+    tabAva.addEventListener('click', function(){ switchTab(false); });
 
-      <div class="form-group">
-        <label class="form-label">准不准？</label>
-        <div class="rating-wrap">
-          <div class="rating-star" data-value="1">★</div>
-          <div class="rating-star" data-value="2">★</div>
-          <div class="rating-star" data-value="3">★</div>
-          <div class="rating-star" data-value="4">★</div>
-          <div class="rating-star" data-value="5">★</div>
-          <span class="rating-text" id="ratingText">点击星星评分</span>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">留言内容</label>
-        <textarea class="form-textarea" id="msgContent" placeholder="说说你的体验、感受或者想分享的故事..." maxlength="500"></textarea>
-      </div>
-
-      <button class="form-submit" id="submitBtn">✦ 提交留言</button>
-      <p class="form-hint">留言完全匿名，不收集邮箱、手机等任何个人信息。提交后即时显示在下方。</p>
-    </div>
-  </div>
-</section>
-
-<!-- STATS -->
-<div class="container">
-  <div class="guest-stats">
-    <div class="stat-item">
-      <div class="num" id="statTotal">0</div>
-      <div class="label">总留言</div>
-    </div>
-    <div class="stat-item">
-      <div class="num" id="statAvg">—</div>
-      <div class="label">平均准度</div>
-    </div>
-    <div class="stat-item">
-      <div class="num" id="statAccurate">0</div>
-      <div class="label">觉得准（4★+）</div>
-    </div>
-  </div>
-</div>
-
-<!-- MESSAGES -->
-<section class="messages-wrap">
-  <div class="container">
-    <div class="messages-header">
-      <h2>留言墙</h2>
-      <span class="count" id="msgCount">0 条留言</span>
-    </div>
-
-    <div class="filter-bar">
-      <button class="filter-btn active" data-filter="all">全部</button>
-      <button class="filter-btn" data-filter="六爻">六爻</button>
-      <button class="filter-btn" data-filter="塔罗">塔罗</button>
-      <button class="filter-btn" data-filter="雷诺曼">雷诺曼</button>
-      <button class="filter-btn" data-filter="八字">八字</button>
-      <button class="filter-btn" data-filter="星盘">星盘</button>
-      <button class="filter-btn" data-filter="中西对照">中西对照</button>
-    </div>
-
-    <div id="messagesList"></div>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-links">
-    <a href="./divination-homepage.html">首页</a>
-    <a href="./about.html">关于</a>
-    <a href="./faq.html">常见问题</a>
-    <a href="./guestbook.html">留言板</a>
-    <a href="./terms.html">用户协议</a>
-    <a href="./privacy.html">隐私政策</a>
-    <a href="./refund.html">退款政策</a>
-  </div>
-  <p>Upon Star · 中西占卜探索平台</p>
-  <p style="font-size:10px;opacity:0.6;margin-top:6px;">本平台内容仅供娱乐参考，不构成人生决策建议</p>
-</footer>
-
-<div class="toast" id="toast"></div>
-
-<script>
-// ===== 预置示例留言 =====
-var SEED_MESSAGES = [
-  { name:'星空旅人', type:'六爻', rating:5, content:'摇出来的卦象说的动爻跟我的情况完全对上了，尤其是二爻变的那段爻辞，简直就是在描述我现在的处境。震惊。', date:'2026-07-28', seed:true },
-  { name:'匿名', type:'塔罗', rating:5, content:'抽了三牌阵，过去现在未来的牌面跟我最近的状态太像了。特别是中间那张牌的位置，直接点出了我一直在回避的问题。', date:'2026-07-27', seed:true },
-  { name:'月下独行', type:'八字', rating:4, content:'排了八字盘，日主和五行分布的分析还挺准的。大运走势也跟我这几年的经历基本吻合，会推荐给朋友试试。', date:'2026-07-26', seed:true },
-  { name:'匿名', type:'中西对照', rating:5, content:'八字说我是偏财格，星盘说我的木星落二宫——一个说财运看偏门，一个说财富靠运气，两个体系居然殊途同归了，有点东西。', date:'2026-07-25', seed:true },
-  { name:'寻星人', type:'雷诺曼', rating:4, content:'第一次试雷诺曼，抽了单牌。牌面意思很直接，不绕弯子，跟我问的事情直接相关。三牌组合解读也很有启发。', date:'2026-07-24', seed:true },
-  { name:'匿名', type:'星盘', rating:5, content:'太阳和上升星座都准了，月亮星座也跟我内心的一面很像。行星相位的解读也比较到位，尤其是金冥相位那段。', date:'2026-07-23', seed:true },
-];
-
-var STORAGE_KEY = 'uponstar_guestbook';
-var currentRating = 0;
-var currentFilter = 'all';
-
-// ===== 初始化 =====
-function getMessages() {
-  var stored = [];
-  try {
-    var raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) stored = JSON.parse(raw);
-  } catch(e) {}
-
-  // 合并预置留言和用户留言
-  var userMsgs = stored.filter(function(m){ return !m.seed; });
-  return SEED_MESSAGES.concat(userMsgs);
-}
-
-function saveMessage(msg) {
-  var stored = [];
-  try {
-    var raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) stored = JSON.parse(raw);
-  } catch(e) {}
-  stored.push(msg);
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
-  } catch(e) {}
-}
-
-// ===== 头像颜色 =====
-function getAvatarColor(type) {
-  if (type === '六爻' || type === '八字') return 'east';
-  if (type === '塔罗' || type === '雷诺曼' || type === '星盘') return 'west';
-  return 'fusion';
-}
-
-// ===== 格式化日期 =====
-function formatDate(dateStr) {
-  var d = new Date(dateStr);
-  var now = new Date();
-  var diff = Math.floor((now - d) / (1000*60*60*24));
-  if (diff === 0) return '今天';
-  if (diff === 1) return '昨天';
-  if (diff < 7) return diff + ' 天前';
-  return (d.getMonth()+1) + '月' + d.getDate() + '日';
-}
-
-// ===== 渲染留言 =====
-function renderMessages() {
-  var allMsgs = getMessages();
-  var msgs = currentFilter === 'all' ? allMsgs : allMsgs.filter(function(m){ return m.type === currentFilter; });
-
-  var list = document.getElementById('messagesList');
-
-  if (msgs.length === 0) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">✦</div><p>还没有留言，快来第一个留言吧</p></div>';
-  } else {
-    var html = '';
-    msgs.forEach(function(msg) {
-      var stars = '';
-      for (var i = 1; i <= 5; i++) {
-        stars += '<span class="star' + (i <= msg.rating ? ' filled' : '') + '">★</span>';
+    /* ---------- 灯箱 ---------- */
+    var lb = document.getElementById('glLb');
+    var lbImg = document.getElementById('glLbImg');
+    var lbDl = document.getElementById('glLbDl');
+    var lbCap = document.getElementById('glLbCap');
+    var lastFocus = null;
+    function openLb(src, title, author){
+      if (!src) return;
+      lastFocus = document.activeElement;
+      lbImg.src = src;
+      lbImg.alt = title || '画廊图片';
+      lbDl.href = src;
+      lbDl.setAttribute('download', '');
+      lbCap.textContent = (title ? title : '') + (author ? ' · 图 ' + author : '');
+      lb.classList.add('show');
+      document.getElementById('glLbClose').focus();
+    }
+    function closeLb(){
+      lb.classList.remove('show');
+      lbImg.src = '';
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+    document.addEventListener('click', function(e){
+      var thumb = e.target.closest ? e.target.closest('.gl-thumb') : null;
+      if (thumb) {
+        var card = thumb.closest('.gl-card');
+        if (card && card.getAttribute('data-src')) {
+          openLb(card.getAttribute('data-src'),
+                 card.getAttribute('data-title'),
+                 card.getAttribute('data-author'));
+        }
+        return;
       }
-      var ratingText = msg.rating === 5 ? '非常准' : msg.rating === 4 ? '比较准' : msg.rating === 3 ? '一般' : msg.rating === 2 ? '不太准' : '不准';
-
-      var avatarChar = msg.name && msg.name !== '匿名' ? msg.name.charAt(0) : '?';
-      var colorClass = getAvatarColor(msg.type);
-
-      html += '<div class="msg-card">' +
-        '<div class="msg-header">' +
-          '<div class="msg-user">' +
-            '<div class="msg-avatar ' + colorClass + '">' + escapeHtml(avatarChar) + '</div>' +
-            '<div class="msg-info">' +
-              '<div class="msg-name">' + escapeHtml(msg.name || '匿名') +
-                '<span class="msg-tag ' + colorClass + '">' + escapeHtml(msg.type) + '</span>' +
-              '</div>' +
-              '<div class="msg-meta">' + formatDate(msg.date) + '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div class="msg-rating">' + stars + '<span class="msg-rating-text">' + ratingText + '</span></div>' +
-        '</div>' +
-        '<div class="msg-body">' + escapeHtml(msg.content) + '</div>' +
-        '<div class="msg-footer"><span class="msg-date">' + (msg.seed ? '已验证留言' : '用户留言') + '</span></div>' +
-      '</div>';
+      if (e.target === lb) closeLb();
     });
-    list.innerHTML = html;
-  }
-
-  // 更新统计
-  var total = allMsgs.length;
-  var totalRating = allMsgs.reduce(function(s, m){ return s + m.rating; }, 0);
-  var avg = total > 0 ? (totalRating / total).toFixed(1) : '—';
-  var accurate = allMsgs.filter(function(m){ return m.rating >= 4; }).length;
-
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statAvg').textContent = avg;
-  document.getElementById('statAccurate').textContent = accurate;
-  document.getElementById('msgCount').textContent = total + ' 条留言';
-}
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-            .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-// ===== 评分交互 =====
-var ratingTexts = ['','不太准','一般','还行','比较准','非常准'];
-document.querySelectorAll('.rating-star').forEach(function(star) {
-  star.addEventListener('click', function() {
-    var val = parseInt(this.getAttribute('data-value'));
-    currentRating = val;
-    document.querySelectorAll('.rating-star').forEach(function(s) {
-      s.classList.toggle('active', parseInt(s.getAttribute('data-value')) <= val);
-    });
-    document.getElementById('ratingText').textContent = ratingTexts[val];
-  });
-  star.addEventListener('mouseenter', function() {
-    var val = parseInt(this.getAttribute('data-value'));
-    document.querySelectorAll('.rating-star').forEach(function(s) {
-      s.classList.toggle('active', parseInt(s.getAttribute('data-value')) <= val);
-    });
-    document.getElementById('ratingText').textContent = ratingTexts[val];
-  });
-});
-document.querySelector('.rating-wrap').addEventListener('mouseleave', function() {
-  document.querySelectorAll('.rating-star').forEach(function(s) {
-    s.classList.toggle('active', parseInt(s.getAttribute('data-value')) <= currentRating);
-  });
-  if (currentRating === 0) {
-    document.getElementById('ratingText').textContent = '点击星星评分';
-  } else {
-    document.getElementById('ratingText').textContent = ratingTexts[currentRating];
-  }
-});
-
-// ===== 提交留言 =====
-document.getElementById('submitBtn').addEventListener('click', function() {
-  var name = document.getElementById('msgName').value.trim() || '匿名';
-  var type = document.getElementById('msgType').value;
-  var content = document.getElementById('msgContent').value.trim();
-  var rating = currentRating;
-
-  if (!content) {
-    showToast('请填写留言内容');
-    return;
-  }
-  if (rating === 0) {
-    showToast('请点击星星评分');
-    return;
-  }
-
-  var msg = {
-    name: name,
-    type: type,
-    rating: rating,
-    content: content,
-    date: new Date().toISOString().split('T')[0],
-    seed: false
-  };
-
-  saveMessage(msg);
-
-  // 清空表单
-  document.getElementById('msgName').value = '';
-  document.getElementById('msgContent').value = '';
-  currentRating = 0;
-  document.querySelectorAll('.rating-star').forEach(function(s){ s.classList.remove('active'); });
-  document.getElementById('ratingText').textContent = '点击星星评分';
-
-  // 刷新列表
-  renderMessages();
-
-  showToast('✦ 留言提交成功，感谢反馈！');
-});
-
-// ===== 筛选 =====
-document.querySelectorAll('.filter-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
-    this.classList.add('active');
-    currentFilter = this.getAttribute('data-filter');
-    renderMessages();
-  });
-});
-
-// ===== Toast =====
-var toastTimer = null;
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
-}
-
-// ===== 初始渲染 =====
-renderMessages();
-</script>
-
+    document.getElementById('glLbClose').addEventListener('click', closeLb);
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && lb.classList.contains('show')) closeLb(); });
+  })();
+  </script>
+  <script src="assets/site-util.js?v=20260914a"></script>
 </body>
 </html>
