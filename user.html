@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>我的 · Upon Star</title>
+  <meta name="description" content="保存你的人格类型与生辰，自动留存最近 10 次运势记录，自主对比每月每日的能量走向。">
+  <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf" as="font/ttf" crossorigin>
+  <link rel="stylesheet" href="assets/base.css?v=20260914c">
+  <style>
+    .tool-hero{position:relative;text-align:center;padding:calc(var(--space-xl) + 8px) var(--space-md) var(--space-md);}
+    .tool-hero .kicker{font-family:var(--font-decor);letter-spacing:.32em;color:var(--gold-light);font-size:.8rem;text-transform:uppercase;}
+    .tool-hero h1{font-size:clamp(2.4rem,7vw,4rem);margin:8px 0 6px;color:var(--text);}
+    .tool-hero .lead{font-family:var(--font-serif);color:var(--text-dim);max-width:600px;margin:0 auto;line-height:1.85;}
+    .privacy-note{text-align:center;font-family:var(--font-serif);font-size:.78rem;color:var(--text-dim);font-style:italic;margin-top:var(--space-md);}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+  </style>
+  <link rel="canonical" href="https://upon-star.com/user.html">
+  <meta property="og:url" content="https://upon-star.com/user.html">
+  <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="我的 · Upon Star">
+  <meta name="twitter:description" content="保存你的人格类型与生辰，自动留存最近 10 次运势记录，自主对比每月每日的能量走向。">
+</head>
+<body>
+  <div class="sacred-light" aria-hidden="true"></div>
+
+  <header class="site-nav">
+    <a class="brand" href="divination-homepage.html">Upon Star<small>UPON STAR</small></a>
+    <nav class="nav-tabs" aria-label="分类导航">
+      <a href="east.html">东方</a>
+      <a href="west.html">西方</a>
+      <a href="fusion.html">融合</a>
+      <a href="mbti.html">人格</a>
+      <a href="pair.html">配对</a>
+      <a href="today.html">今日</a>
+      <a href="user.html" class="active">我的</a>
+    </nav></header>
+
+  <main class="container">
+    <nav class="breadcrumb" aria-label="面包屑"><a href="divination-homepage.html">首页</a> / 我的</nav>
+
+    <section class="tool-hero">
+      <div class="kicker">My Profile · 我的档案</div>
+      <h1>我的</h1>
+      <p class="lead">保存你的人格类型与生辰，运势解读会随你而变；最近 10 次抽签与翻牌记录自动留存，方便你跨日、跨月看清自己的能量走向。</p>
+    </section>
+
+    <section class="user-wrap">
+      <!-- 档案编辑 -->
+      <div class="user-card">
+        <h3 class="panel-h">档案设置</h3>
+        <div class="user-grid">
+          <div>
+            <label>昵称（可选）</label>
+            <input type="text" id="uNick" placeholder="给自己起个名">
+          </div>
+          <div>
+            <label>MBTI 人格类型</label>
+            <select id="uMbti"><option value="">未设置</option></select>
+          </div>
+          <div>
+            <label>出生年</label>
+            <input type="number" id="uYear" min="1900" max="2100" placeholder="例 1995">
+          </div>
+          <div>
+            <label>月</label>
+            <input type="number" id="uMonth" min="1" max="12" placeholder="1-12">
+          </div>
+          <div>
+            <label>日</label>
+            <input type="number" id="uDay" min="1" max="31" placeholder="1-31">
+          </div>
+          <div>
+            <label>出生时辰</label>
+            <select id="uHour">
+              <option value="-1">不详（按正午）</option>
+              <option value="0">子时 23–01</option>
+              <option value="1">丑时 01–03</option>
+              <option value="3">寅时 03–05</option>
+              <option value="5">卯时 05–07</option>
+              <option value="7">辰时 07–09</option>
+              <option value="9">巳时 09–11</option>
+              <option value="11" selected>午时 11–13</option>
+              <option value="13">未时 13–15</option>
+              <option value="15">申时 15–17</option>
+              <option value="17">酉时 17–19</option>
+              <option value="19">戌时 19–21</option>
+              <option value="21">亥时 21–23</option>
+            </select>
+          </div>
+          <div>
+            <label>出生城市</label>
+            <select id="uCity"></select>
+          </div>
+        </div>
+        <div class="user-actions">
+          <button type="button" class="mini-btn primary" id="uSave">保存档案</button>
+          <button type="button" class="mini-btn ghost" id="uClear">清除</button>
+        </div>
+      </div>
+
+      <!-- 已存 MBTI 摘要 -->
+      <div class="profile-summary" id="profileSummary" style="display:none;"></div>
+
+      <!-- 自主对比分析 -->
+      <div class="user-card">
+        <h3 class="panel-h">每月 / 每日对比分析</h3>
+        <div class="analysis-box" id="analysisBox"></div>
+      </div>
+
+      <!-- 最近 10 次记录 -->
+      <div class="user-card">
+        <h3 class="panel-h">最近记录（最多 10 条）</h3>
+        <div class="rec-list" id="recList"></div>
+      </div>
+    </section>
+
+    <p class="privacy-note">隐私说明：你的档案与记录仅保存在当前浏览器本地（localStorage），不上传任何服务器，也不会写入 Cookie。换设备或清缓存会丢失，建议重要结论自行截图留存。</p>
+
+    <hr class="gold-line">
+  </main>
+
+  <footer class="site-footer">
+    <nav class="links" aria-label="页脚导航">
+      <a href="about.html">关于</a><a href="faq.html">常见问题</a><a href="guestbook.html">画廊</a>
+      <a href="terms.html">条款</a><a href="privacy.html">隐私</a><a href="refund.html">费用</a>
+    </nav>
+    <p class="disclaimer">本平台内容仅用于文化研究与心理探索参考。所有计算均在您的设备本地完成。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+  </footer>
+
+  <script src="assets/cities.js?v=20260901a"></script>
+  <script src="assets/user-store.js?v=20260831b"></script>
+  <script src="assets/cards/mbti-data.js"></script>
+  <script>
+  (function(){
+    'use strict';
+    var M = window.MBTI, US = window.UserStore;
+    function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&','<':'<','>':'>','"':'"',"'":"'"}[c];});}
+    function fmtDate(ts){
+      var d=new Date(ts);
+      function p(n){return (n<10?'0':'')+n;}
+      return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+    }
+
+    // 填充 MBTI 下拉
+    var uMbti=document.getElementById('uMbti');
+    if(M){ Object.keys(M.types).forEach(function(k){ var o=document.createElement('option'); o.value=k; o.textContent=k+' · '+M.types[k].cn; uMbti.appendChild(o); }); }
+
+    // 填充城市下拉
+    var uCity=document.getElementById('uCity');
+    if(window.UPON_Cities_API){ uCity.innerHTML = window.UPON_Cities_API.optionsHtml(); }
+
+    function loadForm(){
+      var p = US ? US.getProfile() : null;
+      if(!p) return;
+      document.getElementById('uNick').value = p.nickname||'';
+      if(p.mbti) uMbti.value = p.mbti;
+      document.getElementById('uYear').value = p.year||'';
+      document.getElementById('uMonth').value = p.month||'';
+      document.getElementById('uDay').value = p.day||'';
+      if(p.hour!=null) document.getElementById('uHour').value = String(p.hour);
+      if(p.lat!=null && p.lng!=null){
+        var v = parseFloat(p.lat).toFixed(2)+','+parseFloat(p.lng).toFixed(2);
+        if(window.UPON_Cities_API && !window.UPON_Cities_API.find(v)){
+          var o=document.createElement('option'); o.value=v; o.textContent='自定义 '+v; uCity.appendChild(o);
+        }
+        try{ uCity.value=v; }catch(e){}
+      }
+    }
+
+    function renderProfile(){
+      var box=document.getElementById('profileSummary');
+      var p = US ? US.getProfile() : null;
+      if(p && p.mbti && M && M.types[p.mbti]){
+        var t=M.types[p.mbti];
+        var who=p.nickname?'（'+(p.nickname)+'）':'';
+        box.innerHTML='<div class="ps-code">'+p.mbti+'</div>'
+          +'<div class="ps-name">'+esc(t.cn)+' · '+esc(t.en)+who+'</div>'
+          +'<div class="ps-advice"><b>今日建议：</b>'+esc(t.advice)+'</div>';
+        box.style.display='block';
+      } else {
+        box.style.display='none';
+      }
+    }
+
+    function analyze(records){
+      var out=[];
+      var daily=records.filter(function(r){return r.kind==='每日一签';}).sort(function(a,b){return b.at-a.at;});
+      var monthly=records.filter(function(r){return r.kind==='月运';}).sort(function(a,b){return b.at-a.at;});
+      var weekly=records.filter(function(r){return r.kind==='周运';}).sort(function(a,b){return b.at-a.at;});
+      if(daily.length){
+        out.push('最近一次每日一签（<span class="hl">'+fmtDate(daily[0].at)+'</span>）：'+esc(daily[0].summary)+'。');
+        if(daily.length>=2) out.push('上一次（'+fmtDate(daily[1].at)+'）：'+esc(daily[1].summary)+'。两次抽签基调'+(daily[0].summary===daily[1].summary?'<span class="hl">一致</span>':'<span class="hl">已有变化</span>')+'，可作为近况的小小参照。');
+      }
+      if(monthly.length){
+        out.push('本月星座（<span class="hl">'+esc(monthly[0].title)+'</span>）：'+esc(monthly[0].summary)+'。');
+        if(monthly.length>=2) out.push('上月（'+esc(monthly[1].title)+'）：'+esc(monthly[1].summary)+'。跨月对比，可见你这阶段能量重心是否转移。');
+      }
+      if(weekly.length){
+        out.push('最近一周（<span class="hl">'+esc(weekly[0].title)+'</span>）已生成四维运势，可回看你的桃花 / 学习 / 工作 / 人际节奏。');
+      }
+      if(!out.length) out.push('还没有运势记录。去「每日运势 / 月运 / 周运」抽签或翻开你的星座，记录会自动留在这里——攒够两次以上，就能做跨日、跨月的自我对比了。');
+      return out;
+    }
+
+    function renderRecords(){
+      var box=document.getElementById('recList');
+      var records = US ? US.getRecords() : [];
+      if(!records.length){
+        box.innerHTML='<div class="rec-empty">暂无记录。运势页的抽签 / 翻牌会自动留痕于此。</div>';
+      } else {
+        box.innerHTML = records.map(function(r){
+          return '<div class="rec-item"><div class="rec-head"><span class="rec-kind">'+esc(r.kind)+'</span><span class="rec-date">'+fmtDate(r.at)+'</span></div><div class="rec-summary">'+esc(r.summary||'')+'</div></div>';
+        }).join('');
+      }
+      document.getElementById('analysisBox').innerHTML = analyze(records).map(function(p){return '<p>'+p+'</p>';}).join('');
+    }
+
+    document.getElementById('uSave').addEventListener('click', function(){
+      var v=uCity.value.split(',');
+      var p={
+        nickname: document.getElementById('uNick').value.trim(),
+        mbti: uMbti.value||'',
+        year: document.getElementById('uYear').value.trim(),
+        month: document.getElementById('uMonth').value.trim(),
+        day: document.getElementById('uDay').value.trim(),
+        hour: parseInt(document.getElementById('uHour').value,10),
+        cityName: (window.UPON_Cities_API && window.UPON_Cities_API.find(uCity.value)||{}).name || '',
+        lat: parseFloat(v[0]), lng: parseFloat(v[1])
+      };
+      if(US) US.setProfile(p);
+      renderProfile();
+      var btn=document.getElementById('uSave'); var o=btn.textContent; btn.textContent='已保存 ✓'; setTimeout(function(){btn.textContent=o;},1500);
+    });
+    document.getElementById('uClear').addEventListener('click', function(){
+      if(US) US.setProfile({});
+      ['uNick','uYear','uMonth','uDay'].forEach(function(id){document.getElementById(id).value='';});
+      uMbti.value=''; document.getElementById('uHour').value='-1';
+      renderProfile(); renderRecords();
+    });
+
+    loadForm(); renderProfile(); renderRecords();
+  })();
+  </script>
+  <script src="assets/site-util.js?v=20260914a"></script>
+</body>
+</html>

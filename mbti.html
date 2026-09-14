@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MBTI 人格 · Upon Star</title>
+  <meta name="description" content="MBTI 十六型人格自测与解读：四维度选择，认识你的天性倾向。Upon Star 文化研究与自我探索参考。">
+  <meta property="og:title" content="MBTI 人格 · Upon Star">
+  <meta property="og:description" content="四维度自测，认识你的天性倾向">
+  <meta property="og:type" content="website">
+  <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf" as="font/ttf" crossorigin>
+  <link rel="stylesheet" href="assets/base.css?v=20260914c">
+  <style>
+    .tool-hero{position:relative;text-align:center;padding:calc(var(--space-xl) + 8px) var(--space-md) var(--space-md);}
+    .tool-hero .kicker{font-family:var(--font-decor);letter-spacing:.32em;color:var(--gold-light);font-size:.8rem;text-transform:uppercase;}
+    .tool-hero h1{font-size:clamp(2.4rem,7vw,4rem);margin:8px 0 6px;color:var(--text);}
+    .tool-hero .lead{font-family:var(--font-serif);color:var(--text-dim);max-width:600px;margin:0 auto;line-height:1.85;}
+
+    .mbti-wrap{max-width:720px;margin:var(--space-lg) auto 0;display:flex;flex-direction:column;gap:var(--space-md);}
+    .mbti-dims{display:flex;flex-direction:column;gap:14px;}
+    .mbti-dim{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);flex-wrap:wrap;}
+    .mbti-dim .dim-label{flex:0 0 86px;font-family:var(--font-decor);font-size:.74rem;letter-spacing:.12em;color:var(--gold-light);text-transform:uppercase;}
+    .mbti-dim .dim-name{flex:0 0 64px;font-family:var(--font-sans);font-size:.92rem;color:var(--text);}
+    .mbti-dim .poles{display:flex;gap:8px;flex:1;flex-wrap:wrap;}
+    .pole{flex:1 1 130px;min-width:120px;display:flex;flex-direction:column;gap:3px;align-items:flex-start;
+      padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);cursor:pointer;
+      transition:.22s;font-family:var(--font-sans);color:var(--text-dim);text-align:left;}
+    .pole:hover{border-color:var(--gold-dim);}
+    .pole .pc{font-size:1rem;font-weight:600;color:var(--text);}
+    .pole .pd{font-size:.74rem;color:var(--text-dim);line-height:1.4;}
+    .pole.active{border-color:var(--gold);background:rgba(200,164,92,.12);box-shadow:0 0 16px rgba(200,164,92,.22);}
+    .pole.active .pc{color:var(--gold-light);}
+
+    .mbti-progress{text-align:center;font-family:var(--font-decor);font-size:.76rem;letter-spacing:.18em;color:var(--text-dim);text-transform:uppercase;}
+
+    .mbti-result{display:none;margin-top:var(--space-md);padding:var(--space-lg);border:1px solid var(--gold);border-radius:var(--radius);
+      background:linear-gradient(160deg,rgba(200,164,92,.08),rgba(8,8,14,.5));box-shadow:0 18px 50px rgba(0,0,0,.4);}
+    .mbti-result.show{display:block;animation:mbtiIn .5s ease;}
+    @keyframes mbtiIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+    .mr-code{font-family:var(--font-display);font-size:2.6rem;letter-spacing:.14em;color:var(--gold-light);text-align:center;line-height:1;}
+    .mr-name{text-align:center;font-family:var(--font-display);font-size:1.5rem;color:var(--text);margin-top:6px;}
+    .mr-en{text-align:center;font-family:var(--font-decor);font-size:.74rem;letter-spacing:.22em;color:var(--gold-dim);text-transform:uppercase;margin-top:2px;}
+    .mr-nick{text-align:center;font-family:var(--font-serif);font-size:.95rem;color:var(--text-dim);margin:10px 0 14px;font-style:italic;}
+    .mr-traits{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px;}
+    .mr-traits .t{font-family:var(--font-sans);font-size:.82rem;padding:5px 14px;border-radius:999px;border:1px solid var(--gold);color:var(--gold-light);background:rgba(200,164,92,.10);}
+    .mr-desc{font-family:var(--font-serif);font-size:.92rem;line-height:1.85;color:var(--text);padding:var(--space-sm) var(--space-md);background:rgba(8,8,14,.45);border-left:3px solid var(--gold);border-radius:6px;}
+    .mr-advice{margin-top:12px;font-family:var(--font-serif);font-size:.9rem;line-height:1.8;color:var(--text-dim);}
+    .mr-advice b{color:var(--gold-light);font-weight:600;}
+
+    /* ===== 人格人格详解（mbti-detail.js）===== */
+    .mr-detail{margin-top:var(--space-md);border-top:1px dashed var(--line);padding-top:var(--space-md);}
+    .mr-detail .dt-block{margin-bottom:var(--space-sm);}
+    .mr-detail .dt-h{font-family:var(--font-decor);font-size:.74rem;letter-spacing:.18em;color:var(--gold-light);text-transform:uppercase;margin:0 0 6px;display:flex;align-items:center;gap:8px;}
+    .mr-detail .dt-h::before{content:"";width:14px;height:1px;background:var(--gold);display:inline-block;}
+    .mr-detail .dt-b{font-family:var(--font-serif);font-size:.9rem;color:var(--text);line-height:1.8;}
+    .mr-detail .dt-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);}
+    @media(max-width:600px){.mr-detail .dt-grid{grid-template-columns:1fr;}}
+
+    .mr-actions{display:flex;gap:10px;justify-content:center;margin-top:var(--space-md);flex-wrap:wrap;}
+    .mr-btn{flex:1;min-width:140px;padding:11px 18px;border-radius:999px;font-family:var(--font-sans);font-size:.9rem;letter-spacing:.04em;cursor:pointer;border:1px solid var(--gold);transition:.25s;}
+    .mr-btn.ghost{background:transparent;color:var(--gold-light);}
+    .mr-btn.ghost:hover{background:rgba(200,164,92,.12);}
+    .mr-btn.solid{background:var(--gold);color:var(--on-accent);}
+    .mr-btn.solid:hover{background:var(--gold-light);}
+
+    .meta-note{text-align:center;color:var(--text-dim);font-size:.74rem;margin-top:var(--space-md);font-family:var(--font-serif);font-style:italic;}
+
+    @media (max-width:560px){
+      .mbti-dim .dim-label{flex-basis:100%;}
+      .mbti-dim .dim-name{flex-basis:auto;}
+    }
+    @media (prefers-reduced-motion:reduce){
+    .mbti-result{animation:none;}
+  }
+
+    /* MBTI 速测 · 10 题 */
+    .mbti-quick-progress{text-align:center;font-family:var(--font-decor);font-size:.76rem;letter-spacing:.18em;color:var(--text-dim);text-transform:uppercase;margin-bottom:var(--space-sm);}
+    .mbti-quick-list{display:flex;flex-direction:column;gap:14px;max-width:640px;margin:0 auto;}
+    .mq-item{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:14px 16px;}
+    .mq-q{font-family:var(--font-serif);font-size:.95rem;color:var(--text);margin-bottom:10px;line-height:1.6;}
+    .mq-opts{display:flex;gap:10px;flex-wrap:wrap;}
+    .mq-opt{flex:1 1 200px;min-width:160px;padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);cursor:pointer;color:var(--text-dim);font-family:var(--font-sans);font-size:.88rem;transition:.22s;text-align:left;}
+    .mq-opt:hover{border-color:var(--gold-dim);}
+    .mq-opt.active{border-color:var(--gold);background:rgba(200,164,92,.12);box-shadow:0 0 16px rgba(200,164,92,.2);color:var(--gold-light);}
+    .mbti-quick-result{display:none;margin-top:var(--space-md);padding:var(--space-lg);border:1px solid var(--gold);border-radius:var(--radius);background:linear-gradient(160deg,rgba(200,164,92,.08),rgba(8,8,14,.5));box-shadow:0 18px 50px rgba(0,0,0,.4);}
+    .mbti-quick-result.show{display:block;animation:mbtiIn .5s ease;}
+    .mqr-code{font-family:var(--font-display);font-size:2.6rem;letter-spacing:.14em;color:var(--gold-light);text-align:center;line-height:1;}
+    .mqr-name{text-align:center;font-family:var(--font-display);font-size:1.4rem;color:var(--text);margin-top:6px;}
+    .mqr-nick{text-align:center;font-family:var(--font-serif);font-size:.92rem;color:var(--text-dim);margin:8px 0 12px;font-style:italic;}
+    .mqr-traits{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px;}
+    .mqr-traits .t{font-family:var(--font-sans);font-size:.82rem;padding:5px 14px;border-radius:999px;border:1px solid var(--gold);color:var(--gold-light);background:rgba(200,164,92,.10);}
+    .mqr-desc{font-family:var(--font-serif);font-size:.92rem;line-height:1.85;color:var(--text);padding:var(--space-sm) var(--space-md);background:rgba(8,8,14,.45);border-left:3px solid var(--gold);border-radius:6px;}
+    .mqr-advice{margin-top:12px;font-family:var(--font-serif);font-size:.9rem;line-height:1.8;color:var(--text-dim);}
+    .mqr-actions{text-align:center;margin-top:var(--space-md);}
+    .mqr-link{display:inline-block;color:var(--gold-light);font-family:var(--font-sans);font-size:.88rem;cursor:pointer;text-decoration:underline;}
+  }
+</style>
+  <link rel="canonical" href="https://upon-star.com/mbti.html">
+  <meta property="og:url" content="https://upon-star.com/mbti.html">
+  <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MBTI 人格 · Upon Star">
+  <meta name="twitter:description" content="MBTI 十六型人格自测与解读：四维度选择，认识你的天性倾向。Upon Star 文化研究与自我探索参考。">
+</head>
+<body>
+  <div class="sacred-light" aria-hidden="true"></div>
+
+  <header class="site-nav">
+    <a class="brand" href="divination-homepage.html">Upon Star<small>UPON STAR</small></a>
+    <nav class="nav-tabs" aria-label="分类导航">
+      <a href="east.html">东方</a>
+      <a href="west.html">西方</a>
+      <a href="fusion.html">融合</a>
+      <a href="mbti.html" class="active">人格</a>
+      <a href="pair.html">配对</a>
+      <a href="today.html">今日</a>
+      <a href="user.html">我的</a>
+    </nav></header>
+
+  <main class="container">
+    <nav class="breadcrumb" aria-label="面包屑"><a href="divination-homepage.html">首页</a> / 人格 / <span>MBTI</span></nav>
+
+    <section class="tool-hero">
+      <div class="kicker">MBTI · 人格图谱</div>
+      <h1>MBTI 人格</h1>
+      <p class="lead">四维度自测，认识你的天性倾向——如何获取能量、接收信息、做判断与面对生活。结果仅供自我探索参考。</p>
+    </section>
+
+    <section class="mbti-wrap">
+      <div class="mbti-dims" id="mbtiPick" aria-label="人格维度选择"></div>
+      <div class="mbti-progress" id="mbtiProgress">请依次选择四个维度</div>
+
+      <div class="mbti-result" id="mbtiResult" aria-live="polite">
+        <div class="mr-code" id="mrCode"></div>
+        <div class="mr-name" id="mrName"></div>
+        <div class="mr-en" id="mrEn"></div>
+        <div class="mr-nick" id="mrNick"></div>
+        <div class="mr-traits" id="mrTraits"></div>
+        <div class="mr-desc" id="mrDesc"></div>
+        <div class="mr-advice" id="mrAdvice"></div>
+        <div class="mr-detail" id="mrDetail" hidden></div>
+        <div class="mr-actions">
+          <button type="button" class="mr-btn ghost" id="mrCopy">复制结果</button>
+          <button type="button" class="mr-btn ghost" id="mrSave">存入我的档案</button>
+          <button type="button" class="mr-btn solid" id="mrReset">重新选择</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="compat-wrap" id="compatWrap" aria-live="polite">
+      <h2 class="panel-h" style="text-align:center;">双人人缘 · 缘分指数</h2>
+      <p class="lead" style="text-align:center;font-family:var(--font-serif);color:var(--text-dim);font-size:.88rem;margin:-6px auto var(--space-sm);">选两人的 MBTI 类型，看看你们的能量契合度。</p>
+      <div class="compat-cols">
+        <div class="compat-side">
+          <h4>你</h4>
+          <select id="compatA"></select>
+        </div>
+        <div class="compat-side">
+          <h4>对方</h4>
+          <select id="compatB"></select>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <button type="button" class="mini-btn primary" id="compatBtn">分析缘分</button>
+      </div>
+      <div class="compat-result" id="compatResult" style="display:none;"></div>
+    </section>
+
+    <hr class="gold-line">
+
+    <section class="section" id="quickMbti">
+      <h2 class="panel-h" style="text-align:center;">MBTI 速测 · 10 题</h2>
+      <p class="lead" style="text-align:center;max-width:600px;margin:0 auto 14px;font-family:var(--font-serif);color:var(--text-dim);font-size:.9rem;">没空做四维度精测？10 道小问题，快速看见你的天性轮廓。</p>
+      <div class="mbti-quick-progress" id="mqProgress">已答 0 / 10</div>
+      <div class="mbti-quick-list" id="mqList"></div>
+      <div class="mbti-quick-result" id="mqResult"></div>
+    </section>
+
+    <hr class="gold-line">
+
+    <section class="section">
+      <p class="disclaimer" style="text-align:center;max-width:680px;margin:0 auto;font-size:.85rem;">
+        免责声明：MBTI 为一种性格倾向模型，本页解读仅供文化研究与自我探索参考，不构成任何专业心理评估或建议。 本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <nav class="links" aria-label="页脚导航">
+      <a href="about.html">关于</a><a href="faq.html">常见问题</a><a href="guestbook.html">画廊</a>
+      <a href="terms.html">条款</a><a href="privacy.html">隐私</a><a href="refund.html">费用</a>
+    </nav>
+    <p class="disclaimer">本平台内容仅用于文化研究与心理探索参考。所有计算均在您的设备本地完成。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+  </footer>
+
+  <script src="assets/cards/mbti-data.js"></script>
+  <script src="assets/mbti-detail.js?v=20260831a"></script>
+  <script src="assets/user-store.js?v=20260831b"></script>
+  <script>
+  (function(){
+    'use strict';
+    var M = window.MBTI;
+    if(!M){
+      document.getElementById('mbtiPick').innerHTML = '<p style="color:#d9806a;">MBTI 数据未载入</p>';
+      return;
+    }
+    var pick = document.getElementById('mbtiPick');
+    var progress = document.getElementById('mbtiProgress');
+    var result = document.getElementById('mbtiResult');
+    var selected = {};      // dimKey -> 'E'/'I' ...
+    var dimKeys = M.dims.map(function(d){ return d.key; });
+
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&','<':'<','>':'>','"':'"',"'":"'"}[c]; }); }
+
+    // 构建四维度选择
+    M.dims.forEach(function(dim){
+      var row = document.createElement('div'); row.className = 'mbti-dim';
+      row.innerHTML = '<div class="dim-label">' + dim.key + '</div>'
+        + '<div class="dim-name"></div>'
+        + '<div class="poles"></div>';
+      row.querySelector('.dim-name').textContent = dim.a.name + ' / ' + dim.b.name;
+      var poles = row.querySelector('.poles');
+      [dim.a, dim.b].forEach(function(pole){
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'pole'; b.setAttribute('role','radio');
+        b.setAttribute('data-dim', dim.key); b.setAttribute('data-code', pole.code);
+        b.setAttribute('aria-checked','false'); b.setAttribute('aria-label', pole.name);
+        b.innerHTML = '<span class="pc">' + pole.code + ' · ' + pole.name + '</span>'
+          + '<span class="pd">' + pole.desc + '</span>';
+        b.addEventListener('click', function(){ choose(dim.key, pole.code); });
+        poles.appendChild(b);
+      });
+      pick.appendChild(row);
+    });
+
+    function choose(dimKey, code){
+      selected[dimKey] = code;
+      // 更新该行两个 pole 的选中态
+      var row = pick.querySelector('.pole[data-dim="'+dimKey+'"]').closest('.mbti-dim');
+      row.querySelectorAll('.pole').forEach(function(p){
+        var on = (p.getAttribute('data-code') === code);
+        p.classList.toggle('active', on);
+        p.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+      updateProgress();
+      if(allChosen()) render();
+    }
+
+    function allChosen(){
+      return dimKeys.every(function(k){ return !!selected[k]; });
+    }
+    function buildCode(){
+      // 顺序固定 EI / SN / TF / JP
+      return dimKeys.map(function(k){ return selected[k]; }).join('');
+    }
+    function updateProgress(){
+      var n = dimKeys.filter(function(k){ return selected[k]; }).length;
+      progress.textContent = '已选 ' + n + ' / 4 个维度' + (n === 4 ? ' · 已生成你的类型' : '');
+    }
+
+    function render(){
+      var code = buildCode();
+      var t = M.types[code];
+      if(!t){ return; }
+      document.getElementById('mrCode').textContent = code;
+      document.getElementById('mrName').textContent = t.cn;
+      document.getElementById('mrEn').textContent = t.en;
+      document.getElementById('mrNick').textContent = '「' + t.nick + '」';
+      document.getElementById('mrTraits').innerHTML = t.traits.map(function(x){ return '<span class="t">' + escapeHtml(x) + '</span>'; }).join('');
+      document.getElementById('mrDesc').textContent = t.desc;
+      document.getElementById('mrAdvice').innerHTML = '<b>今日建议：</b>' + escapeHtml(t.advice);
+
+      // 人格详解（mbti-detail.js）
+      var dEl = document.getElementById('mrDetail');
+      var D = window.MBTI_DETAIL && window.MBTI_DETAIL[code];
+      if(D){
+        var blocks = [
+          ['性格优势', D.strengths],
+          ['性格盲点', D.blindspots],
+          ['个人发展建议', D.growth],
+          ['恋爱', D.love],
+          ['友谊', D.friendship],
+          ['亲子与家庭', D.family],
+          ['职业方向', D.career],
+          ['与其他类型相处', D.relate]
+        ];
+        var html = '';
+        // 前 3 项单列，后 5 项双列网格
+        html += blockHtml(blocks[0]) + blockHtml(blocks[1]) + blockHtml(blocks[2]);
+        html += '<div class="dt-grid">';
+        for(var i=3;i<blocks.length;i++) html += blockHtml(blocks[i]);
+        html += '</div>';
+        dEl.innerHTML = html;
+        dEl.hidden = false;
+      } else {
+        dEl.hidden = true; dEl.innerHTML = '';
+      }
+
+      result.classList.add('show');
+      if(result.scrollIntoView) result.scrollIntoView({ behavior:'smooth', block:'center' });
+    }
+
+    function blockHtml(b){
+      if(!b) return '';
+      return '<div class="dt-block"><div class="dt-h">' + escapeHtml(b[0]) + '</div><div class="dt-b">' + escapeHtml(b[1]) + '</div></div>';
+    }
+
+    document.getElementById('mrReset').addEventListener('click', function(){
+      selected = {};
+      pick.querySelectorAll('.pole').forEach(function(p){ p.classList.remove('active'); p.setAttribute('aria-checked','false'); });
+      result.classList.remove('show');
+      var dEl = document.getElementById('mrDetail');
+      if(dEl){ dEl.hidden = true; dEl.innerHTML = ''; }
+      updateProgress();
+    });
+
+    document.getElementById('mrCopy').addEventListener('click', function(){
+      var code = buildCode();
+      var t = M.types[code];
+      if(!t) return;
+      var text = '我的 MBTI 是 ' + code + '（' + t.cn + ' / ' + t.en + '）— ' + t.nick + '\n' + t.desc + '\n今日建议：' + t.advice + '\n—— 来自 Upon Star';
+      var btn = document.getElementById('mrCopy');
+      var done = function(){ var o = btn.textContent; btn.textContent = '已复制'; setTimeout(function(){ btn.textContent = o; }, 1500); };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done).catch(function(){ fallbackCopy(text, done); });
+      } else { fallbackCopy(text, done); }
+    });
+    function fallbackCopy(text, cb){
+      try{
+        var ta = document.createElement('textarea'); ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); cb();
+      }catch(e){}
+    }
+
+    updateProgress();
+
+    // ===== 双人人缘 · 缘分指数 =====
+    var MBTI_TYPES = Object.keys(M.types);
+    function fillCompat(){
+      var a=document.getElementById('compatA'), b=document.getElementById('compatB');
+      if(!a||!b) return;
+      var html='';
+      MBTI_TYPES.forEach(function(k){ html+='<option value="'+k+'">'+k+' · '+M.types[k].cn+'</option>'; });
+      a.innerHTML=html; b.innerHTML=html;
+      var prof=(window.UserStore && UserStore.getProfile) ? UserStore.getProfile() : null;
+      if(prof && prof.mbti && M.types[prof.mbti]) a.value=prof.mbti;
+      b.value='ENFP';
+    }
+    fillCompat();
+
+    function compat(a,b){
+      if(!a||!b||!M.types[a]||!M.types[b]) return null;
+      var same=0; for(var i=0;i<4;i++){ if(a[i]===b[i]) same++; }
+      var diff=4-same;
+      var base=40 + same*11 + diff*3;            // 40..88
+      var syn=0;
+      if(a[0]!==b[0] && a[3]!==b[3]) syn+=4;     // 内外向 + 收发 互补
+      if(a[1]!==b[1] && a[2]!==b[2]) syn+=4;     // 感直 + 思情 互补
+      var idx=Math.min(99, base+syn);
+      var tier = idx>=85?'天作之合':idx>=72?'默契良缘':idx>=58?'互补成长':idx>=45?'需要磨合':'差异挑战';
+      var labels=['内外向(EI)','感直(SN)','思情(TF)','收发(JP)'];
+      var dims=[];
+      for(var i=0;i<4;i++){ dims.push({dim:labels[i], a:a[i], b:b[i], same:(a[i]===b[i])}); }
+      return {idx:idx, tier:tier, same:same, dims:dims, syn:syn};
+    }
+    function compatText(c, a, b){
+      var ta=M.types[a], tb=M.types[b];
+      var head='你是 <b>'+a+' '+ta.cn+'（'+ta.nick+'）</b>，对方是 <b>'+b+' '+tb.cn+'（'+tb.nick+'）</b>。';
+      var body;
+      if(c.same===4){ body='你们在四个维度上高度一致，彼此是天然的同频者——理解成本极低，相处轻松顺畅。留意：过于相似也可能缺少互补视角，偶尔主动引入新体验，关系会更鲜活。'; }
+      else if(c.same===0){ body='你们在四个维度上几乎全部相反，差异本身既是张力也是养分。短期可能因节奏不同而生摩擦，长期却最能彼此补全：你缺的，正是对方擅长的。磨合是这门关系的关键词。'; }
+      else {
+        body='你们有 '+c.same+' 个维度一致、'+(4-c.same)+' 个维度互补。';
+        if(c.syn>=8) body+='内外向与收发方式、感直与思情双双互补，是经典的「吸引型」组合，既能共鸣又能互相拓展边界。';
+        else body+='既有共鸣基础，也有需要互相理解的差拍；在差异维度上多些耐心与表达，缘分便能稳稳生长。';
+      }
+      return head+body+'<br><span style="color:var(--text-dim);font-size:.78rem;">缘分指数为参考性趣味解读，真实关系仍取决于相处与沟通。</span>';
+    }
+    document.getElementById('compatBtn').addEventListener('click', function(){
+      var a=document.getElementById('compatA').value, b=document.getElementById('compatB').value;
+      var c=compat(a,b); if(!c) return;
+      var dimsHtml=c.dims.map(function(d){
+        return '<span class="cd '+(d.same?'match':'diff')+'">'+d.dim+': '+d.a+'/'+d.b+' '+(d.same?'一致':'互补')+'</span>';
+      }).join('');
+      var res=document.getElementById('compatResult');
+      res.innerHTML='<div class="compat-index">'+c.idx+'<small> / 100</small></div>'
+        +'<div class="compat-tier">'+c.tier+'</div>'
+        +'<p class="compat-dims-label" style="text-align:center;font-family:var(--font-decor);font-size:.72rem;letter-spacing:.18em;color:var(--gold-dim);text-transform:uppercase;margin:10px 0 4px;">维度契合</p>'
+        +'<div class="compat-dims">'+dimsHtml+'</div>'
+        +'<div class="compat-text">'+compatText(c, a, b)+'</div>';
+      res.style.display='block';
+    });
+
+    // 存入我的档案（仅写 MBTI；生日/昵称在「我的」页补全）
+    document.getElementById('mrSave').addEventListener('click', function(){
+      var code=buildCode(); if(!code || !M.types[code]) return;
+      var p=(window.UserStore && UserStore.getProfile) ? UserStore.getProfile() : {};
+      p=Object.assign({}, p||{}, { mbti: code });
+      if(window.UserStore) UserStore.setProfile(p);
+      var btn=document.getElementById('mrSave'); var o=btn.textContent;
+      btn.textContent='已存入 ✓'; setTimeout(function(){ btn.textContent=o; }, 1500);
+    });
+  })();
+  </script>
+
+  <script>
+  (function(){
+    'use strict';
+    var M = window.MBTI;
+    if(!M) return;
+    var list = document.getElementById('mqList');
+    if(!list) return;
+    function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&','<':'<','>':'>','"':'"',"'":"'"}[c]; }); }
+    var Q = [
+      {q:'聚会结束后，你通常——', dim:'EI', a:[{t:'觉得充电满格，还想继续',c:'E'},{t:'想赶紧回家独处回血',c:'I'}]},
+      {q:'认识新朋友时你更可能——', dim:'EI', a:[{t:'主动破冰、带动气氛',c:'E'},{t:'先安静观察再开口',c:'I'}]},
+      {q:'你更信任——', dim:'SN', a:[{t:'看得见的事实与经验',c:'S'},{t:'直觉与联想到的可能性',c:'N'}]},
+      {q:'听人说明一件事，你更在意——', dim:'SN', a:[{t:'细节、步骤与落地',c:'S'},{t:'整体脉络与背后意义',c:'N'}]},
+      {q:'做决定时你更看重——', dim:'TF', a:[{t:'逻辑、对错与因果',c:'T'},{t:'感受、价值与和谐',c:'F'}]},
+      {q:'朋友向你吐槽，你第一反应——', dim:'TF', a:[{t:'帮 Ta 分析原委',c:'T'},{t:'先共情、陪 Ta 把情绪接住',c:'F'}]},
+      {q:'出门旅行你偏好——', dim:'JP', a:[{t:'行程提前规划妥当',c:'J'},{t:'随性走走，走到哪算哪',c:'P'}]},
+      {q:'临近截止日期，你通常——', dim:'JP', a:[{t:'早已完成最安心',c:'J'},{t:'逼近期才进入状态',c:'P'}]},
+      {q:'你的工作台更可能——', dim:'JP', a:[{t:'整齐有序、各归其位',c:'J'},{t:'看似凌乱但自有章法',c:'P'}]},
+      {q:'学一样新东西，你倾向——', dim:'JP', a:[{t:'跟一套系统课程循序渐进',c:'J'},{t:'边做边学、在实践中摸索',c:'P'}]}
+    ];
+    var answered = {}; // qIndex -> chosen code
+    Q.forEach(function(item, qi){
+      var box = document.createElement('div'); box.className = 'mq-item';
+      var optsHtml = item.a.map(function(o){
+        return '<button type="button" class="mq-opt" data-q="'+qi+'" data-code="'+o.c+'">'+esc(o.t)+'</button>';
+      }).join('');
+      box.innerHTML = '<div class="mq-q">'+(qi+1)+'. '+esc(item.q)+'</div><div class="mq-opts">'+optsHtml+'</div>';
+      list.appendChild(box);
+    });
+    function updateProgress(){
+      var n = Object.keys(answered).length;
+      document.getElementById('mqProgress').textContent = '已答 ' + n + ' / ' + Q.length + (n===Q.length ? ' · 已生成你的类型' : '');
+    }
+    list.addEventListener('click', function(e){
+      var btn = e.target.closest('.mq-opt'); if(!btn) return;
+      var qi = btn.getAttribute('data-q');
+      answered[qi] = btn.getAttribute('data-code');
+      list.querySelectorAll('.mq-opt[data-q="'+qi+'"]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      updateProgress();
+      if(Object.keys(answered).length === Q.length) render();
+    });
+    function render(){
+      var dt = { EI:{}, SN:{}, TF:{}, JP:{} };
+      Q.forEach(function(item, qi){
+        var code = answered[qi]; if(!code) return;
+        dt[item.dim][code] = (dt[item.dim][code]||0) + 1;
+      });
+      function pick(dim){
+        var t = dt[dim]; var keys = Object.keys(t);
+        if(keys.length === 1) return keys[0];
+        return (t[keys[0]] >= t[keys[1]]) ? keys[0] : keys[1];
+      }
+      var code = pick('EI') + pick('SN') + pick('TF') + pick('JP');
+      var t = M.types[code];
+      if(!t) return;
+      var res = document.getElementById('mqResult');
+      res.innerHTML = '<div class="mqr-code">'+code+'</div>'
+        + '<div class="mqr-name">'+esc(t.cn)+' · '+esc(t.en)+'</div>'
+        + '<div class="mqr-nick">「'+esc(t.nick)+'」</div>'
+        + '<div class="mqr-traits">'+t.traits.map(function(x){ return '<span class="t">'+esc(x)+'</span>'; }).join('')+'</div>'
+        + '<div class="mqr-desc">'+esc(t.desc)+'</div>'
+        + '<div class="mqr-advice"><b style="color:var(--gold-light)">今日建议：</b>'+esc(t.advice)+'</div>'
+        + '<div class="mqr-actions"><span class="mqr-link" id="mqToFull">想更深入？试试完整四维度测试 ↓</span></div>';
+      res.classList.add('show');
+      res.scrollIntoView({behavior:'smooth', block:'center'});
+      var link = document.getElementById('mqToFull');
+      if(link) link.addEventListener('click', function(){
+        var p = document.getElementById('mbtiPick'); if(p) p.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    }
+    updateProgress();
+  })();
+  </script>
+  <script src="assets/site-util.js?v=20260914a"></script>
+</body>
+</html>

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>今日指引 · Upon Star</title>
+  <meta name="description" content="每日一牌、每日运势、每日一卦、每日宜忌、今日抽签、本命星盘，六合一的当日指引。确定性、纯本地计算，同一天同一结果，免费开放。Upon Star 文化研究与心理探索参考。">
+  <meta property="og:title" content="今日指引 · Upon Star">
+  <meta property="og:description" content="每日一牌 · 每日运势 · 每日一卦 · 每日宜忌 · 今日抽签 · 本命星盘，免费开放的当日指引聚合页">
+  <meta property="og:type" content="website">
+  <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="assets/base.css?v=20260914c">
+  <style>
+    .tool-hero{position:relative;text-align:center;padding:calc(var(--space-xl) + 8px) var(--space-md) var(--space-md);}
+    .tool-hero .kicker{font-family:var(--font-decor);letter-spacing:.32em;color:var(--gold-light);font-size:.8rem;text-transform:uppercase;}
+    .tool-hero h1{font-size:clamp(2.2rem,7vw,3.6rem);margin:8px 0 6px;color:var(--text);}
+    .tool-hero .lead{font-family:var(--font-serif);color:var(--text-dim);max-width:640px;margin:0 auto;line-height:1.85;}
+    .today-date{text-align:center;font-family:var(--font-decor);letter-spacing:.18em;color:var(--gold);font-size:.82rem;margin-top:6px;}
+
+    /* 六个聚合卡切换 */
+    .today-tabs{display:inline-flex;gap:6px;padding:5px;border:1px solid var(--line);border-radius:999px;background:var(--surface);flex-wrap:wrap;justify-content:center;margin:var(--space-md) auto 0;position:relative;left:50%;transform:translateX(-50%);max-width:92vw;}
+    .today-tabs button{border:0;background:transparent;color:var(--text-dim);font-family:var(--font-sans);font-size:.9rem;padding:9px 16px;border-radius:999px;transition:.25s;white-space:nowrap;cursor:pointer;}
+    .today-tabs button.active{background:var(--gold);color:var(--on-accent);}
+    .today-tabs button:not(.active):hover{color:var(--gold-light);}
+
+    .today-panel{display:none;max-width:760px;margin:var(--space-lg) auto 0;}
+    .today-panel.show{display:block;animation:fadeUp .5s ease;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+
+    /* 每日一牌 */
+    .daily-card-stage{display:flex;flex-direction:column;align-items:center;gap:var(--space-md);}
+    .deck-card{position:relative;width:200px;aspect-ratio:2/3;perspective:1000px;cursor:pointer;user-select:none;}
+    .deck-card .flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.25,.46,.45,.94);}
+    .deck-card.flipped .flip-inner{transform:rotateY(180deg);}
+    .deck-card .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2);display:grid;place-items:center;}
+    .deck-card .face-down{background:radial-gradient(circle at 50% 40%,rgba(80,120,160,.18),transparent 70%),var(--surface-2);}
+    .deck-card .face-down::after{content:"";position:absolute;inset:6px;border:1px solid rgba(200,164,92,.25);border-radius:6px;pointer-events:none;}
+    .deck-card .face-up{transform:rotateY(180deg);}
+    .deck-card .face img{width:100%;height:100%;object-fit:cover;}
+    .deck-card.flipped{box-shadow:0 0 0 2px var(--gold),0 8px 24px rgba(200,164,92,.30);}
+    .card-cap{text-align:center;}
+    .card-cap .cc-name{font-family:var(--font-display);font-size:1.5rem;color:var(--gold-light);line-height:1.2;}
+    .card-cap .cc-pos{font-family:var(--font-decor);font-size:.7rem;letter-spacing:.14em;color:#d98a8a;margin-top:4px;text-transform:uppercase;}
+    .card-cap .cc-pos.up{color:#6fae7e;}
+    .card-cap .cc-kw{font-family:var(--font-serif);font-size:.9rem;color:var(--text-dim);margin-top:8px;line-height:1.7;}
+    .card-cap .cc-detail{font-family:var(--font-serif);font-size:.86rem;color:var(--text);margin-top:10px;line-height:1.85;padding:var(--space-sm) var(--space-md);background:rgba(8,8,14,.45);border-left:3px solid var(--gold);border-radius:6px;text-align:left;}
+    .tap-hint{font-family:var(--font-serif);font-style:italic;color:var(--text-dim);font-size:.82rem;}
+
+    /* 每日运势 */
+    .fortune-sign{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:var(--space-md);}
+    .fortune-hint{font-family:var(--font-serif);color:var(--text-dim);font-size:.88rem;margin:0;text-align:center;}
+    .zodiac-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;width:100%;max-width:560px;}
+    @media(max-width:560px){.zodiac-grid{grid-template-columns:repeat(4,1fr);}}
+    .zodiac-card{position:relative;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+      border:1px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer;transition:.28s;overflow:hidden;
+      transform-style:preserve-3d;}
+    .zodiac-card .zs-sym{font-size:1.7rem;line-height:1;color:var(--text);transition:.28s;}
+    .zodiac-card .zs-name{font-family:var(--font-decor);font-size:.62rem;letter-spacing:.08em;color:var(--gold-dim);opacity:0;transition:.28s;}
+    .zodiac-card:hover{border-color:var(--gold);box-shadow:0 0 18px rgba(200,164,92,.2);}
+    .zodiac-card.active{border-color:var(--gold);background:linear-gradient(180deg,rgba(200,164,92,.16),rgba(200,164,92,.04));box-shadow:0 0 24px rgba(200,164,92,.3);}
+    .zodiac-card.active .zs-sym{color:var(--gold-light);}
+    .zodiac-card.active .zs-name{opacity:1;color:var(--gold-light);}
+    .zodiac-card .zs-saved{position:absolute;top:4px;right:5px;font-size:.52rem;letter-spacing:.05em;color:var(--gold-light);border:1px solid var(--gold);border-radius:999px;padding:0 4px;opacity:0;}
+    .zodiac-card.saved .zs-saved{opacity:1;}
+
+    .fortune-bars{display:flex;flex-direction:column;gap:18px;margin-top:var(--space-sm);}
+    .fb-block{padding:var(--space-sm) var(--space-md);border:1px solid var(--line);border-radius:10px;background:rgba(8,8,14,.35);}
+    .fb-top{display:flex;align-items:center;gap:12px;}
+    .fb-label{flex:0 0 64px;font-family:var(--font-decor);font-size:.74rem;letter-spacing:.1em;color:var(--gold-light);text-transform:uppercase;text-align:right;}
+    .fb-track{flex:1;height:14px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;border:1px solid var(--line);}
+    .fb-fill{height:100%;border-radius:999px;transition:width .8s cubic-bezier(.25,.46,.45,.94);}
+    .fb-val{flex:0 0 38px;text-align:right;font-family:var(--font-sans);font-size:.9rem;color:var(--text);font-weight:600;}
+    .fb-desc{font-family:var(--font-serif);font-size:.86rem;color:var(--text-dim);line-height:1.7;margin-top:8px;}
+    .fortune-note{text-align:center;font-family:var(--font-serif);font-size:.84rem;color:var(--text-dim);margin-top:var(--space-md);line-height:1.7;}
+
+    /* 每日一卦 */
+    .gua-stage{display:flex;flex-direction:column;align-items:center;gap:var(--space-md);}
+    .gua-svg{width:200px;height:auto;}
+    .gua-cap{text-align:center;max-width:600px;}
+    .gua-cap .g-name{font-family:var(--font-display);font-size:1.6rem;color:var(--gold-light);}
+    .gua-cap .g-sym{font-size:1.4rem;color:var(--text);letter-spacing:.2em;margin:0 8px;}
+    .gua-cap .g-guaci{font-family:var(--font-serif);font-size:.9rem;color:var(--text-dim);margin-top:8px;line-height:1.7;}
+    .gua-cap .g-line{font-family:var(--font-serif);font-size:.9rem;color:var(--text);margin-top:6px;line-height:1.8;text-align:left;padding:var(--space-sm) var(--space-md);background:rgba(8,8,14,.45);border-left:3px solid var(--gold);border-radius:6px;}
+    .gua-cap .g-line b{color:var(--gold-light);}
+
+    /* 每日宜忌·黄历 */
+    .lunar-tag{display:inline-block;font-family:var(--font-serif);font-size:.95rem;letter-spacing:.06em;color:var(--gold-light);}
+    .yiji-jc{text-align:center;margin-bottom:var(--space-sm);}
+    .yiji-jc .jc-big{font-family:var(--font-display);font-size:2.6rem;color:var(--gold-light);line-height:1;display:block;}
+    .yiji-jc .jc-sub{font-family:var(--font-decor);font-size:.72rem;letter-spacing:.22em;color:var(--gold-dim);text-transform:uppercase;margin-top:4px;}
+    .yiji-cols{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-sm);margin-top:var(--space-sm);}
+    .yiji-col{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:rgba(8,8,14,.5);}
+    .yiji-col h4{margin:0 0 8px;font-family:var(--font-decor);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;}
+    .yiji-col.yi h4{color:#7bb88a;}
+    .yiji-col.ji h4{color:#d98a7b;}
+    .yiji-col .tags{display:flex;flex-wrap:wrap;gap:6px;}
+    .yiji-col .tag{font-family:var(--font-serif);font-size:.82rem;padding:3px 10px;border-radius:999px;border:1px solid var(--line);}
+    .yiji-col.yi .tag{color:#9fd3ad;border-color:rgba(123,184,138,.4);}
+    .yiji-col.ji .tag{color:#e0a89c;border-color:rgba(217,138,123,.4);}
+    .yiji-note{text-align:center;font-size:.72rem;color:var(--text-dim);font-family:var(--font-serif);font-style:italic;margin-top:10px;}
+
+    /* 今日抽签 */
+    .qian-stage{text-align:center;margin-bottom:var(--space-sm);min-height:120px;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;}
+    .qian-stage:active{cursor:grabbing;}
+    .qian-hint{text-align:center;font-family:var(--font-serif);font-size:.82rem;color:var(--text-dim);margin:10px auto 0;max-width:480px;line-height:1.6;}
+    .qian-tube{position:relative;width:64px;height:110px;border-radius:10px 10px 14px 14px;background:linear-gradient(180deg,#caa06a,#8a5a2c);border:2px solid #6c4527;box-shadow:0 8px 22px rgba(0,0,0,.45),inset 0 0 10px rgba(40,20,8,.5);display:flex;align-items:flex-end;justify-content:center;gap:6px;padding-bottom:10px;}
+    .qian-tube::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:44px;height:10px;border-radius:6px;background:#6c4527;}
+    .qian-stick{width:7px;height:78px;border-radius:4px;background:linear-gradient(180deg,#f3e6c8,#d9c39a);box-shadow:0 0 4px rgba(0,0,0,.3);}
+    .qian-tube.shake{animation:qianShake .5s ease-in-out;}
+    @keyframes qianShake{0%,100%{transform:translateX(0) rotate(0);}20%{transform:translateX(-6px) rotate(-4deg);}40%{transform:translateX(6px) rotate(4deg);}60%{transform:translateX(-4px) rotate(-2deg);}80%{transform:translateX(4px) rotate(2deg);}}
+    .qian-result{margin-top:var(--space-sm);font-family:var(--font-serif);display:none;}
+    .qian-result.show{display:block;}
+    .qian-card{padding:var(--space-md);border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(8,8,14,.5));border:1px solid var(--line);animation:qianIn .5s ease;}
+    @keyframes qianIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+    .qian-card.lv-top{border-color:#e0c078;box-shadow:0 0 26px rgba(224,192,120,.3);}
+    .qian-card.lv-up{border-color:#9cc0e8;}
+    .qian-card.lv-midup{border-color:#7ab888;}
+    .qian-card.lv-mid{border-color:var(--line);}
+    .qian-card.lv-down{border-color:#a09888;}
+    .qian-id{font-family:var(--font-decor);letter-spacing:.2em;text-transform:uppercase;font-size:.74rem;color:var(--gold-light);text-align:center;}
+    .qian-title{font-family:var(--font-display);font-size:1.5rem;color:var(--gold-light);text-align:center;margin:4px 0 10px;}
+    .qian-poem{text-align:center;font-family:var(--font-serif);font-size:1rem;color:var(--text);line-height:1.9;margin-bottom:10px;}
+    .qian-poem-line{letter-spacing:.08em;}
+    .qian-baihua{font-family:var(--font-serif);font-size:.9rem;line-height:1.8;color:var(--text-dim);padding:var(--space-sm) var(--space-md);background:rgba(8,8,14,.4);border-left:3px solid var(--gold);border-radius:6px;}
+    .roll-btn{font-family:var(--font-sans);font-size:.92rem;padding:10px 24px;border-radius:999px;border:1px solid var(--gold);background:var(--gold);color:var(--bg);transition:.25s;display:block;margin:0 auto;}
+    .roll-btn:hover:not(:disabled){background:var(--gold-light);box-shadow:0 0 20px rgba(200,164,92,.4);}
+    .roll-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+    /* 个人生辰·本命星盘 */
+    .birth-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;align-items:end;}
+    .birth-form label{display:block;font-family:var(--font-decor);font-size:.7rem;letter-spacing:.16em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:4px;}
+    .birth-form input,.birth-form select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font-family:var(--font-serif);font-size:.9rem;}
+    .birth-actions{display:flex;gap:8px;margin-top:var(--space-sm);flex-wrap:wrap;}
+    .mini-btn{font-family:var(--font-sans);font-size:.82rem;padding:8px 16px;border-radius:999px;border:1px solid var(--gold);background:transparent;color:var(--gold-light);cursor:pointer;transition:.2s;}
+    .mini-btn.primary{background:var(--gold);color:var(--bg);border-color:var(--gold);}
+    .mini-btn:hover{box-shadow:0 0 14px rgba(200,164,92,.35);}
+    .birth-result{margin-top:var(--space-sm);padding:var(--space-sm);background:rgba(8,8,14,.5);border-radius:8px;border:1px dashed var(--line);font-family:var(--font-serif);font-size:.88rem;line-height:1.75;color:var(--text);display:none;}
+    .birth-result.show{display:block;}
+    .birth-result .row{display:flex;gap:10px;align-items:baseline;margin-bottom:4px;}
+    .birth-result .k{flex:0 0 64px;color:var(--gold-light);font-family:var(--font-decor);font-size:.74rem;letter-spacing:.1em;}
+    .birth-result .v{flex:1;}
+    .birth-note{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);color:var(--text-dim);font-size:.85rem;}
+
+    .meta-note{text-align:center;color:var(--text-dim);font-size:.76rem;margin-top:var(--space-lg);font-family:var(--font-serif);font-style:italic;}
+
+    @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+  </style>
+  <link rel="canonical" href="https://upon-star.com/today.html">
+  <meta property="og:url" content="https://upon-star.com/today.html">
+  <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="今日指引 · Upon Star">
+  <meta name="twitter:description" content="每日一牌、每日运势、每日一卦、每日宜忌、今日抽签、本命星盘，免费开放的当日指引聚合页。">
+</head>
+<body>
+  <div class="sacred-light" aria-hidden="true"></div>
+
+  <header class="site-nav">
+    <a class="brand" href="divination-homepage.html">Upon Star<small>UPON STAR</small></a>
+    <nav class="nav-tabs" aria-label="分类导航">
+      <a href="east.html">东方</a>
+      <a href="west.html">西方</a>
+      <a href="fusion.html">融合</a>
+      <a href="mbti.html">人格</a>
+      <a href="pair.html">配对</a>
+      <a href="today.html" class="active">今日</a>
+      <a href="user.html">我的</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <nav class="breadcrumb" aria-label="面包屑"><a href="divination-homepage.html">首页</a> / <span>今日指引</span></nav>
+
+    <section class="tool-hero">
+      <div class="kicker">Today · 今日指引</div>
+      <h1>今日指引</h1>
+      <p class="lead">同一天，同一份指引。以下六项均由当天的日期确定性生成，免费、无需登录；本命星盘依你填写的生辰个性化。</p>
+      <div class="today-date" id="todayDate"></div>
+    </section>
+
+    <div class="today-tabs" role="tablist" aria-label="今日功能切换">
+      <button type="button" class="active" data-tab="card" role="tab" aria-selected="true">每日一牌</button>
+      <button type="button" data-tab="fortune" role="tab" aria-selected="false">每日运势</button>
+      <button type="button" data-tab="gua" role="tab" aria-selected="false">每日一卦</button>
+      <button type="button" data-tab="yiji" role="tab" aria-selected="false">每日宜忌</button>
+      <button type="button" data-tab="qian" role="tab" aria-selected="false">今日抽签</button>
+      <button type="button" data-tab="birth" role="tab" aria-selected="false">本命星盘</button>
+    </div>
+
+    <!-- 每日一牌 -->
+    <section class="today-panel show" id="panel-card" aria-label="每日一牌">
+      <div class="daily-card-stage">
+        <div class="deck-card" id="dailyCard" role="button" tabindex="0" aria-label="点击翻牌">
+          <div class="flip-inner">
+            <div class="face face-down"><img src="assets/cards/tarot/back.jpg" alt="牌背" loading="lazy"></div>
+            <div class="face face-up"><img id="dailyCardImg" src="" alt="" loading="lazy"></div>
+          </div>
+        </div>
+        <p class="tap-hint">点击卡牌翻看今日指引</p>
+        <div class="card-cap" id="dailyCardCap" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- 每日运势 -->
+    <section class="today-panel" id="panel-fortune" aria-label="每日运势">
+      <div class="fortune-sign">
+        <p class="fortune-hint">点击你的星座，翻开今日六维运势</p>
+        <div class="zodiac-grid" id="zodiacGrid" role="listbox" aria-label="选择星座"></div>
+      </div>
+      <div class="fortune-bars" id="fortuneBars" aria-live="polite"></div>
+      <p class="fortune-note">评分与解读仅作今日能量参考，同一星座每天不同。点击的星座会自动记住，下次打开默认翻开你的星座。</p>
+    </section>
+
+    <!-- 每日一卦 -->
+    <section class="today-panel" id="panel-gua" aria-label="每日一卦">
+      <div class="gua-stage">
+        <div id="guaSvg" class="gua-svg"></div>
+        <div class="gua-cap" id="guaCap" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- 每日宜忌·黄历 -->
+    <section class="today-panel" id="panel-yiji" aria-label="每日宜忌">
+      <p style="text-align:center;"><span class="lunar-tag" id="lunarTag">—</span></p>
+      <div id="yijiBox"></div>
+    </section>
+
+    <!-- 今日抽签 -->
+    <section class="today-panel" id="panel-qian" aria-label="今日抽签">
+      <div class="qian-stage" id="qianStage">
+        <div class="qian-tube" id="qianTube"><span class="qian-stick"></span><span class="qian-stick"></span><span class="qian-stick"></span></div>
+      </div>
+      <button type="button" class="roll-btn" id="drawBtn">求一支签</button>
+      <p class="qian-hint">手机摇一摇，或在签筒上按住来回滑动 / 拖动，亲手抽签</p>
+      <div class="qian-result" id="qianResult"></div>
+    </section>
+
+    <!-- 个人生辰·本命星盘 -->
+    <section class="today-panel" id="panel-birth" aria-label="本命星盘">
+      <div id="birthBox">
+        <div class="birth-form">
+          <div>
+            <label>出生年</label>
+            <input type="number" id="bYear" min="1900" max="2100" placeholder="例 1995">
+          </div>
+          <div>
+            <label>月</label>
+            <input type="number" id="bMonth" min="1" max="12" placeholder="1-12">
+          </div>
+          <div>
+            <label>日</label>
+            <input type="number" id="bDay" min="1" max="31" placeholder="1-31">
+          </div>
+          <div>
+            <label>出生时辰</label>
+            <select id="bHour">
+              <option value="-1">不详（按正午）</option>
+              <option value="0">子时 23–01</option>
+              <option value="1">丑时 01–03</option>
+              <option value="3">寅时 03–05</option>
+              <option value="5">卯时 05–07</option>
+              <option value="7">辰时 07–09</option>
+              <option value="9">巳时 09–11</option>
+              <option value="11" selected>午时 11–13</option>
+              <option value="13">未时 13–15</option>
+              <option value="15">申时 15–17</option>
+              <option value="17">酉时 17–19</option>
+              <option value="19">戌时 19–21</option>
+              <option value="21">亥时 21–23</option>
+            </select>
+          </div>
+          <div>
+            <label>出生地</label>
+            <select id="bCity">
+              <option value="39.9,116.4" selected>北京</option>
+            </select>
+          </div>
+        </div>
+        <div class="birth-actions">
+          <button type="button" class="mini-btn primary" id="birthSave">保存并计算</button>
+          <button type="button" class="mini-btn" id="birthClear">清除记录</button>
+        </div>
+        <div class="birth-result" id="birthResult"></div>
+      </div>
+    </section>
+
+    <p class="meta-note">以上结果由浏览器于本地依当天日期或你填写的生辰确定性推算，仅用于文化研究与心理探索参考，不构成任何建议。</p>
+  </main>
+
+  <footer class="site-footer">
+    <nav class="links" aria-label="页脚导航">
+      <a href="about.html">关于</a><a href="faq.html">常见问题</a><a href="guestbook.html">画廊</a>
+      <a href="terms.html">条款</a><a href="privacy.html">隐私</a><a href="refund.html">费用</a>
+    </nav>
+    <p class="disclaimer">本平台内容仅用于文化研究与心理探索参考。所有计算均在您的设备本地完成。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+  </footer>
+
+  <script src="assets/lib/astronomy-engine/astronomy.browser.min.js"></script>
+  <script src="assets/cards/astro-engine.js"></script>
+  <script src="assets/cards/tarot-data.js"></script>
+  <script src="assets/cards/yijing-data.js"></script>
+  <script src="assets/cards/yijing-baihua.js"></script>
+  <script src="assets/cards/lunar-engine.js"></script>
+  <script src="assets/cards/lots-data.js"></script>
+  <script src="assets/cities.js?v=20260901a"></script>
+  <script src="assets/user-store.js?v=20260831b"></script>
+  <script>
+  (function(){
+    'use strict';
+    function $(id){ return document.getElementById(id); }
+    function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&','<':'<','>':'>','"':'"',"'":"'"}[c]; }); }
+
+    // 当天日期种子：YYYYMMDD（本地时区）
+    var now = new Date();
+    var Y = now.getFullYear(), M = now.getMonth()+1, D = now.getDate();
+    var seed = Y*10000 + M*100 + D;
+    $('todayDate').textContent = Y + ' 年 ' + M + ' 月 ' + D + ' 日 · 今日指引';
+
+    // 简单可复现 PRNG（mulberry32）
+    function mulberry32(a){
+      return function(){
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        var t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    // 标签切换
+    var tabs = document.querySelectorAll('.today-tabs button');
+    tabs.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        tabs.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+        btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+        document.querySelectorAll('.today-panel').forEach(function(p){ p.classList.remove('show'); });
+        $('panel-' + btn.getAttribute('data-tab')).classList.add('show');
+      });
+    });
+
+    /* ---------- 每日一牌 ---------- */
+    (function(){
+      var T = window.TAROT;
+      if(!T || !T.cards || !T.cards.length) return;
+      var idx = seed % T.cards.length;
+      var upright = (Math.floor(seed / T.cards.length) % 2) === 0;
+      var card = T.cards[idx];
+      if(!card) return;
+      var posLabel = upright ? '正位' : '逆位';
+      $('dailyCardImg').src = card.img || '';
+      $('dailyCardImg').alt = card.nameCn || '塔罗牌';
+      function reveal(){
+        var key = upright ? card.meaning : card.reversed;
+        $('dailyCardCap').innerHTML =
+          '<div class="cc-name">' + esc(card.nameCn) + '</div>' +
+          '<div class="cc-pos ' + (upright ? 'up' : '') + '">' + posLabel + ' · ' + esc(card.name) + '</div>' +
+          '<div class="cc-kw">关键词：' + esc(key) + '</div>' +
+          '<div class="cc-detail">' + esc(card.detail || key) + '</div>';
+      }
+      var dc = $('dailyCard');
+      dc.addEventListener('click', function(){ dc.classList.add('flipped'); reveal(); });
+      dc.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); dc.classList.add('flipped'); reveal(); } });
+    })();
+
+    /* ---------- 每日运势 ---------- */
+    var ZODIAC = [
+      {name:'白羊',sym:'♈',wx:'火'},{name:'金牛',sym:'♉',wx:'土'},{name:'双子',sym:'♊',wx:'风'},
+      {name:'巨蟹',sym:'♋',wx:'水'},{name:'狮子',sym:'♌',wx:'火'},{name:'处女',sym:'♍',wx:'土'},
+      {name:'天秤',sym:'♎',wx:'风'},{name:'天蝎',sym:'♏',wx:'水'},{name:'射手',sym:'♐',wx:'火'},
+      {name:'摩羯',sym:'♑',wx:'土'},{name:'水瓶',sym:'♒',wx:'风'},{name:'双鱼',sym:'♓',wx:'水'}
+    ];
+    (function(){
+      // 六维 + 解读文案（数值分三档：顺 hi / 平 mid / 需留意 lo）
+      var DIMS = ['感情','工作','学业','财运','健康','桃花'];
+      var DIM_PHRASES = {
+        感情:{ hi:['今日的情感流动顺畅，已有关系更显默契，单身的你也容易在寻常场合接收到善意信号。','心绪柔软，适合主动表达或在关系里多一份耐心，氛围会回以温柔。','人际磁场调和，旧矛盾有自然消融的机会，宜把握轻松相处的时刻。'],
+               mid:['感情平稳，不冷不热。把注意力放回自己，反而能给关系留白与呼吸。','今日宜观察多于行动，暧昧或犹豫的事可先放着，时机未到不勉强。','关系里小摩擦难免，少纠结对错、多给彼此空间，便能平稳度过。'],
+               lo:['情绪易感起伏，旧话题可能被点燃。先照顾好自己，别在疲惫时做重大关系决定。','今日宜守不宜攻，过度索求回应容易落空，把期待收一收更轻松。','沟通易有错位，重要的事缓一缓再说，避免误会累积。'] },
+        工作:{ hi:['思路清晰、行动顺手，今日适合推进关键任务或主动争取机会，容易被看见。','执行力在线，积压的事项能一口气推进，团队协作也顺。','灵感与节奏都在线，适合做决定、开新局，把握上午的黄金时段。'],
+               mid:['事务平稳，按部就班即可。把大目标拆小，今天能稳稳往前挪一步。','琐碎居多，专注当下以免被杂事扯散；完成比完美更重要。','节奏适中，适合复盘与整理，为下一阶段蓄力。'],
+               lo:['易遇卡顿或临时变动，重要会议前多准备一套预案更稳妥。','精力易分散，优先处理要紧事，别让不重要的事占满今天。','沟通易有落差，交代任务时尽量说清，减少返工。'] },
+        学业:{ hi:['吸收力强，适合啃硬骨头或开启新专题，专注两小时胜过往日半天。','理解力在线，难题今日更易豁然开朗，宜做深度训练。','记忆与逻辑俱佳，考试、答辩、创作都能拿出状态。'],
+               mid:['平稳积累的一天，不求快，把基础打实就是进步。','宜整理笔记、查漏补缺，慢工出细活。','注意力一般，分段学习、定时休息，效率反而更高。'],
+               lo:['易分心或钻牛角尖，换个方法或环境会有帮助。','今日不宜硬啃难题，先做能上手的部分，保持手感。','状态起伏，降低预期、完成小目标即可，别和自我较劲。'] },
+        财运:{ hi:['正财稳健，今日也适合梳理账目或落实一项长期理财小计划。','有小额进账或省钱妙招的机缘，留意身边务实的机会。','消费克制、收益可见，财务感踏实。'],
+               mid:['收支平稳，无大进无大出。理性消费，避免为情绪买单。','宜守成，非必要开支先记下来，过后再判断。','财务无波，适合做预算与规划，不为冲动埋单。'],
+               lo:['易有冲动消费或小额破财，今日付款前多停三秒。','留意账单与合同细节，避免因疏忽造成损失。','投资宜保守，不追高、不跟风，现金为王。'] },
+        健康:{ hi:['精力饱满，适合运动、户外或把作息调回正轨。','身心轻盈，情绪也稳，是养护自己的好日子。','气血通畅，注意补水与作息，状态能维持在线。'],
+               mid:['基本平稳，留意久坐与用眼，适度活动即可。','精力中等，别熬夜硬撑，给身体留点恢复空间。','饮食作息常规即可，小毛病早处理不拖延。'],
+               lo:['易感疲惫或旧症反复，今天宜休息多于折腾。','注意肠胃、肩颈或睡眠，别用咖啡硬扛。','情绪影响身体，先放松再做事，避免透支。'] },
+        桃花:{ hi:['魅力值在线上，社交场合易有桃花或善意关注，主动一点更有戏。','今日人缘亮眼，新朋友、新好感都可能悄悄出现。','氛围轻松，适合出现在人群里，缘分开窗概率高。'],
+               mid:['桃花平平，专注自我提升反而更吸引同频的人。','日常互动自然即可，不强求、不将就最自在。','旧识中可能藏着未留意的好感，多点留意。'],
+               lo:['今日桃花暗淡，独处或深耕爱好更划算，别为脱单硬凑。','易感孤单但无需焦虑，把能量放回自己最稳。','社交耗能偏高，减少无效社交，留时间给自己。'] }
+      };
+      function toneOf(v){ return v>=75?'hi':(v>=50?'mid':'lo'); }
+      function colorFor(v){
+        if(v >= 80) return '#6fae7e';
+        if(v >= 60) return 'var(--gold)';
+        if(v >= 40) return 'var(--text-dim)';
+        return '#d9806a';
+      }
+
+      var grid = $('zodiacGrid');
+      var savedIdx = null;
+      try{ savedIdx = localStorage.getItem('uponstar_daily_sign'); }catch(e){}
+      if(savedIdx!==null && !ZODIAC[savedIdx]) savedIdx = null;
+
+      ZODIAC.forEach(function(z, i){
+        var card = document.createElement('button');
+        card.type = 'button'; card.className = 'zodiac-card'; card.setAttribute('role','option');
+        card.setAttribute('data-i', i); card.setAttribute('aria-label', z.sym + ' ' + z.name + '座');
+        card.innerHTML = '<span class="zs-saved">已选</span><span class="zs-sym">' + z.sym + '</span><span class="zs-name">' + z.name + '</span>';
+        if(savedIdx!==null && parseInt(savedIdx,10)===i) card.classList.add('saved');
+        card.addEventListener('click', function(){ selectSign(i); });
+        grid.appendChild(card);
+      });
+
+      function blockHtml(d, v, txt){
+        return '<div class="fb-block"><div class="fb-top"><div class="fb-label">' + d + '</div>' +
+          '<div class="fb-track"><div class="fb-fill" style="width:0%;background:' + colorFor(v) + '"></div></div>' +
+          '<div class="fb-val">' + v + '</div></div>' +
+          '<div class="fb-desc">' + esc(txt) + '</div></div>';
+      }
+      function render(i){
+        var idx = parseInt(i,10);
+        var rv = mulberry32(seed * 131 + (idx+1) * 977);
+        var rp = mulberry32(seed * 991 + (idx+1) * 131);
+        var vals = [];
+        var html = '';
+        DIMS.forEach(function(d){
+          var v = 40 + Math.floor(rv() * 60);          // 40–99
+          var bucket = DIM_PHRASES[d][toneOf(v)];
+          var txt = bucket[Math.floor(rp() * bucket.length)];
+          vals.push(v);
+          html += blockHtml(d, v, txt);
+        });
+        $('fortuneBars').innerHTML = html;
+        var fills = $('fortuneBars').querySelectorAll('.fb-fill');
+        fills.forEach(function(f,k){ var v = vals[k]; requestAnimationFrame(function(){ f.style.width = v + '%'; }); });
+      }
+      function selectSign(i){
+        var idx = parseInt(i,10);
+        try{ localStorage.setItem('uponstar_daily_sign', String(idx)); }catch(e){}
+        grid.querySelectorAll('.zodiac-card').forEach(function(c){
+          var on = (parseInt(c.getAttribute('data-i'),10) === idx);
+          c.classList.toggle('active', on);
+          c.classList.toggle('saved', on);
+        });
+        render(idx);
+      }
+      if(savedIdx!==null){ selectSign(parseInt(savedIdx,10)); }
+    })();
+
+    /* ---------- 每日一卦 ---------- */
+    (function(){
+      var YJ = window.YIJING, BH = window.YIJING_BAIHUA;
+      if(!YJ || !YJ.guas) return;
+      var gi = seed % YJ.total;
+      var gua = YJ.guas[gi];
+      if(!gua) return;
+      var bin = (gua.binary && gua.binary.length === 6) ? gua.binary : [0,0,0,0,0,0];
+      var colors = { yang:'var(--gold)', yin:'var(--text-dim)' };
+      var svg = '<svg viewBox="0 0 200 300" class="gua-svg" xmlns="http://www.w3.org/2000/svg">';
+      for(var k=0;k<6;k++){
+        var y = 250 - k*40;
+        var isYang = bin[k] === 1;
+        if(isYang){
+          svg += '<rect x="30" y="' + (y-12) + '" width="140" height="20" rx="4" fill="' + colors.yang + '"/>';
+        } else {
+          svg += '<rect x="30" y="' + (y-12) + '" width="58" height="20" rx="4" fill="' + colors.yin + '"/>';
+          svg += '<rect x="112" y="' + (y-12) + '" width="58" height="20" rx="4" fill="' + colors.yin + '"/>';
+        }
+      }
+      svg += '</svg>';
+      $('guaSvg').innerHTML = svg;
+
+      var bh = BH && BH[gua.name] ? BH[gua.name] : null;
+      var lines = [];
+      if(bh){
+        lines.push('<b>主旨 · </b>' + esc(bh.theme));
+        lines.push(esc(bh.text));
+        var cats = [['love','感情'],['career','事业'],['wealth','财运'],['health','健康'],['study','学业'],['decision','抉择']];
+        var pick = cats[seed % cats.length];
+        if(bh.cat && bh.cat[pick[0]]) lines.push('<b>' + pick[1] + ' · </b>' + esc(bh.cat[pick[0]]));
+      } else {
+        lines.push(esc(gua.guaci));
+        if(gua.yaoci && gua.yaoci[0]) lines.push(esc(gua.yaoci[0]));
+      }
+      $('guaCap').innerHTML =
+        '<div class="g-name">' + esc(gua.name) + '卦<span class="g-sym">' + esc(gua.symbol || '') + '</span></div>' +
+        '<div class="g-guaci">' + esc(gua.guaci) + '</div>' +
+        '<div class="g-line">' + lines.join('<br>') + '</div>';
+    })();
+
+    /* ---------- 每日宜忌·黄历 ---------- */
+    (function(){
+      var L = window.LUNAR;
+      var box = $('yijiBox'), tag = $('lunarTag');
+      if(!L || !box){ return; }
+      var lunar = L.solar2lunar(Y, M, D);
+      tag.textContent = lunar.IMonthCn + lunar.IDayCn + ' · ' + lunar.gzYear + '年 · ' + lunar.gzDay + '日 · 生肖' + lunar.Animal + (lunar.Term ? (' · ' + lunar.Term) : '');
+      var info = L.yiji(lunar);
+      var yiHtml = (info.yi || []).map(function(x){ return '<span class="tag">' + x + '</span>'; }).join('');
+      var jiHtml = (info.ji || []).map(function(x){ return '<span class="tag">' + x + '</span>'; }).join('');
+      var html = '<div class="yiji-jc"><span class="jc-big">' + info.jianchu + '</span><span class="jc-sub">建除十二神 · ' + info.jianchu + '日</span></div>';
+      html += '<div class="yiji-cols">';
+      html += '<div class="yiji-col yi"><h4>宜</h4><div class="tags">' + (yiHtml || '<span class="tag">诸事平平</span>') + '</div></div>';
+      html += '<div class="yiji-col ji"><h4>忌</h4><div class="tags">' + (jiHtml || '<span class="tag">无特别禁忌</span>') + '</div></div>';
+      html += '</div>';
+      html += '<p class="yiji-note">建除十二神与宜忌为民间择日传统，仅供文化研究参考，请依实际情况判断。</p>';
+      box.innerHTML = html;
+    })();
+
+    /* ---------- 今日抽签（庙签）---------- */
+    var TEST_MODE = false; // 强制每日只能抽一次（2026-09-14 用户定稿：去测试不限次）
+    (function(){
+      var LOTS = window.UPLOTS;
+      if(!LOTS || !LOTS.LOTS){ return; }
+      var drawBtn = $('drawBtn');
+      var qianResult = $('qianResult');
+      var qianTube = $('qianTube');
+      function todayKey(){ return 'uponstar_daily_qian_' + Y + '-' + M + '-' + D; }
+      function todayLot(){
+        var idx = (seed * 9301 + 49297) % LOTS.LOTS.length;
+        return LOTS.LOTS[idx >= 0 ? idx : 0];
+      }
+      function renderLot(lot){
+        var cls = LOTS.levelClass(lot.level);
+        var poemHtml = lot.poem.map(function(p){ return '<div class="qian-poem-line">' + esc(p) + '</div>'; }).join('');
+        qianResult.innerHTML = '<div class="qian-card ' + cls + '">' +
+          '<div class="qian-id">' + esc(lot.id) + ' · ' + esc(lot.level) + '</div>' +
+          '<div class="qian-title">' + esc(lot.title) + '</div>' +
+          '<div class="qian-poem">' + poemHtml + '</div>' +
+          '<div class="qian-baihua">' + esc(lot.baihua) + '</div>' +
+          '</div>';
+        qianResult.classList.add('show');
+      }
+      function lockDraw(){ drawBtn.disabled = true; drawBtn.textContent = '今日已抽签'; }
+      function loadOrDraw(){
+        var saved = null;
+        try { saved = localStorage.getItem(todayKey()); } catch(e){}
+        if(saved && !TEST_MODE){
+          try { renderLot(JSON.parse(saved)); lockDraw(); return; } catch(e){}
+        }
+        drawBtn.disabled = false;
+        drawBtn.textContent = TEST_MODE ? '求一支签（测试不限次）' : '求一支签';
+      }
+      var isDrawing = false;
+      function doDraw(){
+        if(isDrawing) return;
+        if(!TEST_MODE && drawBtn.disabled) return;
+        isDrawing = true;
+        qianTube.classList.add('shake');
+        drawBtn.disabled = true;
+        drawBtn.textContent = '抽签中…';
+        setTimeout(function(){
+          qianTube.classList.remove('shake');
+          var lot = todayLot();
+          renderLot(lot);
+          try { localStorage.setItem(todayKey(), JSON.stringify(lot)); } catch(e){}
+          try { if(window.UserStore){ UserStore.addRecord({ key:'daily-' + Y + '-' + M + '-' + D, kind:'每日一签', title:'每日一签', summary:(lot.id||'')+' '+(lot.title||'')+'（'+(lot.level||'')+'）', at:Date.now() }); } } catch(e){}
+          isDrawing = false;
+          if(TEST_MODE){ drawBtn.disabled = false; drawBtn.textContent = '再求一支（测试）'; }
+          else { lockDraw(); }
+        }, 650);
+      }
+      drawBtn.addEventListener('click', doDraw);
+
+      // 桌面 / 触屏：在签筒上按住并来回拖动即可抽签
+      var stage = $('qianStage');
+      var dragEnergy = 0, lastX = 0, dragging = false;
+      function onDown(e){
+        if(isDrawing) return;
+        dragging = true; lastX = e.clientX || 0;
+        if(stage.setPointerCapture && e.pointerId != null){ try{ stage.setPointerCapture(e.pointerId); }catch(_){} }
+      }
+      function onMove(e){
+        if(!dragging || isDrawing) return;
+        var x = e.clientX || 0;
+        var dx = x - lastX; lastX = x;
+        qianTube.style.transform = 'translateX(' + Math.max(-10, Math.min(10, dx*0.4)) + 'px) rotate(' + Math.max(-12, Math.min(12, dx*0.6)) + 'deg)';
+        dragEnergy += Math.abs(dx);
+        if(dragEnergy > 480){ dragEnergy = 0; qianTube.classList.add('shake'); setTimeout(function(){ qianTube.classList.remove('shake'); }, 600); doDraw(); }
+      }
+      function onUp(){ dragging = false; dragEnergy = 0; qianTube.style.transform = ''; }
+      if(stage){
+        stage.addEventListener('pointerdown', onDown);
+        stage.addEventListener('pointermove', onMove);
+        stage.addEventListener('pointerup', onUp);
+        stage.addEventListener('pointercancel', onUp);
+        stage.addEventListener('pointerleave', onUp);
+      }
+
+      // 手机：摇一摇即可抽签
+      function enableQianShake(){
+        if(typeof window.DeviceMotionEvent === 'undefined') return;
+        var last = { x:0, y:0, z:0 }, lastT = 0, lastShuffle = 0;
+        function handler(e){
+          var a = e.accelerationIncludingGravity || e.acceleration; if(!a) return;
+          var t = Date.now();
+          if(t - lastT < 100) return; lastT = t;
+          var dx = a.x - last.x, dy = a.y - last.y, dz = a.z - last.z; last = { x:a.x, y:a.y, z:a.z };
+          var mag = Math.sqrt(dx*dx + dy*dy + dz*dz);
+          if(mag > 16 && t - lastShuffle > 1500){ lastShuffle = t; doDraw(); }
+        }
+        function attach(){ window.addEventListener('devicemotion', handler); }
+        if(typeof DeviceMotionEvent.requestPermission === 'function'){
+          var asked = false;
+          function ask(){ if(asked) return; asked = true; try{ DeviceMotionEvent.requestPermission().then(function(s){ if(s === 'granted') attach(); }).catch(function(){}); }catch(_){} }
+          document.addEventListener('click', ask, { once:true });
+          document.addEventListener('touchend', ask, { once:true });
+        } else { attach(); }
+      }
+      enableQianShake();
+
+      loadOrDraw();
+    })();
+
+    /* ---------- 个人生辰·本命星盘 ---------- */
+    (function(){
+      var A = window.ASTRO;
+      var BIRTH_KEY = 'uponstar_birth_v1';
+      if(!A || !A.computeNatal){ return; }
+      function loadBirth(){ try{ var raw = localStorage.getItem(BIRTH_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; } }
+      function saveBirth(obj){ try{ localStorage.setItem(BIRTH_KEY, JSON.stringify(obj)); }catch(e){} }
+      function clearBirth(){ try{ localStorage.removeItem(BIRTH_KEY); }catch(e){} }
+
+      var TIER_TEXT = {
+        'S':'今日宇宙能量与你的太阳星座高度共振，宜主动推进重要事务，把握显现的契机。',
+        'A':'今日多有和谐相位支持，适合合作、表达与沟通，顺势而为事半功倍。',
+        'B':'今日运势平稳中带些许摩擦，宜守不宜攻，留意人际与细节即可安度。',
+        'C':'今日冲相较强，宜缓步前行、避免正面冲突，把重要决定留待他日。'
+      };
+      function sunResonanceTier(userSunIdx, todaySunIdx){
+        var d = Math.abs(userSunIdx - todaySunIdx);
+        if(d === 0) return 'S';
+        if(d === 2 || d === 10) return 'A';
+        if(d === 4 || d === 8) return 'A';
+        if(d === 3 || d === 9) return 'B';
+        if(d === 6) return 'C';
+        return 'B';
+      }
+
+      function computeAndShow(b){
+        var by = +b.year, bm = +b.month, bd = +b.day;
+        var bh = (b.hour == null || b.hour < 0) ? 12 : +b.hour;
+        var lat = +b.lat, lng = +b.lng;
+        var r = $('birthResult');
+        if(!by || !bm || !bd || bm < 1 || bm > 12 || bd < 1 || bd > 31){
+          r.className = 'birth-result show';
+          r.innerHTML = '<p style="color:#d98a7c;">请填写有效的出生年月日（时辰与出生地可留空）。</p>';
+          return;
+        }
+        var natal, todayNatal;
+        try{ natal = A.computeNatal(by, bm, bd, bh, lat, lng); }catch(e){ natal = null; }
+        try{ todayNatal = A.computeNatal(Y, M, D, 12, 39.9, 116.4); }catch(e){ todayNatal = null; }
+        if(!natal){
+          r.className = 'birth-result show';
+          r.innerHTML = '<p style="color:#d98a7c;">本命计算失败，请检查输入。</p>';
+          return;
+        }
+        var sun = natal.planets[0], moon = natal.planets[1], asc = natal.asc;
+        var tier, lunarNote = '';
+        if(todayNatal){
+          var tSun = todayNatal.planets[0];
+          tier = sunResonanceTier(sun.signIdx, tSun.signIdx);
+        } else { tier = 'B'; }
+        var html = '';
+        html += '<div class="row"><span class="k">太阳</span><span class="v">' + sun.sign.sym + ' ' + sun.sign.name + '座（' + sun.deg.toFixed(1) + '°）— 核心自我与意志方向</span></div>';
+        html += '<div class="row"><span class="k">月亮</span><span class="v">' + moon.sign.sym + ' ' + moon.sign.name + '座 — 情绪与本能反应</span></div>';
+        html += '<div class="row"><span class="k">上升</span><span class="v">' + asc.sign.sym + ' ' + asc.sign.name + '座 — 你面对世界的方式</span></div>';
+        html += '<div class="birth-note">' + lunarNote + TIER_TEXT[tier] + '<br><span style="color:var(--text-dim);font-size:.78rem;">本命推算按东八区（UTC+8）与所选出生地经纬，精度约 ±1–2°，仅供文化探索参考。</span></div>';
+        r.className = 'birth-result show';
+        r.innerHTML = html;
+      }
+
+      function initBirth(){
+        var bYear = $('bYear'), bMonth = $('bMonth'), bDay = $('bDay'), bHour = $('bHour'), bCity = $('bCity');
+        if(window.UPON_Cities_API && bCity){
+          bCity.innerHTML = window.UPON_Cities_API.optionsHtml();
+          var saved = loadBirth();
+          if(saved && saved.lat != null && saved.lng != null){
+            var v = parseFloat(saved.lat).toFixed(2) + ',' + parseFloat(saved.lng).toFixed(2);
+            if(!window.UPON_Cities_API.find(v)){
+              var o = document.createElement('option'); o.value = v; o.textContent = '自定义 ' + v; bCity.appendChild(o);
+            }
+            try{ bCity.value = v; }catch(e){}
+          }
+        }
+        var saved = loadBirth();
+        if(saved){
+          bYear.value = saved.year || '';
+          bMonth.value = saved.month || '';
+          bDay.value = saved.day || '';
+          if(saved.hour != null) bHour.value = String(saved.hour);
+          if(saved.lat != null && saved.lng != null) bCity.value = saved.lat + ',' + saved.lng;
+          computeAndShow(saved);
+        }
+        $('birthSave').addEventListener('click', function(){
+          var latlng = (bCity.value || '39.9,116.4').split(',');
+          var obj = { year:bYear.value.trim(), month:bMonth.value.trim(), day:bDay.value.trim(), hour:parseInt(bHour.value,10), lat:parseFloat(latlng[0]), lng:parseFloat(latlng[1]) };
+          if(!obj.year || !obj.month || !obj.day){ computeAndShow(obj); return; }
+          saveBirth(obj);
+          computeAndShow(obj);
+        });
+        $('birthClear').addEventListener('click', function(){
+          clearBirth();
+          bYear.value = ''; bMonth.value = ''; bDay.value = ''; bHour.value = '-1'; bCity.value = '39.9,116.4';
+          var r = $('birthResult'); r.className = 'birth-result'; r.innerHTML = '';
+        });
+      }
+      initBirth();
+    })();
+  })();
+  </script>
+  <script src="assets/site-util.js?v=20260914a"></script>
+</body>
+</html>

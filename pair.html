@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>双人配对 · Upon Star</title>
+  <meta name="description" content="双人配对综合缘分：MBTI 人格缘、星座兼容、星盘合盘、五行合婚，一次算清。Upon Star 文化研究与自我探索参考。">
+  <meta property="og:title" content="双人配对 · Upon Star">
+  <meta property="og:description" content="MBTI + 星座 + 星盘 + 五行，四重缘分一次看清">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="assets/base.css?v=20260914c">
+  <style>
+    .pair-hero{position:relative;text-align:center;padding:calc(var(--space-xl) + 8px) var(--space-md) var(--space-md);}
+    .pair-hero .kicker{font-family:var(--font-decor);letter-spacing:.32em;color:var(--gold-light);font-size:.8rem;text-transform:uppercase;}
+    .pair-hero h1{font-size:clamp(2.4rem,7vw,4rem);margin:8px 0 6px;color:var(--text);}
+    .pair-hero .lead{font-family:var(--font-serif);color:var(--text-dim);max-width:620px;margin:0 auto;line-height:1.85;}
+
+    .pair-grid{max-width:880px;margin:var(--space-lg) auto 0;display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md);}
+    .pair-person{padding:var(--space-md);border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);}
+    .pair-person h3{font-family:var(--font-display);color:var(--gold-light);font-size:1.15rem;margin:0 0 12px;display:flex;align-items:center;gap:8px;}
+    .pair-person h3 .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);}
+    .pair-field{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+    .pair-field label{font-family:var(--font-sans);font-size:.8rem;color:var(--text-dim);letter-spacing:.02em;}
+    .pair-field input, .pair-field select{
+      width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;
+      background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:.92rem;transition:border-color .2s,box-shadow .2s;
+    }
+    .pair-field input:focus, .pair-field select:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 3px rgba(200,164,92,.22),0 0 14px rgba(200,164,92,.18);}
+    .pair-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .pair-row.three{grid-template-columns:1fr 1fr 1fr;}
+
+    .pair-actions{text-align:center;margin:var(--space-md) auto 0;max-width:880px;}
+    .pair-go{padding:13px 40px;border-radius:999px;border:1px solid var(--gold);background:var(--gold);color:var(--on-accent);
+      font-family:var(--font-sans);font-size:1rem;letter-spacing:.06em;cursor:pointer;transition:.25s;box-shadow:0 10px 30px rgba(200,164,92,.28);}
+    .pair-go:hover{background:var(--gold-light);}
+    .pair-go:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}
+
+    .pair-summary{max-width:880px;margin:var(--space-md) auto 0;display:none;gap:12px;grid-template-columns:1fr 1fr;}
+    .pair-summary.show{display:grid;}
+    .ps-card{padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-family:var(--font-serif);font-size:.84rem;color:var(--text-dim);line-height:1.7;}
+    .ps-card b{color:var(--gold-light);font-weight:600;}
+
+    .pair-result{max-width:880px;margin:var(--space-lg) auto 0;display:none;}
+    .pair-result.show{display:block;animation:pairIn .5s ease;}
+    @keyframes pairIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+
+    .pair-total{text-align:center;padding:var(--space-lg);border:1px solid var(--gold);border-radius:var(--radius);
+      background:linear-gradient(160deg,rgba(200,164,92,.10),rgba(8,8,14,.5));box-shadow:0 18px 50px rgba(0,0,0,.4);}
+    .pair-total .pt-num{font-family:var(--font-display);font-size:clamp(3.4rem,12vw,5rem);line-height:1;color:var(--gold-light);}
+    .pair-total .pt-tier{font-family:var(--font-decor);letter-spacing:.2em;color:var(--gold);font-size:1rem;margin-top:6px;text-transform:uppercase;}
+    .pair-total .pt-title{font-family:var(--font-serif);color:var(--text);font-size:1.05rem;margin-top:4px;}
+    .pair-total .pt-bar{height:8px;border-radius:999px;background:var(--bg);margin:14px auto 0;max-width:340px;overflow:hidden;border:1px solid var(--line);}
+    .pair-total .pt-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold-light));}
+
+    .pair-cards{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md);margin-top:var(--space-md);}
+    .pair-card{padding:var(--space-md);border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);}
+    .pair-card .pc-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px;}
+    .pair-card .pc-name{font-family:var(--font-display);color:var(--text);font-size:1.05rem;}
+    .pair-card .pc-idx{font-family:var(--font-display);font-size:1.7rem;color:var(--gold-light);}
+    .pair-card .pc-tier{display:inline-block;font-family:var(--font-sans);font-size:.72rem;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:2px 10px;margin-bottom:8px;}
+    .pair-card .pc-text{font-family:var(--font-serif);font-size:.86rem;line-height:1.78;color:var(--text-dim);}
+
+    .pair-save{text-align:center;margin-top:var(--space-md);}
+    .pair-save button{padding:11px 30px;border-radius:999px;border:1px solid var(--gold);background:transparent;color:var(--gold-light);
+      font-family:var(--font-sans);font-size:.9rem;cursor:pointer;transition:.25s;}
+    .pair-save button:hover{background:rgba(200,164,92,.12);}
+
+    @media (max-width:720px){
+      .pair-grid{grid-template-columns:1fr;}
+      .pair-cards{grid-template-columns:1fr;}
+      .pair-summary{grid-template-columns:1fr;}
+      .pair-row.three{grid-template-columns:1fr 1fr 1fr;}
+    }
+    @media (prefers-reduced-motion:reduce){ .pair-result{animation:none;} }
+  </style>
+  <link rel="canonical" href="https://upon-star.com/pair.html">
+  <meta property="og:url" content="https://upon-star.com/pair.html">
+  <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="双人配对 · Upon Star">
+  <meta name="twitter:description" content="双人配对综合缘分：MBTI 人格缘、星座兼容、星盘合盘、五行合婚，一次算清。Upon Star 文化研究与自我探索参考。">
+</head>
+<body>
+  <div class="sacred-light" aria-hidden="true"></div>
+
+  <header class="site-nav">
+    <a class="brand" href="divination-homepage.html">Upon Star<small>UPON STAR</small></a>
+    <nav class="nav-tabs" aria-label="分类导航">
+      <a href="east.html">东方</a>
+      <a href="west.html">西方</a>
+      <a href="fusion.html">融合</a>
+      <a href="mbti.html">人格</a>
+      <a href="pair.html" class="active">配对</a>
+      <a href="today.html">今日</a>
+      <a href="user.html">我的</a>
+    </nav></header>
+
+  <main class="container">
+    <nav class="breadcrumb" aria-label="面包屑"><a href="divination-homepage.html">首页</a> / 配对 / <span>双人配对</span></nav>
+
+    <section class="pair-hero">
+      <div class="kicker">Pairing · 双人配对</div>
+      <h1>双人配对</h1>
+      <p class="lead">一次看清你们的四重缘分——MBTI 人格缘、星座兼容、星盘合盘、五行合婚。所有计算都在你的设备本地完成。</p>
+    </section>
+
+    <div class="quick-link">只想快速看看？ <a href="#" id="quickToggle">试试星座速配 →</a></div>
+    <div class="quick-match" id="quickMatch">
+      <h3>星座速配 · 只看太阳星座</h3>
+      <div class="quick-row">
+        <select id="qSignA"></select>
+        <select id="qSignB"></select>
+      </div>
+      <button type="button" class="pair-go" id="quickGo" style="margin-top:14px;">速配一下</button>
+      <div class="quick-result" id="quickResult"></div>
+    </div>
+
+    <div class="wizard-steps" id="wizSteps">
+      <div class="wstep active" data-step="1"><span class="dot">1</span><span>你</span></div>
+      <div class="wstep" data-step="2"><span class="dot">2</span><span>TA</span></div>
+      <div class="wstep" data-step="3"><span class="dot">3</span><span>确认信息</span></div>
+    </div>
+
+    <section class="wizard-step show" id="step1">
+      <div class="wizard-card">
+        <h2 class="wstep-title">第一位 · 你</h2>
+        <div class="pair-field"><label>昵称</label><input id="aName" type="text" placeholder="如：小星" maxlength="12"></div>
+        <div class="pair-field"><label>性别（五行合婚需要）</label>
+          <select id="aGender"><option value="M">男</option><option value="F">女</option></select>
+        </div>
+        <div class="pair-field"><label>出生日期</label>
+          <div class="pair-row three">
+            <select id="aYear"></select><select id="aMonth"></select><select id="aDay"></select>
+          </div>
+        </div>
+        <div class="pair-field"><label>出生时（0–23 时，用于星盘/八字）</label>
+          <select id="aHour"></select>
+        </div>
+        <div class="pair-field"><label>出生城市（用于经纬度）</label>
+          <select id="aCity"></select>
+        </div>
+        <div class="pair-field"><label>MBTI（可稍后填）</label>
+          <select id="aMbti"><option value="">未知 / 稍后填</option></select>
+        </div>
+        <div class="wizard-nav"><button type="button" class="wiz-next" data-next="2">下一步：TA →</button></div>
+      </div>
+    </section>
+
+    <section class="wizard-step" id="step2">
+      <div class="wizard-card">
+        <h2 class="wstep-title">第二位 · TA</h2>
+        <div class="pair-field"><label>昵称</label><input id="bName" type="text" placeholder="如：小月" maxlength="12"></div>
+        <div class="pair-field"><label>性别（五行合婚需要）</label>
+          <select id="bGender"><option value="F">女</option><option value="M">男</option></select>
+        </div>
+        <div class="pair-field"><label>出生日期</label>
+          <div class="pair-row three">
+            <select id="bYear"></select><select id="bMonth"></select><select id="bDay"></select>
+          </div>
+        </div>
+        <div class="pair-field"><label>出生时（0–23 时，用于星盘/八字）</label>
+          <select id="bHour"></select>
+        </div>
+        <div class="pair-field"><label>出生城市（用于经纬度）</label>
+          <select id="bCity"></select>
+        </div>
+        <div class="pair-field"><label>MBTI（可稍后填）</label>
+          <select id="bMbti"><option value="">未知 / 稍后填</option></select>
+        </div>
+        <div class="wizard-nav">
+          <button type="button" class="wiz-back" data-back="1">← 返回</button>
+          <button type="button" class="wiz-next" data-next="3">下一步：确认 →</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="wizard-step" id="step3">
+      <div class="wizard-card">
+        <h2 class="wstep-title">确认信息</h2>
+        <div id="confirmBox" style="font-family:var(--font-serif);color:var(--text-dim);font-size:.9rem;line-height:1.9;"></div>
+        <div class="wizard-nav">
+          <button type="button" class="wiz-back" data-back="2">← 返回</button>
+          <button type="button" class="pair-go" id="pairGo">分析我们的缘分</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="pair-summary" id="pairSummary" aria-live="polite"></section>
+
+    <section class="pair-result" id="pairResult" aria-live="polite">
+      <div class="pair-total">
+        <div class="pt-num" id="ptNum">0</div>
+        <div class="pt-tier" id="ptTier"></div>
+        <div class="pt-title" id="ptTitle"></div>
+        <div class="pt-bar"><i id="ptBar" style="width:0%"></i></div>
+      </div>
+      <div class="pair-cards" id="pairCards"></div>
+      <div class="pair-save">
+        <button type="button" id="pairSave">存入我的记录</button>
+      </div>
+    </section>
+
+    <hr class="gold-line">
+
+    <section class="section">
+      <p class="disclaimer" style="text-align:center;max-width:680px;margin:0 auto;font-size:.85rem;">
+        免责声明：MBTI、星座、星盘与五行均为文化研究与自我探索工具，本页分析仅供娱乐与参考，不构成任何专业心理、情感或命理建议。所有数据均在您的设备本地计算。 本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <nav class="links" aria-label="页脚导航">
+      <a href="about.html">关于</a><a href="faq.html">常见问题</a><a href="guestbook.html">画廊</a>
+      <a href="terms.html">条款</a><a href="privacy.html">隐私</a><a href="refund.html">费用</a>
+    </nav>
+    <div class="footer-legal">
+      <details>
+        <summary>法律信息与免责声明</summary>
+        <div class="legal-body">
+          本平台内容仅用于文化研究与心理探索参考。所有计算均在您的设备本地完成。<br>内容交流与反馈微信：<strong>uponstar_wx</strong>
+        </div>
+      </details>
+    </div>
+  </footer>
+
+  <script src="assets/cards/astro-engine.js"></script>
+  <script src="assets/cards/bazi-engine.js"></script>
+  <script src="assets/cards/mbti-data.js"></script>
+  <script src="assets/cities.js?v=20260901a"></script>
+  <script src="assets/user-store.js?v=20260831b"></script>
+  <script src="assets/pair-engine.js?v=20260831b"></script>
+  <script>
+  (function(){
+    'use strict';
+    function $(id){ return document.getElementById(id); }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&','<':'<','>':'>','"':'"',"'":"'"}[c]; }); }
+    // 统一追加 option；ph 为占位提示文案（value="" 且默认选中，避免默认值 1930 这类不合理预设）
+    function opt(sel, v, t){ var o=document.createElement('option'); o.value=v; o.textContent=t; sel.appendChild(o); }
+    function fillSelect(sel, from, to, pad, ph){
+      opt(sel, '', ph || '请选择');
+      for(var i=from;i<=to;i++){ opt(sel, i, pad ? ('0'+i).slice(-2) : i); }
+      sel.value = '';
+    }
+    function fillMonths(sel){ opt(sel,'','请选择月'); for(var i=1;i<=12;i++){ opt(sel,i,i+'月'); } sel.value=''; }
+    function fillDays(sel){ opt(sel,'','请选择日'); for(var i=1;i<=31;i++){ opt(sel,i,i+'日'); } sel.value=''; }
+
+    // 初始化下拉
+    ['a','b'].forEach(function(p){
+      fillSelect($(p+'Year'), 1940, 2010, false, '请选择年');
+      fillMonths($(p+'Month'));
+      fillDays($(p+'Day'));
+      // 出生时辰：多数人不确定，提供「未知（按 12 时）」占位，避免默认 00 时造成隐性错误
+      fillSelect($(p+'Hour'), 0, 23, true, '未知（按 12 时算）');
+      // 城市
+      var city = $(p+'City');
+      city.innerHTML = '<option value="">选择城市（默认北京）</option>' + (window.UPON_Cities_API ? window.UPON_Cities_API.optionsHtml('0,0') : '');
+      // MBTI
+      var mb = $(p+'Mbti');
+      if(window.MBTI){ Object.keys(window.MBTI.types).forEach(function(code){
+        var o=document.createElement('option'); o.value=code; o.textContent=code+' · '+window.MBTI.types[code].cn; mb.appendChild(o);
+      }); }
+    });
+
+    // 仅当 select 中确实存在该 option 时才赋值（年份范围收窄后，档案里的旧值可能已不在范围内，静默跳过）
+    function setVal(sel, v){
+      if(v === null || v === undefined || v === '') return;
+      for(var i=0;i<sel.options.length;i++){
+        if(String(sel.options[i].value) === String(v)){ sel.value = v; return; }
+      }
+    }
+
+    // 预填「第一位」为我的档案
+    try{
+      var prof = window.UserStore ? window.UserStore.getProfile() : null;
+      if(prof){
+        if(prof.nick) $('aName').value = prof.nick;
+        if(prof.gender) $('aGender').value = prof.gender;
+        setVal($('aYear'), prof.y);
+        setVal($('aMonth'), prof.m);
+        setVal($('aDay'), prof.d);
+        setVal($('aHour'), prof.h);
+        if(prof.city){ var c=$( 'aCity'); for(var i=0;i<c.options.length;i++){ if(c.options[i].textContent.indexOf(prof.city)>=0){ c.selectedIndex=i; break; } } }
+        if(prof.mbti) $('aMbti').value = prof.mbti;
+      }
+    }catch(e){}
+
+    function cityLatLng(sel){
+      if(!window.UPON_Cities_API) return {lat:39.9042,lng:116.4074};
+      var v = sel.value; // "lat,lng" 形式，由 optionsHtml 的 value 决定
+      if(v && v.indexOf(',')>=0){ var p=v.split(','); return {lat:parseFloat(p[0]),lng:parseFloat(p[1])}; }
+      return {lat:39.9042,lng:116.4074}; // 默认北京
+    }
+
+    function readPerson(p){
+      return {
+        name: $(p+'Name').value.trim() || (p==='a'?'你':'TA'),
+        gender: $(p+'Gender').value,
+        y: parseInt($(p+'Year').value,10),
+        m: parseInt($(p+'Month').value,10),
+        d: parseInt($(p+'Day').value,10),
+        // 时辰留空（未知）时按 12 时（正午）计算，避免默认 00 时带来的隐性偏差
+        h: ($(p+'Hour').value === '' ? 12 : parseInt($(p+'Hour').value, 10)),
+        city: cityLatLng($(p+'City')),
+        mbti: $(p+'Mbti').value || null
+      };
+    }
+
+    var lastRecord = null;
+
+    $('pairGo').addEventListener('click', function(){
+      var A = readPerson('a'), B = readPerson('b');
+      // 逐项校验：年月日为必填（占位默认空），时辰可留空
+      var need = [];
+      if(!A.y || !A.m || !A.d) need.push('第一位（你）的出生年月日');
+      if(!B.y || !B.m || !B.d) need.push('第二位（TA）的出生年月日');
+      if(need.length){
+        alert('请先选择：\n· ' + need.join('\n· ') + '\n\n时辰如不确定，可保留「未知（按 12 时算）」。');
+        return;
+      }
+
+      var parts = [], summary = [];
+
+      // MBTI
+      var mbtiRes = (A.mbti && B.mbti) ? window.PairEngine.mbti(A.mbti, B.mbti) : null;
+      if(mbtiRes) parts.push(mbtiRes); else parts.push({key:'mbti',name:'MBTI 人格缘',idx:null,tier:'未填',title:'',text:'双方 MBTI 未都填写，已跳过此项。'});
+
+      // 星盘（需经纬度）
+      var chartA = window.ASTRO.computeNatal(A.y,A.m,A.d,A.h,A.city.lat,A.city.lng);
+      var chartB = window.ASTRO.computeNatal(B.y,B.m,B.d,B.h,B.city.lat,B.city.lng);
+      var sunA = chartA.planets.filter(function(p){return p.key==='sun';})[0];
+      var sunB = chartB.planets.filter(function(p){return p.key==='sun';})[0];
+      var zo = window.PairEngine.zodiac(sunA.signIdx, sunB.signIdx);
+      if(zo) parts.push(zo);
+      var syn = window.PairEngine.synastry(chartA, chartB);
+      if(syn) parts.push(syn);
+
+      // 五行
+      var bA, bB;
+      try{ bA = window.BAZI.compute(A.y,A.m,A.d,A.h,A.gender); }catch(e){ bA=null; }
+      try{ bB = window.BAZI.compute(B.y,B.m,B.d,B.h,B.gender); }catch(e){ bB=null; }
+      var wu = (bA&&bB) ? window.PairEngine.wuxing(bA,bB) : null;
+      if(wu) parts.push(wu); else parts.push({key:'wuxing',name:'五行合婚缘',idx:null,tier:'无法计算',title:'',text:'八字计算需要准确的出生年月日与性别，请检查后重试。'});
+
+      // 综合
+      var comb = window.PairEngine.combine(parts.filter(function(p){return p && typeof p.idx==='number';}));
+
+      // 摘要卡
+      summary.push('<div class="ps-card"><b>'+escapeHtml(A.name)+'</b> · '+sunA.sign.name+'座 · '+(A.mbti||'MBTI未填')+'<br>日主五行：'+(bA?window.BAZI.WUXING_GAN[bA.dayGan]:'—')+'</div>');
+      summary.push('<div class="ps-card"><b>'+escapeHtml(B.name)+'</b> · '+sunB.sign.name+'座 · '+(B.mbti||'MBTI未填')+'<br>日主五行：'+(bB?window.BAZI.WUXING_GAN[bB.dayGan]:'—')+'</div>');
+      $('pairSummary').innerHTML = summary.join('');
+      $('pairSummary').classList.add('show');
+
+      // 总分
+      $('ptNum').textContent = comb.total;
+      $('ptTier').textContent = comb.tier;
+      $('ptTitle').textContent = comb.title;
+      $('ptBar').style.width = comb.total + '%';
+
+      // 各系统卡
+      var cards = parts.map(function(p){
+        return '<div class="pair-card">'+
+          '<div class="pc-head"><span class="pc-name">'+escapeHtml(p.name)+'</span>'+
+          (typeof p.idx==='number' ? '<span class="pc-idx">'+p.idx+'</span>' : '<span class="pc-idx">—</span>')+'</div>'+
+          (p.tier && p.tier!=='未填' && p.tier!=='无法计算' ? '<span class="pc-tier">'+escapeHtml(p.tier)+'</span>' : '')+
+          '<div class="pc-text">'+escapeHtml(p.text||'')+'</div>'+
+        '</div>';
+      }).join('');
+      $('pairCards').innerHTML = cards;
+      $('pairResult').classList.add('show');
+      $('pairResult').scrollIntoView({behavior:'smooth', block:'start'});
+
+      lastRecord = {
+        key:'pair-'+Date.now(),
+        kind:'双人配对',
+        title: A.name+' × '+B.name,
+        summary: '综合 '+comb.total+'（'+comb.tier+'）· MBTI '+(mbtiRes?mbtiRes.idx:'—')+' · 星座 '+(zo?zo.idx:'—')+' · 星盘 '+(syn?syn.idx:'—')+' · 五行 '+(wu?wu.idx:'—'),
+        ts: Date.now()
+      };
+    });
+
+    $('pairSave').addEventListener('click', function(){
+      if(!lastRecord){ alert('请先完成分析'); return; }
+      if(window.UserStore){ window.UserStore.addRecord(lastRecord); alert('已存入「我的」最近记录'); }
+    });
+
+    /* ===== 星座速配快速版（仅看太阳星座，复用 PairEngine.zodiac） ===== */
+    var ZSIGNS = ['白羊','金牛','双子','巨蟹','狮子','处女','天秤','天蝎','射手','摩羯','水瓶','双鱼'];
+    [['qSignA'],['qSignB']].forEach(function(pair){
+      var sel = $(pair[0]);
+      opt(sel, '', '选择星座');
+      ZSIGNS.forEach(function(s, i){ opt(sel, i, s); });
+      sel.value = '';
+    });
+    var quickMatch = $('quickMatch');
+    $('quickToggle').addEventListener('click', function(e){
+      e.preventDefault();
+      quickMatch.classList.toggle('show');
+      if(quickMatch.classList.contains('show')) quickMatch.scrollIntoView({behavior:'smooth', block:'center'});
+    });
+    $('quickGo').addEventListener('click', function(){
+      var iA = parseInt($('qSignA').value,10), iB = parseInt($('qSignB').value,10);
+      if(isNaN(iA) || isNaN(iB)){ alert('请选择两个星座'); return; }
+      var r = window.PairEngine.zodiac(iA, iB);
+      $('quickResult').innerHTML = '<span class="qnum">'+r.idx+'</span>'+escapeHtml(r.tier)+' · '+escapeHtml(r.text);
+    });
+
+    /* ===== 三步向导 ===== */
+    function goStep(n){
+      document.querySelectorAll('.wizard-step').forEach(function(s){ s.classList.remove('show'); });
+      var cur = document.getElementById('step'+n);
+      if(cur) cur.classList.add('show');
+      document.querySelectorAll('.wstep').forEach(function(w){
+        var sn = parseInt(w.getAttribute('data-step'),10);
+        w.classList.toggle('active', sn===n);
+        w.classList.toggle('done', sn<n);
+      });
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    function personComplete(p){
+      return !!($(p+'Year').value && $(p+'Month').value && $(p+'Day').value);
+    }
+    function renderConfirm(){
+      var A = readPerson('a'), B = readPerson('b');
+      function fmt(p){
+        var ymd = p.y+'年'+p.m+'月'+p.d+'日'+(p.h!==12 ? (' '+p.h+'时') : '（时辰未知，按12时算）');
+        var city = (!p.city || (p.city.lat===39.9042 && p.city.lng===116.4074)) ? '北京（默认）' : (p.city.lat.toFixed(2)+','+p.city.lng.toFixed(2));
+        return '<b>'+escapeHtml(p.name)+'</b>：'+ymd+' · '+(p.mbti||'MBTI 未填')+' · '+(p.gender==='M'?'男':'女')+' · '+city;
+      }
+      $('confirmBox').innerHTML = fmt(A) + '<br><br>' + fmt(B) + '<br><br>确认无误后，点击「分析我们的缘分」。';
+    }
+    document.querySelectorAll('.wiz-next').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var to = parseInt(btn.getAttribute('data-next'),10);
+        if(to===2 && !personComplete('a')){ alert('请先填写「你」的出生年月日'); return; }
+        if(to===3){
+          if(!personComplete('a')){ alert('请先填写「你」的出生年月日'); goStep(1); return; }
+          if(!personComplete('b')){ alert('请先填写「TA」的出生年月日'); goStep(2); return; }
+          renderConfirm();
+        }
+        goStep(to);
+      });
+    });
+    document.querySelectorAll('.wiz-back').forEach(function(btn){
+      btn.addEventListener('click', function(){ goStep(parseInt(btn.getAttribute('data-back'),10)); });
+    });
+  })();
+  </script>
+  <script src="assets/site-util.js?v=20260914a"></script>
+</body>
+</html>
