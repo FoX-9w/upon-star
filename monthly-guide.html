@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>月度指引 · Upon Star</title>
+  <meta name="description" content="每月能量总览、十二星座评分与当月塔罗主题牌。本地计算，零外部依赖。Upon Star 文化研究与心理探索参考。">
+  <meta property="og:title" content="月度指引 · Upon Star">
+  <meta property="og:description" content="每月能量 · 十二星座评分 · 当月塔罗">
+  <meta property="og:type" content="website">
+  <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="assets/base.css?v=20260914c">
+  <style>
+    .tool-hero{position:relative;text-align:center;padding:calc(var(--space-xl) + 8px) var(--space-md) var(--space-md);}
+    .tool-hero .kicker{font-family:var(--font-decor);letter-spacing:.32em;color:var(--gold-light);font-size:.8rem;text-transform:uppercase;}
+    .tool-hero h1{font-size:clamp(2.4rem,7vw,4rem);margin:8px 0 6px;color:var(--text);}
+    .tool-hero .lead{font-family:var(--font-serif);color:var(--text-dim);max-width:600px;margin:0 auto;line-height:1.85;}
+
+    .month-pick{max-width:480px;margin:var(--space-lg) auto 0;display:flex;gap:var(--space-sm);justify-content:center;align-items:flex-end;flex-wrap:wrap;}
+    .month-pick label{display:flex;flex-direction:column;gap:4px;font-family:var(--font-decor);color:var(--gold-light);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;}
+    .month-pick select{background:var(--surface);border:1px solid var(--line);border-radius:999px;color:var(--text);font-family:var(--font-sans);font-size:1rem;padding:10px 16px;transition:.25s;}
+    .month-pick select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,164,92,.16);}
+    .month-pick button{font-family:var(--font-sans);font-size:.95rem;padding:11px 26px;border-radius:999px;border:1px solid var(--gold);background:var(--gold);color:var(--bg);transition:.25s;}
+    .month-pick button:hover{background:var(--gold-light);box-shadow:0 0 24px rgba(200,164,92,.4);}
+
+    .guide-container{max-width:1100px;margin:var(--space-lg) auto 0;}
+    .month-header{text-align:center;font-family:var(--font-display);color:var(--text);font-size:clamp(1.4rem,4vw,2rem);margin-bottom:var(--space-md);}
+    .month-header .sub{font-family:var(--font-serif);color:var(--text-dim);font-size:.95rem;margin-top:6px;}
+
+    .moon-orbit-card{padding:var(--space-md);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:var(--space-md);}
+    .moon-orbit-card h3{font-family:var(--font-decor);color:var(--gold-light);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;margin:0 0 var(--space-sm);text-align:center;}
+    .orbit-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line);font-family:var(--font-serif);font-size:.88rem;}
+    .orbit-row:first-child{border-top:0;}
+    .orbit-row .pSym{flex:0 0 26px;font-size:1.1rem;color:var(--gold-light);text-align:center;}
+    .orbit-row .pName{flex:0 0 70px;font-family:var(--font-display);color:var(--text);font-size:.95rem;}
+    .orbit-row .pPos{flex:1;color:var(--text-dim);}
+    .orbit-row .pPos strong{color:var(--gold-light);font-weight:600;}
+
+    /* 星座选择器 */
+    .sign-pick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:700px;margin:var(--space-lg) auto 0;}
+    .sign-pick .pick-label{width:100%;text-align:center;font-family:var(--font-decor);color:var(--gold-light);font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:2px;}
+    .sign-pick .chip{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer;transition:.25s;min-width:52px;}
+    .sign-pick .chip .cs{font-size:1.2rem;color:var(--gold-light);line-height:1;}
+    .sign-pick .chip .cn{font-family:var(--font-sans);font-size:.7rem;color:var(--text-dim);}
+    .sign-pick .chip:hover{border-color:var(--gold-dim);}
+    .sign-pick .chip.active{border-color:var(--gold);background:rgba(200,164,92,.14);box-shadow:0 0 18px rgba(200,164,92,.32);}
+    .sign-pick .chip.active .cn{color:var(--gold-light);}
+
+    /* 翻牌网格 */
+    .sign-score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--space-xs);margin:var(--space-md) 0 var(--space-md);}
+    .sign-card{perspective:900px;cursor:pointer;height:150px;}
+    .sign-card .flip{position:relative;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;}
+    .sign-card.flipped .flip{transform:rotateY(180deg);}
+    .sign-card .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);padding:10px;transition:.3s;}
+    .sign-card .front .sym{font-size:1.8rem;color:var(--gold-light);}
+    .sign-card .front .name{font-family:var(--font-display);font-size:.92rem;color:var(--text);margin-top:4px;}
+    .sign-card .front .tap{font-family:var(--font-serif);font-size:.66rem;color:var(--text-dim);margin-top:10px;opacity:.65;letter-spacing:.04em;}
+    .sign-card .back{transform:rotateY(180deg);}
+    .sign-card .back .tier{font-family:var(--font-decor);font-size:1.7rem;letter-spacing:.06em;line-height:1;}
+    .sign-card .back .tier.S{color:#e0c078;}
+    .sign-card .back .tier.A{color:#9cc0e8;}
+    .sign-card .back .tier.B{color:#7ab888;}
+    .sign-card .back .tier.C{color:var(--text-dim);}
+    .sign-card .back .hint{font-family:var(--font-serif);font-size:.72rem;color:var(--text-dim);margin-top:8px;line-height:1.45;text-align:center;}
+    .sign-card.mine .front,.sign-card.mine .back{border-color:var(--gold);box-shadow:0 0 20px rgba(200,164,92,.3);}
+    .sign-card.mine .front .name{color:var(--gold-light);}
+
+    .card-pick{padding:var(--space-md);background:var(--surface);border:1px solid var(--gold);border-radius:var(--radius);text-align:center;box-shadow:0 0 28px rgba(200,164,92,.16);}
+    .card-pick h3{font-family:var(--font-decor);color:var(--gold-light);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;margin:0 0 var(--space-sm);}
+    .card-frame{display:inline-block;width:120px;aspect-ratio:2/3;border-radius:8px;border:1px solid var(--gold);overflow:hidden;background:rgba(8,8,14,.5);box-shadow:0 10px 28px rgba(0,0,0,.5);margin-bottom:var(--space-sm);}
+    .card-frame img{width:100%;height:100%;object-fit:contain;}
+    .card-frame .ph{width:100%;height:100%;display:grid;place-items:center;font-family:var(--font-display);font-size:1.2rem;color:var(--gold-light);}
+    .card-name{font-family:var(--font-display);font-size:1.3rem;color:var(--gold-light);margin-bottom:4px;}
+    .card-keyword{font-family:var(--font-decor);font-size:.72rem;letter-spacing:.18em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:var(--space-sm);}
+    .card-meaning{font-family:var(--font-serif);font-size:.88rem;color:var(--text-dim);line-height:1.7;max-width:480px;margin:0 auto;}
+
+    .meta-note{text-align:center;color:var(--text-dim);font-size:.76rem;margin-top:var(--space-md);font-family:var(--font-serif);font-style:italic;}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+  </style>
+  <link rel="canonical" href="https://upon-star.com/monthly-guide.html">
+  <meta property="og:url" content="https://upon-star.com/monthly-guide.html">
+  <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="月度指引 · Upon Star">
+  <meta name="twitter:description" content="每月能量总览、十二星座评分与当月塔罗主题牌。本地计算，零外部依赖。Upon Star 文化研究与心理探索参考。">
+</head>
+<body class="theme-fusion cat-fusion">
+  <div class="sacred-light" aria-hidden="true"></div>
+
+  <header class="site-nav">
+    <a class="brand" href="divination-homepage.html">Upon Star<small>UPON STAR</small></a>
+    <nav class="nav-tabs" aria-label="分类导航">
+      <a href="east.html">东方</a>
+      <a href="west.html">西方</a>
+      <a href="fusion.html" class="active">融合</a>
+      <a href="mbti.html">人格</a>
+      <a href="pair.html">配对</a>
+      <a href="today.html">今日</a>
+      <a href="user.html">我的</a>
+    </nav></header>
+
+  <main class="container">
+    <nav class="breadcrumb" aria-label="面包屑"><a href="divination-homepage.html">首页</a> / <a href="fusion.html">融合</a> / 月度指引</nav>
+
+    <section class="tool-hero">
+      <div class="kicker">Monthly Guidance · Astro + Tarot</div>
+      <h1>月度指引</h1>
+      <p class="lead">每月能量总览：行星过境、十二星座运势评分、当月主题塔罗牌。</p>
+    </section>
+
+    <div class="month-pick">
+      <label>年<select id="pickYear"></select></label>
+      <label>月<select id="pickMonth"></select></label>
+      <button type="button" id="goBtn">查看指引</button>
+    </div>
+
+    <section id="output" aria-live="polite"></section>
+
+    <hr class="gold-line">
+
+    <section class="section">
+      <p class="disclaimer" style="text-align:center;max-width:680px;margin:0 auto;font-size:.85rem;">
+        免责声明：本工具内容仅用于文化研究与心理探索参考，不构成任何专业建议。 本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <nav class="links" aria-label="页脚导航">
+      <a href="about.html">关于</a><a href="faq.html">常见问题</a><a href="guestbook.html">画廊</a>
+      <a href="terms.html">条款</a><a href="privacy.html">隐私</a><a href="refund.html">费用</a>
+    </nav>
+    <p class="disclaimer">本平台内容仅用于文化研究与心理探索参考。所有计算均在您的设备本地完成。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+  </footer>
+
+  <script src="assets/lib/astronomy-engine/astronomy.browser.min.js"></script>
+  <script src="assets/cards/astro-engine.js"></script>
+  <script src="assets/cards/tarot-data.js"></script>
+  <script src="assets/user-store.js?v=20260831b"></script>
+  <script src="assets/cards/mbti-data.js"></script>
+  <script src="assets/mbti-personalize.js?v=20260831b"></script>
+  <script>
+  (function(){
+    'use strict';
+    var A=window.ASTRO, T=window.TAROT;
+    if(!A){document.getElementById('output').innerHTML='<p style="color:#d9806a;text-align:center;">占星引擎未载入。</p>';return;}
+
+    var yEl=document.getElementById('pickYear'), mEl=document.getElementById('pickMonth');
+    var now=new Date();
+    for(var y=now.getFullYear()-2;y<=now.getFullYear()+3;y++){
+      var o=document.createElement('option');o.value=y;o.textContent=y+' 年';if(y===now.getFullYear())o.selected=true;yEl.appendChild(o);
+    }
+    for(var m=1;m<=12;m++){
+      var o=document.createElement('option');o.value=m;o.textContent=m+' 月';if(m===(now.getMonth()+1))o.selected=true;mEl.appendChild(o);
+    }
+
+    // 月份种子随机（稳定可重现，同月同结果）
+    function seedRand(seed){
+      var s=seed|0;
+      return function(){ s = (s*1664525 + 1013904223|0)>>>0; return s/0x100000000; };
+    }
+
+    // 行星本月「当前位置」（用月中点：15 号 12:00 北京时）
+    function monthPlanets(y, m){
+      var ascLng=116.40, lat=39.90;
+      var natal=A.computeNatal(y, m, 15, 20, lat, ascLng); // 20:00 BJT = 12:00 UT
+      return natal.planets;
+    }
+
+    // 十二星座评分：根据当月行星 vs 各个星座 ASC 位置形成的相位
+    function signScores(planets, seed){
+      // 给每个星座以一个上升位置（白羊=0..双鱼=330）
+      var scores=[];
+      for(var i=0;i<12;i++){
+        var ascLon=i*30;
+        var totalScore=0;
+        var counts={合:0,六合:0,三合:0,刑:0,冲:0};
+        planets.forEach(function(p){
+          var diff=Math.abs(p.lon-ascLon);
+          if(diff>180) diff=360-diff;
+          if(diff<8){totalScore+=3;counts['合']++;}
+          else if(Math.abs(diff-60)<7){totalScore+=2;counts['六合']++;}
+          else if(Math.abs(diff-120)<8){totalScore+=2;counts['三合']++;}
+          else if(Math.abs(diff-90)<7){totalScore-=1;counts['刑']++;}
+          else if(Math.abs(diff-180)<8){totalScore-=2;counts['冲']++;}
+        });
+        scores.push({i:i, score:totalScore, counts:counts});
+      }
+      return scores;
+    }
+
+    function tierOf(score){
+      if(score>=6) return 'S';
+      if(score>=3) return 'A';
+      if(score>=0) return 'B';
+      return 'C';
+    }
+    function hintFor(score, counts, sign){
+      var t=tierOf(score);
+      var parts=[];
+      if(counts['合']>0) parts.push('('+counts['合']+')合相力强');
+      if(counts['三合']>0) parts.push('三合支持');
+      if(counts['六合']>0) parts.push('六合和顺');
+      if(counts['冲']>0) parts.push('冲相挑战');
+      if(counts['刑']>0) parts.push('刑相摩擦');
+      return (parts.length?parts.join(' · '):(t==='C'?'行运偏弱':'稳定行进'));
+    }
+
+    function pickMonthlyTarotCard(y, m){
+      // 月份种子从塔罗 22 大阿尔克那抽一张作主题（稳定）
+      var major=[].concat((T.cards||[]).filter(function(c){return (c.arcana||'major')==='major';}));
+      var idx=(function(){
+        var s=(y*100+m)*1664525+1013904223>>>0;
+        return s%major.length;
+      })();
+      return major[idx];
+    }
+
+    function render(y, m){
+      var planets=monthPlanets(y, m);
+      var seed=seedRand(y*100+m);
+      var scores=signScores(planets, seed);
+      var card=pickMonthlyTarotCard(y, m);
+
+      var html='<div class="guide-container">';
+      html+='<div class="month-header">'+y+' 年 '+m+' 月<div class="sub">Monthly Astrological Guide</div></div>';
+
+      // 行星过境
+      html+='<div class="moon-orbit-card"><h3>当月中旬行星过境</h3>';
+      planets.forEach(function(p){
+        html+='<div class="orbit-row"><span class="pSym">'+p.sym+'</span><span class="pName">'+p.name+'</span><span class="pPos">当前 <strong>'+p.sign.sym+' '+p.sign.name+' '+p.deg.toFixed(1)+'°</strong></span></div>';
+      });
+      html+='</div>';
+
+      // 十二星座评分（先选自己的星座，轻触翻开）
+      html+='<div>';
+      html+='<div class="sign-pick" id="signPick"><div class="pick-label">选择你的星座 · 轻触翻开本月运势</div>';
+      A.SIGNS.forEach(function(sg, i){
+        html+='<div class="chip" data-i="'+i+'" role="button" tabindex="0" aria-label="'+sg.name+'"><span class="cs">'+sg.sym+'</span><span class="cn">'+sg.name+'</span></div>';
+      });
+      html+='</div>';
+      html+='<div class="sign-score-grid">';
+      scores.forEach(function(s){
+        var tier=tierOf(s.score);
+        var sig=A.SIGNS[s.i];
+        html+='<div class="sign-card" data-i="'+s.i+'" role="button" tabindex="0" aria-label="'+sig.name+' 本月运势">'
+          + '<div class="flip">'
+          + '<div class="face front"><div class="sym">'+sig.sym+'</div><div class="name">'+sig.name+'</div><div class="tap">轻触翻开</div></div>'
+          + '<div class="face back"><div class="tier '+tier+'">'+tier+'</div><div class="hint">'+hintFor(s.score, s.counts, sig)+'</div></div>'
+          + '</div></div>';
+      });
+      html+='</div></div>';
+
+      // MBTI 个性化解读提示
+      html += (window.MBTIPersonalize ? MBTIPersonalize.lineHtml() : '');
+
+      // 当月塔罗主题牌
+      if(card){
+        var imgPath=card.art?(card.img||('assets/cards/tarot/'+card.id+'.jpg')):null;
+        html+='<div class="card-pick"><h3>本月主题塔罗</h3>';
+        html+='<div class="card-frame">';
+        if(imgPath) html+='<img src="'+imgPath+'" alt="'+(card.nameCn||card.name)+' 主题牌" loading="lazy">';
+        else html+='<div class="ph">'+(card.symbol||sig.sym||'✦')+'</div>';
+        html+='</div>';
+        html+='<div class="card-name">'+(card.nameCn||card.name)+'</div>';
+        html+='<div class="card-keyword">'+(card.name||'')+'</div>';
+        if(card.meaning) html+='<div class="card-meaning">'+card.meaning+'（本月主题）</div>';
+        else html+='<div class="card-meaning">'+card.meaning+'</div>';
+        html+='</div>';
+      }
+
+      html+='<p class="meta-note">资料基于当月 15 号北京正午 12:00 UTC 行星位置生成 · 星座评分依相行星 vs 上升位置相位加权</p>';
+      html+='</div>';
+      document.getElementById('output').innerHTML=html;
+      bindSignCards();
+    }
+
+    // 星座自选 + 翻开交互
+    function bindSignCards(){
+      var pick=document.getElementById('signPick');
+      var chips=pick?pick.querySelectorAll('.chip'):[];
+      var cards=document.querySelectorAll('.sign-card');
+      function select(i){
+        chips.forEach(function(c){ c.classList.toggle('active', (+c.getAttribute('data-i'))===i); });
+        cards.forEach(function(c){
+          var ci=+c.getAttribute('data-i');
+          c.classList.toggle('mine', ci===i);
+          if(ci===i) c.classList.add('flipped');
+        });
+        try{
+          if(window.UserStore && scores[i]){
+            var s=scores[i], sig=A.SIGNS[i];
+            UserStore.addRecord({
+              key:'monthly-'+y+'-'+m, kind:'月运',
+              title:y+'年'+m+'月 · '+sig.name,
+              summary:(tierOf(s.score))+' '+hintFor(s.score, s.counts, sig),
+              at:Date.now()
+            });
+          }
+        }catch(e){}
+      }
+      chips.forEach(function(c){
+        c.addEventListener('click', function(){ select(+c.getAttribute('data-i')); });
+        c.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(+c.getAttribute('data-i')); } });
+      });
+      cards.forEach(function(c){
+        c.addEventListener('click', function(){
+          var i=+c.getAttribute('data-i');
+          if(c.classList.contains('flipped')){ c.classList.remove('flipped'); }
+          else { select(i); }
+        });
+        c.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); c.click(); } });
+      });
+    }
+
+    document.getElementById('goBtn').addEventListener('click', function(){
+      render(parseInt(yEl.value,10), parseInt(mEl.value,10));
+    });
+
+    // 首次加载自动渲染当月
+    render(now.getFullYear(), now.getMonth()+1);
+  })();
+  </script>
+  <script src="assets/site-util.js?v=20260914a"></script>
+</body>
+</html>

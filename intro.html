@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Upon Star — 启幕</title>
+  <meta name="description" content="星沿轨道公转一周，落于拱门中心。从这里开始探索。内容仅供文化研究与心理探索参考。">
+  <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" as="image" href="assets/logo-mark.webp" fetchpriority="high">
+  <link rel="stylesheet" href="assets/base.css?v=20260914c">
+  <link rel="stylesheet" href="assets/logo-orbit.css?v=20260914b">
+  <script>
+  /* 门厅页每次到访都播放公转（先清掉「已看过」标记再加载 logo-orbit.js）；
+     禁用 JS / prefers-reduced-motion 时页面直接呈现静止终态。 */
+  try { sessionStorage.removeItem('loIntro'); } catch (e) {}
+  </script>
+  <style>
+  /* ============================================================
+     intro.html —— 启幕门厅 v2（极简版）
+     整页只做一件事：黑暗里，星离位 → 沿轨道公转一周 → 归位爆闪。
+     落定后唯一浮现的入口：一枚「探索」。点它（或点页面任意处）进英雄页。
+     · 公转动效复用 assets/logo-orbit.css + .js，本页放慢节奏
+     · 英雄页 = divination-homepage.html（首屏 hero + 往下滑动六幕，结构不变）
+     ============================================================ */
+
+  /* ---------- 电影感节奏：本页覆盖模块默认节拍 ----------
+     t0 .90 + hook .80×2 + dur 6.00 = end 8.50，自洽 */
+  :root{
+    --lo-t0:   .90s;
+    --lo-hook: .80s;
+    --lo-dur:  6.00s;
+    --lo-end:  8.50s;
+    --lo-rest: 9.30s;
+  }
+
+  html,body{height:100%;}
+  body{margin:0;background:var(--bg);overflow:hidden;}
+
+  .in-scene{position:fixed;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:clamp(20px,3.4vh,40px);
+    padding:clamp(18px,3vh,40px);cursor:pointer;}
+  /* 极淡的四角晕，把视线收进中央 */
+  .in-scene::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+    box-shadow:inset 0 0 26vmin rgba(0,0,0,.72);}
+
+  /* ---------- 舞台：整页唯一主体 ---------- */
+  .in-stage{position:relative;z-index:2;width:min(1220px,94vw,86vh);}
+
+  /* ---------- 唯一入口：归位爆闪后浮现 ---------- */
+  .in-enter{position:relative;z-index:2;
+    display:inline-flex;flex-direction:column;align-items:center;gap:4px;
+    padding:14px 52px;border-radius:999px;
+    border:1px solid var(--gold);background:transparent;color:var(--gold-light);
+    transition:background .25s,box-shadow .3s,transform .3s,color .25s;}
+  .in-enter:hover{background:var(--gold);color:var(--on-accent);
+    box-shadow:0 0 34px rgba(200,164,92,.5);transform:translateY(-2px);}
+  .in-enter-cn{font-family:var(--font-sans);font-size:1.02rem;letter-spacing:.34em;line-height:1.3;}
+  .in-enter-en{font-family:var(--font-decor);font-size:.56rem;letter-spacing:.3em;
+    text-transform:uppercase;opacity:.66;line-height:1.2;}
+
+  /* 入场门控：html.in-armed 时先藏入口；in-show 挂上后按 --lo-rest 延迟浮现。
+     JS 失效 → 无 in-armed → 入口直接可见（静止终态），不白屏 */
+  html.in-armed .in-enter{opacity:0;}
+  html.in-armed.in-show .in-enter{animation:inReveal 1.5s cubic-bezier(.22,.61,.36,1) var(--lo-rest) both;}
+  html.in-armed.in-show .in-stage{animation:inStageIn 1.2s ease both;}
+  @keyframes inReveal{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+  @keyframes inStageIn{from{opacity:0;transform:scale(.985);}to{opacity:1;transform:none;}}
+  /* 兜底：12s 后无论如何把入口交出来 */
+  html.in-armed .in-enter{animation:inReveal 1.5s ease 12s forwards;}
+
+  /* 合规要求的常驻声明：极淡，不抢画面 */
+  .in-legal{position:absolute;bottom:clamp(10px,1.8vh,18px);left:0;right:0;z-index:2;
+    text-align:center;font-family:var(--font-sans);font-size:.62rem;
+    letter-spacing:.1em;color:var(--text-dim);opacity:.42;padding:0 16px;}
+
+  @media (max-width:640px){
+    .in-stage{width:min(100vw - 24px,72vh);}
+    .in-enter{padding:12px 42px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    html.in-armed .in-enter{opacity:1;animation:none;}
+    html.in-armed.in-show .in-enter,html.in-armed.in-show .in-stage{animation:none;}
+  }
+  </style>
+  <link rel="canonical" href="https://upon-star.com/intro.html">
+</head>
+<body>
+  <div class="sacred-light" aria-hidden="true"></div>
+
+  <div class="in-scene" id="inScene">
+    <!-- 徽标舞台：整页唯一主体。结构与坐标契约见 assets/logo-orbit.css -->
+    <div class="lo-stage in-stage" data-lo>
+      <div class="lo-box">
+        <svg class="lo-overlay" viewBox="0 0 2290 1510" aria-hidden="true">
+          <defs>
+            <radialGradient id="loHaloGrad">
+              <stop offset="0%" stop-color="#e0c078" stop-opacity=".8"/>
+              <stop offset="45%" stop-color="#c8a45c" stop-opacity=".28"/>
+              <stop offset="100%" stop-color="#c8a45c" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <g class="lo-orbit-g"><path class="lo-orbit-line" data-lo-orbit d=""/></g>
+          <g class="lo-eye-g">
+            <circle class="lo-eyeglow" cx="1140" cy="106" r="92" fill="url(#loHaloGrad)"/>
+          </g>
+        </svg>
+
+        <img class="lo-mark" src="assets/logo-mark.webp" width="2290" height="1510"
+             alt="Upon Star 标志：白色拱门与立柱，拱顶一只全视之眼，红丝带写着 Wish upon a Star 环绕成环">
+
+        <div class="lo-star-g" data-lo-star aria-hidden="true">
+          <span class="lo-star-flash"></span>
+          <span class="lo-star-halo"></span>
+          <img class="lo-star" src="assets/logo-star.webp" width="480" height="480" alt="">
+        </div>
+      </div>
+    </div>
+
+    <a class="in-enter" href="divination-homepage.html" id="inEnter">
+      <span class="in-enter-cn">探索</span>
+      <span class="in-enter-en">Explore</span>
+    </a>
+
+    <p class="in-legal">本平台内容仅供文化研究与心理探索参考，不构成命运定论。</p>
+  </div>
+
+  <script src="assets/logo-orbit.js?v=20260914b"></script>
+  <script>
+  (function () {
+    'use strict';
+    var de = document.documentElement;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var HOME = 'divination-homepage.html';
+
+    /* 门控：入口按 --lo-rest 延迟浮现（见 CSS） */
+    if (!reduce) {
+      de.classList.add('in-armed');
+      de.classList.add('in-show');
+    }
+
+    /* 动画期间点页面任意处 = 跳过，直达英雄页；「探索」按钮本身也通向同一页 */
+    if (!reduce) {
+      document.getElementById('inScene').addEventListener('click', function (e) {
+        if (e.target && e.target.closest && e.target.closest('a')) return;  /* 交给按钮默认跳转 */
+        window.location.href = HOME;
+      });
+    }
+  })();
+  </script>
+</body>
+</html>

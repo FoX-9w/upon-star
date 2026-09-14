@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>占星 · Upon Star</title>
+  <meta name="description" content="输入公历生辰，绘制本命星盘：十颗行星落入黄道十二星座与十二宫位，标注主要相位。本地计算，零外部依赖。Upon Star 文化研究与心理探索参考。">
+  <meta property="og:title" content="占星 · Upon Star">
+  <meta property="og:description" content="十大行星、十二宫位与相位，绘制本命星盘">
+  <meta property="og:type" content="website">
+  <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="assets/base.css?v=20260914c">
+  <style>
+    /* ===== 占星工具专属样式 ===== */
+    .tool-hero{position:relative;text-align:center;padding:calc(var(--space-xl) + 8px) var(--space-md) var(--space-md);}
+    .tool-hero .kicker{font-family:var(--font-decor);letter-spacing:.32em;color:var(--gold-light);font-size:.8rem;text-transform:uppercase;}
+    .tool-hero h1{font-size:clamp(2.4rem,7vw,4rem);margin:8px 0 6px;color:var(--text);}
+    .tool-hero .lead{font-family:var(--font-serif);color:var(--text-dim);max-width:600px;margin:0 auto;line-height:1.85;}
+
+    /* ===== 表单 ===== */
+    .astro-form{max-width:880px;margin:var(--space-lg) auto 0;padding:var(--space-md);
+      background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);}
+    .form-row{display:grid;grid-template-columns:1fr;gap:var(--space-sm);}
+    @media(min-width:640px){.form-row{grid-template-columns:repeat(4,1fr);}}
+    .form-row + .form-row{margin-top:var(--space-sm);}
+    .form-row label{display:flex;flex-direction:column;gap:4px;font-family:var(--font-decor);color:var(--gold-light);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;}
+    .form-row select,.form-row input{background:var(--bg);border:1px solid var(--line);border-radius:8px;
+      color:var(--text);font-family:var(--font-sans);font-size:1rem;padding:10px 12px;transition:.25s;}
+    .form-row select:focus,.form-row input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,164,92,.16);}
+    .form-actions{text-align:center;margin-top:var(--space-md);}
+    .calc-btn{font-family:var(--font-sans);font-size:1rem;letter-spacing:.08em;padding:13px 36px;border-radius:999px;
+      border:1px solid var(--gold);background:var(--gold);color:var(--bg);transition:.25s;}
+    .calc-btn:hover{background:var(--gold-light);box-shadow:0 0 28px rgba(200,164,92,.4);}
+
+    /* ===== 结果区 ===== */
+    .result-wrap{max-width:1180px;margin:var(--space-lg) auto 0;display:grid;grid-template-columns:1fr;gap:var(--space-md);}
+    @media(min-width:980px){.result-wrap{grid-template-columns:1.1fr 1fr;align-items:start;}}
+
+    /* 星盘 */
+    .chart-card{padding:var(--space-md);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);text-align:center;}
+    .chart-card h3{font-family:var(--font-decor);color:var(--gold-light);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;margin:0 0 var(--space-sm);}
+    .chart-svg{width:100%;max-width:520px;height:auto;display:block;margin:0 auto;}
+
+    /* 行星列表 */
+    .planets-card{padding:var(--space-md);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);}
+    .planets-card h3{font-family:var(--font-decor);color:var(--gold-light);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;margin:0 0 var(--space-sm);text-align:center;}
+    .planet-row{display:flex;align-items:center;gap:var(--space-sm);padding:10px 0;border-top:1px dashed var(--line);font-family:var(--font-serif);font-size:.92rem;}
+    .planet-row:first-child{border-top:0;}
+    .planet-row .sym{flex:0 0 28px;text-align:center;font-size:1.3rem;color:var(--gold-light);}
+    .planet-row .name{flex:0 0 70px;color:var(--text);font-family:var(--font-display);font-size:1.05rem;}
+    .planet-row .pos{flex:1;color:var(--text-dim);font-size:.88rem;}
+    .planet-row .pos strong{color:var(--gold-light);font-weight:600;}
+    .planet-row .house{flex:0 0 60px;text-align:right;font-family:var(--font-decor);font-size:.72rem;color:var(--gold-dim);letter-spacing:.15em;}
+
+    /* 相位列表 */
+    .aspects-card{padding:var(--space-md);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-top:var(--space-md);}
+    .aspects-card h3{font-family:var(--font-decor);color:var(--gold-light);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;margin:0 0 var(--space-sm);text-align:center;}
+    .aspect-row{display:flex;align-items:center;gap:var(--space-sm);padding:8px 0;border-top:1px dashed var(--line);font-family:var(--font-serif);font-size:.85rem;}
+    .aspect-row:first-child{border-top:0;}
+    .aspect-row .glyph{flex:0 0 28px;text-align:center;color:var(--gold-light);font-size:1.1rem;}
+    .aspect-row .pair{flex:1;color:var(--text-dim);}
+    .aspect-row .pair strong{color:var(--gold-light);font-weight:600;margin-right:3px;}
+    .aspect-row .orb{flex:0 0 60px;text-align:right;font-family:var(--font-decor);font-size:.72rem;color:var(--gold-dim);letter-spacing:.12em;}
+
+    .meta-note{text-align:center;color:var(--text-dim);font-size:.76rem;margin-top:var(--space-md);font-family:var(--font-serif);font-style:italic;}
+    .error-msg{text-align:center;color:#d9806a;font-family:var(--font-serif);font-size:.92rem;margin-top:var(--space-md);}
+
+    /* ===== 解读说明（让星盘看得懂，数据驱动、非通用图例） ===== */
+    .intro-card{max-width:1180px;margin:var(--space-lg) auto 0;padding:var(--space-md);
+      background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);}
+    .intro-card h3{font-family:var(--font-decor);color:var(--gold-light);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;margin:0 0 var(--space-sm);text-align:center;}
+    .intro-trio{display:grid;grid-template-columns:1fr;gap:var(--space-sm);}
+    @media(min-width:720px){.intro-trio{grid-template-columns:repeat(3,1fr);}}
+    .intro-item{padding:14px;border:1px dashed var(--line);border-radius:10px;background:var(--bg);}
+    .intro-item .it-head{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+    .intro-item .it-sym{font-size:1.5rem;color:var(--gold-light);line-height:1;}
+    .intro-item .it-title{font-family:var(--font-display);font-size:1.02rem;color:var(--text);}
+    .intro-item .it-body{font-family:var(--font-serif);font-size:.86rem;line-height:1.75;color:var(--text-dim);}
+    .intro-item .it-body b{color:var(--gold-light);font-weight:600;}
+
+    .planet-row{display:block;padding:10px 0;border-top:1px dashed var(--line);}
+    .planet-row:first-child{border-top:0;}
+    .planet-row .pr-top{display:flex;align-items:center;gap:var(--space-sm);}
+    .planet-row .pr-interp{margin:6px 0 0 28px;font-family:var(--font-serif);font-size:.84rem;line-height:1.7;color:var(--text-dim);}
+    .planet-row .pr-interp b{color:var(--gold-light);font-weight:600;}
+
+    .aspect-row{display:block;padding:8px 0;border-top:1px dashed var(--line);}
+    .aspect-row:first-child{border-top:0;}
+    .aspect-row .ar-top{display:flex;align-items:center;gap:var(--space-sm);}
+    .aspect-row .ar-meaning{margin:5px 0 0 28px;font-family:var(--font-serif);font-size:.82rem;line-height:1.65;color:var(--text-dim);}
+
+    .dist-card{margin-top:var(--space-md);padding:var(--space-md);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);}
+    .dist-card h3{font-family:var(--font-decor);color:var(--gold-light);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;margin:0 0 var(--space-sm);text-align:center;}
+    .dist-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:8px;}
+    .dist-row .dl{flex:0 0 auto;font-family:var(--font-decor);font-size:.72rem;letter-spacing:.15em;color:var(--gold-dim);}
+    .dist-row .dt{font-family:var(--font-display);font-size:.92rem;color:var(--text);padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--bg);}
+    .dist-row .dt.zero{opacity:.35;}
+    .dist-note{text-align:center;font-family:var(--font-serif);font-size:.88rem;line-height:1.75;color:var(--text-dim);margin:6px 0 0;}
+    .dist-note .hl{color:var(--gold-light);font-weight:600;}
+
+    @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+  </style>
+  <link rel="canonical" href="https://upon-star.com/astrology.html">
+  <meta property="og:url" content="https://upon-star.com/astrology.html">
+  <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="占星 · Upon Star">
+  <meta name="twitter:description" content="输入公历生辰，绘制本命星盘：十颗行星落入黄道十二星座与十二宫位，标注主要相位。本地计算，零外部依赖。Upon Star 文化研究与心理探索参考。">
+</head>
+<body class="theme-fusion cat-fusion">
+  <div class="sacred-light" aria-hidden="true"></div>
+
+  <header class="site-nav">
+    <a class="brand" href="divination-homepage.html">Upon Star<small>UPON STAR</small></a>
+    <nav class="nav-tabs" aria-label="分类导航">
+      <a href="east.html">东方</a>
+      <a href="west.html">西方</a>
+      <a href="fusion.html" class="active">融合</a>
+      <a href="mbti.html">人格</a>
+      <a href="pair.html">配对</a>
+      <a href="today.html">今日</a>
+      <a href="user.html">我的</a>
+    </nav></header>
+
+  <main class="container">
+    <nav class="breadcrumb" aria-label="面包屑"><a href="divination-homepage.html">首页</a> / <a href="fusion.html">融合</a> / 占星</nav>
+
+    <section class="tool-hero">
+      <div class="kicker">Natal Chart · Western Astrology</div>
+      <h1>占星</h1>
+      <p class="lead">以公历生辰绘制本命星盘：十颗行星落入黄道十二星座与十二宫位，标注主要相位。</p>
+    </section>
+
+    <form class="astro-form" id="astroForm" autocomplete="off">
+      <div class="form-row">
+        <label>年<select id="year"></select></label>
+        <label>月<select id="month"></select></label>
+        <label>日<select id="day"></select></label>
+        <label>时<select id="hour"></select></label>
+      </div>
+      <div class="form-row">
+        <label>分<select id="minute"></select></label>
+        <label>出生城市<select id="city"></select></label>
+        <label>纬度<input id="lat" type="number" step="0.01" min="-90" max="90" value="39.90"></label>
+        <label>经度<input id="lng" type="number" step="0.01" min="-180" max="180" value="116.40"></label>
+        <label>时区
+          <select id="tz"></select>
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="calc-btn">绘制星盘</button>
+      </div>
+    </form>
+
+    <section id="output" aria-live="polite"></section>
+    <div id="navHost" class="div-nav" hidden></div>
+
+    <hr class="gold-line">
+
+    <section class="section">
+      <p class="disclaimer" style="text-align:center;max-width:680px;margin:0 auto;font-size:.85rem;">
+        免责声明：本工具内容仅用于文化研究与心理探索参考，不构成任何专业建议。占星学为西方传统文化的一部分，其象征意义可作自我探索工具。所有计算均在您的设备本地完成。 本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <nav class="links" aria-label="页脚导航">
+      <a href="about.html">关于</a>
+      <a href="faq.html">常见问题</a>
+      <a href="guestbook.html">画廊</a>
+      <a href="terms.html">条款</a>
+      <a href="privacy.html">隐私</a>
+      <a href="refund.html">费用</a>
+    </nav>
+    <p class="disclaimer">本平台内容仅用于文化研究与心理探索参考，不构成任何专业建议。所有推演计算均在您的设备本地完成，我们不会存储你的个人数据，也不写入 Cookie。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+  </footer>
+
+  <script src="assets/lib/astronomy-engine/astronomy.browser.min.js"></script>
+  <script src="assets/cards/astro-engine.js"></script>
+  <script src="assets/share.js?v=20260831a"></script>
+  <script src="assets/div-nav.js?v=20260831a"></script>
+  <script src="assets/cities.js?v=20260901a"></script>
+  <script>
+  (function(){
+    'use strict';
+    var A = window.ASTRO;
+    if(!A){
+      document.getElementById('output').innerHTML = '<p class="error-msg">占星计算引擎未载入。</p>';
+      return;
+    }
+
+    // 填充年/月/日/时/分
+    var yEl=document.getElementById('year'), mEl=document.getElementById('month'), dEl=document.getElementById('day'),
+        hEl=document.getElementById('hour'), miEl=document.getElementById('minute');
+    var now=new Date();
+    for(var y=1900; y<=now.getFullYear(); y++){
+      var o=document.createElement('option');o.value=y;o.textContent=y;if(y===now.getFullYear())o.selected=true;yEl.appendChild(o);
+    }
+    for(var m=1;m<=12;m++){var o=document.createElement('option');o.value=m;o.textContent=m;if(m===(now.getMonth()+1))o.selected=true;mEl.appendChild(o);}
+    for(var d=1;d<=31;d++){var o=document.createElement('option');o.value=d;o.textContent=d;if(d===now.getDate())o.selected=true;dEl.appendChild(o);}
+    for(var h=0;h<24;h++){var o=document.createElement('option');o.value=h;o.textContent=h+':00';if(h===now.getHours())o.selected=true;hEl.appendChild(o);}
+    for(var mm=0;mm<60;mm+=5){var o=document.createElement('option');o.value=mm;o.textContent=mm+'分';miEl.appendChild(o);}
+
+    // 出生城市下拉（自动填经纬度 / 时区）
+    var cityEl=document.getElementById('city'), latEl=document.getElementById('lat'), lngEl=document.getElementById('lng'), tzEl=document.getElementById('tz');
+
+    // 时区下拉：覆盖全部城市所在时区 + 常用国际时区（消除「只有香港/北京」的盲区）
+    var TZ_LABELS = {
+      '12':'奥克兰 +12', '11':'所罗门 +11', '10':'悉尼 +10', '9':'东京·首尔 +9',
+      '8':'北京·香港·全国 +8', '7':'曼谷 +7', '6.5':'仰光 +6:30', '6':'新疆(地方时) +6',
+      '5.5':'孟买 +5:30', '5':'伊斯兰堡 +5', '4.5':'喀布尔 +4:30', '4':'迪拜 +4',
+      '3.5':'德黑兰 +3:30', '3':'莫斯科 +3', '2':'开罗·开普敦 +2', '1':'巴黎·柏林 +1',
+      '0':'UTC·伦敦 0', '-3.5':'纽芬兰 -3:30', '-3':'圣保罗 -3', '-4':'圣地亚哥 -4',
+      '-5':'纽约 -5', '-6':'芝加哥 -6', '-7':'丹佛 -7', '-8':'洛杉矶 -8',
+      '-9':'安克雷奇 -9', '-10':'檀香山 -10', '-11':'中途岛 -11'
+    };
+    function buildTzOptions(){
+      var set = {};
+      if(window.UPON_CITIES) window.UPON_CITIES.forEach(function(c){ set[c.tz] = true; });
+      [12,11,10,9,8,7,6.5,6,5.5,5,4.5,4,3.5,3,2,1,0,-3.5,-3,-4,-5,-6,-7,-8,-9,-10,-11].forEach(function(t){ set[t]=true; });
+      var order = Object.keys(set).map(Number).sort(function(a,b){ return b-a; });
+      return order.map(function(t){
+        var lbl = TZ_LABELS[String(t)] || ('UTC'+(t>0?'+':'')+t);
+        return '<option value="'+t+'">'+lbl+'</option>';
+      }).join('');
+    }
+    if(tzEl){
+      tzEl.innerHTML = buildTzOptions();
+      tzEl.value = '8'; // 默认对齐初始城市（北京）
+    }
+
+    if(cityEl && window.UPON_Cities_API){
+      cityEl.innerHTML = window.UPON_Cities_API.optionsHtml('39.90,116.41');
+      cityEl.addEventListener('change', function(){
+        var c = window.UPON_Cities_API.find(cityEl.value);
+        if(c){ latEl.value=c.lat.toFixed(2); lngEl.value=c.lng.toFixed(2); if(tzEl) tzEl.value=String(c.tz); }
+      });
+    }
+
+    function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&','<':'<','>':'>','"':'"',"'":"'"}[c];});}
+
+    // ===== SVG 星盘绘制 =====
+    function drawChart(result){
+      var cx=260, cy=260, R=240; // 外圆
+      var svg = '<svg class="chart-svg" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="本命星盘">';
+      // 背景圆
+      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="rgba(200,164,92,.4)" stroke-width="1"/>';
+      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+(R-30)+'" fill="none" stroke="rgba(200,164,92,.22)" stroke-width="1"/>';
+      svg += '<circle cx="'+cx+'" cy="'+cy+'" r="'+(R-100)+'" fill="none" stroke="rgba(200,164,92,.18)" stroke-width="1"/>';
+
+      // 黄道带（外环 30° 分 12 星座）
+      var ascLon = result.asc.lon;
+      // 占星习惯：星座从春分（白羊 0°）开始，但星盘绘制通常将 ASC 放在左侧（9 点钟方向），逆时针排列
+      // 计算每个星座中心在 SVG 中的角度（0° = 顶部 12 点钟，逆时针递增 → 实际上传统占星顺时针）
+      // 简化：0° 在右侧 3 点钟方向，逆时针递增
+      function lonToAngle(lon){
+        // ASC 在左侧（180°），行星按实际黄道经度放：0° 春分点 → 9 点钟位置？太复杂
+        // 采用最简：0° 在 12 点钟方向，顺时针递增（西方占星盘惯例：春分点在 9 点钟方向 ASC=东方地平）
+        // 我们用：lon=0 → 9 点钟（左侧水平），逆时针增加（实际占星惯例）
+        var ang = 180 - lon; // 0° → 180° SVG 角度（左侧），360° → -180°（回到左侧）
+        // 转为弧度，SVG y 轴向下所以要 -180
+        return ang;
+      }
+      function polar(lon, r){
+        var ang = lonToAngle(lon) * Math.PI / 180;
+        return { x: cx + r * Math.cos(ang), y: cy - r * Math.sin(ang) };
+      }
+
+      // 12 星座符号 + 分割线
+      var signColors = {'火':'#d9806a','土':'#b89868','风':'#7ab8b8','水':'#6a9ad0'};
+      for(var i=0;i<12;i++){
+        var signLon = i*30 + 15; // 星座中心
+        var p1 = polar(i*30, R);
+        var p2 = polar(i*30, R-30);
+        svg += '<line x1="'+p1.x+'" y1="'+p1.y+'" x2="'+p2.x+'" y2="'+p2.y+'" stroke="rgba(200,164,92,.5)" stroke-width="1"/>';
+        var pText = polar(signLon, R-15);
+        var sig = A.SIGNS[i];
+        svg += '<text x="'+pText.x+'" y="'+pText.y+'" text-anchor="middle" dominant-baseline="central" font-family="serif" font-size="16" fill="'+signColors[sig.wx]+'" font-weight="600">'+sig.sym+'</text>';
+      }
+
+      // 12 宫位分割线（从中心向外，ASC 在 9 点钟方向）
+      for(var i=0;i<12;i++){
+        var houseLon = A.rev(ascLon + i*30);
+        var inner = polar(houseLon, 60);
+        var outer = polar(houseLon, R-30);
+        svg += '<line x1="'+inner.x+'" y1="'+inner.y+'" x2="'+outer.x+'" y2="'+outer.y+'" stroke="rgba(200,164,92,.22)" stroke-width="1" stroke-dasharray="2,3"/>';
+        // 宫位数字
+        var numPos = polar(houseLon, R-45);
+        svg += '<text x="'+numPos.x+'" y="'+numPos.y+'" text-anchor="middle" dominant-baseline="central" font-family="Outfit,sans-serif" font-size="11" fill="rgba(200,164,92,.7)" font-weight="600">'+(i+1)+'</text>';
+      }
+
+      // ASC 标记
+      var ascP = polar(ascLon, R-30);
+      svg += '<text x="'+ascP.x+'" y="'+ascP.y+'" text-anchor="middle" dominant-baseline="central" font-family="Outfit,sans-serif" font-size="11" fill="#e8a878" font-weight="700">ASC</text>';
+
+      // 行星
+      result.planets.forEach(function(p){
+        var pt = polar(p.lon, R-70);
+        svg += '<g><circle cx="'+pt.x+'" cy="'+pt.y+'" r="9" fill="rgba(200,164,92,.15)" stroke="rgba(200,164,92,.6)" stroke-width="1"/>';
+        svg += '<text x="'+pt.x+'" y="'+pt.y+'" text-anchor="middle" dominant-baseline="central" font-family="serif" font-size="13" fill="#f4c89c" font-weight="700">'+p.sym+'</text></g>';
+      });
+
+      svg += '</svg>';
+      return svg;
+    }
+
+    // ===== 解读词典（让星盘看得懂，数据驱动、非通用图例） =====
+    var PLANET_INFO = {
+      sun:    { role: '核心自我、意志与生命力' },
+      moon:   { role: '情绪、安全感与潜意识' },
+      mercury:{ role: '思维、沟通与学习方式' },
+      venus:  { role: '爱、美与价值感' },
+      mars:   { role: '行动力、欲望与冲劲' },
+      jupiter:{ role: '成长、幸运与视野' },
+      saturn: { role: '责任、限制与成熟度' },
+      uranus: { role: '独立、突变与革新' },
+      neptune:{ role: '梦想、灵性与模糊地带' },
+      pluto:  { role: '转化、深度与重生' }
+    };
+    var SIGN_FLAVOR = ['直接、热情、冲劲足','务实、稳定、重感官','灵活、好奇、善表达','细腻、顾家、重情感','自信、大方、爱被看见','细致、求稳、爱条理','和谐、重关系、讲平衡','深刻、专注、有掌控','乐观、爱自由、求意义','自律、负责、重成就','独立、理性、求独特','柔软、共情、富想象'];
+    var HOUSE_THEME = [
+      '自我、气质与他人对你的第一印象','金钱、资源与自我价值','沟通、手足与日常学习',
+      '家庭、根源与内心安稳','恋爱、创造与自我表达','工作、健康与日常秩序',
+      '伴侣、合作与公开关系','深层关系、共享与转化','远方、学识与人生信念',
+      '事业、声望与社会角色','社群、朋友与理想追求','潜意识、独处与隐秘之事'
+    ];
+    var ASPECT_MEANING = {
+      '合相': '两股能量高度融合、彼此强化，像同一股力量在发力。',
+      '六合': '顺遂的机会与和谐，稍加留意便能轻松善用。',
+      '刑':   '内在张力与课题，需要主动调适才能转化为成长。',
+      '三合': '天赋般的流畅与助力，往往自然而然、毫不费力。',
+      '冲':   '对立两端的拉扯，平衡二者方能稳定发挥。'
+    };
+    function planetInterp(p){
+      var info = PLANET_INFO[p.key] || { role:'能量' };
+      return info.role + '，以「' + SIGN_FLAVOR[p.signIdx] + '」的姿态呈现——这份能量投注在「' + HOUSE_THEME[p.house-1] + '」相关的人事物上。';
+    }
+    function aspectInterp(a){
+      var m = ASPECT_MEANING[a.type.name] || '';
+      return '<b>' + a.a.name + a.type.sym + a.b.name + '</b>：' + m;
+    }
+
+    function render(result){
+      var html = '';
+
+      // ===== 本命盘速读（具体、数据驱动的解读） =====
+      var sun = null, moon = null;
+      result.planets.forEach(function(p){ if(p.key==='sun') sun=p; if(p.key==='moon') moon=p; });
+      var asc = result.asc;
+      html += '<div class="intro-card"><h3>本命盘速读</h3><div class="intro-trio">';
+      html += '<div class="intro-item"><div class="it-head"><span class="it-sym">'+asc.sign.sym+'</span><span class="it-title">上升 '+asc.sign.name+'</span></div>'
+            + '<div class="it-body">你给外界的<b>第一印象</b>与外在气质，偏「'+SIGN_FLAVOR[asc.signIdx]+'」。他人初见你，往往先感受到这一面。</div></div>';
+      if(sun) html += '<div class="intro-item"><div class="it-head"><span class="it-sym">'+sun.sym+'</span><span class="it-title">太阳 '+sun.sign.name+' · 第'+sun.house+'宫</span></div>'
+            + '<div class="it-body">你的<b>核心自我</b>与想在人生成为的样子，落在「'+HOUSE_THEME[sun.house-1]+'」；当这份能量以'+sun.sign.name+'座的「'+SIGN_FLAVOR[sun.signIdx]+'」呈现，你会更自在、更有生命力。</div></div>';
+      if(moon) html += '<div class="intro-item"><div class="it-head"><span class="it-sym">'+moon.sym+'</span><span class="it-title">月亮 '+moon.sign.name+' · 第'+moon.house+'宫</span></div>'
+            + '<div class="it-body">你独处时的<b>情绪与安全感</b>，来自「'+HOUSE_THEME[moon.house-1]+'」；'+moon.sign.name+'座的「'+SIGN_FLAVOR[moon.signIdx]+'」让你在放松时最为真实。</div></div>';
+      html += '</div></div>';
+
+      html += '<div class="result-wrap">';
+      // 左侧：星盘
+      html += '<div class="chart-card">';
+      html += '<h3>本命星盘</h3>';
+      html += drawChart(result);
+      html += '<p style="margin-top:var(--space-sm);font-family:var(--font-serif);font-size:.85rem;color:var(--text-dim);line-height:1.7;">上升 <strong style="color:var(--gold-light);">'+asc.sign.sym+' '+asc.sign.name+'</strong> '+asc.deg.toFixed(1)+'°<br>外环＝十二星座（你「怎样」表达能量） · 内环＝十二宫位（能量落在「哪些人生领域」） · 行星符号为其在黄道上的位置</p>';
+      html += '</div>';
+
+      // 右侧：行星列表 + 相位 + 分布
+      html += '<div><div class="planets-card"><h3>行星位置与解读</h3>';
+      result.planets.forEach(function(p){
+        html += '<div class="planet-row">'
+          + '<div class="pr-top">'
+          + '<span class="sym">'+p.sym+'</span>'
+          + '<span class="name">'+p.name+'</span>'
+          + '<span class="pos"><strong>'+p.sign.sym+' '+p.sign.name+'</strong> '+p.deg.toFixed(1)+'° · '+p.sign.wx+'相 · '+p.sign.ruler+'守护</span>'
+          + '<span class="house">第 '+p.house+' 宫</span>'
+          + '</div>'
+          + '<div class="pr-interp">'+planetInterp(p)+'</div>'
+          + '</div>';
+      });
+      html += '</div>';
+
+      // 相位列表
+      html += '<div class="aspects-card"><h3>主要相位与解读</h3>';
+      if(result.aspects.length === 0){
+        html += '<p style="text-align:center;color:var(--text-dim);font-family:var(--font-serif);font-size:.88rem;">无主要相位（容许度内）</p>';
+      } else {
+        result.aspects.slice(0, 12).forEach(function(a){
+          html += '<div class="aspect-row">'
+            + '<div class="ar-top">'
+            + '<span class="glyph">'+a.type.sym+'</span>'
+            + '<span class="pair"><strong>'+a.a.name+'</strong> '+a.type.name+' <strong>'+a.b.name+'</strong>'+(a.exact?' · 精准':'')+'</span>'
+            + '<span class="orb">orb '+a.orb.toFixed(1)+'°</span>'
+            + '</div>'
+            + '<div class="ar-meaning">'+aspectInterp(a)+'</div>'
+            + '</div>';
+        });
+      }
+      html += '</div>';
+
+      // 元素 / 模式分布摘要
+      (function(){
+        var ec={'火':0,'土':0,'风':0,'水':0};
+        var mc={'开创':0,'固定':0,'变动':0};
+        var mm={0:'开创',6:'开创',3:'开创',9:'开创',1:'固定',4:'固定',7:'固定',10:'固定',2:'变动',5:'变动',8:'变动',11:'变动'};
+        result.planets.forEach(function(p){ ec[p.sign.wx]=(ec[p.sign.wx]||0)+1; mc[mm[p.signIdx]]=(mc[mm[p.signIdx]]||0)+1; });
+        var domE=Object.keys(ec).sort(function(a,b){return ec[b]-ec[a];})[0];
+        var domM=Object.keys(mc).sort(function(a,b){return mc[b]-mc[a];})[0];
+        var em={'火':'行动与热情','土':'务实与稳定','风':'思维与交流','水':'感受与直觉'};
+        var mmd={'开创':'擅启动、喜开拓','固定':'重坚守、求安稳','变动':'善应变、多弹性'};
+        html+='<div class="dist-card"><h3>元素 / 模式分布</h3>';
+        html+='<div class="dist-row"><span class="dl">元素</span>';
+        ['火','土','风','水'].forEach(function(w){ html+='<span class="dt'+(ec[w]?'':' zero')+'">'+w+' '+ec[w]+'</span>'; });
+        html+='</div><div class="dist-row"><span class="dl">模式</span>';
+        ['开创','固定','变动'].forEach(function(m){ html+='<span class="dt'+(mc[m]?'':' zero')+'">'+m+' '+mc[m]+'</span>'; });
+        html+='</div>';
+        html+='<p class="dist-note">本命盘以 <span class="hl">'+domE+'象</span> 为主导，性格偏向'+em[domE]+'；模式以 <span class="hl">'+domM+'</span> 为主，'+mmd[domM]+'。</p>';
+        html+='</div>';
+      })();
+
+      html += '</div>'; // 关闭右侧栏
+
+      html += '</div>'; // 关闭 result-wrap
+
+      var engLabel = result.preciseEngine ? ' · 演算：Astronomy Engine（MIT 高精度）' : ' · 演算：内置简易天文算法';
+      html += '<p class="meta-note">公历 '+result.birth.year+'/'+result.birth.month+'/'+result.birth.day+' '+result.birth.hour+':00 · 纬度 '+result.birth.lat.toFixed(2)+'°N · 经度 '+result.birth.lng.toFixed(2)+'°E · UTC '+result.utc.year+'/'+result.utc.month+'/'+result.utc.day+' '+result.utc.hour+':00' + engLabel + '</p>';
+
+      document.getElementById('output').innerHTML = html;
+    }
+
+    document.getElementById('astroForm').addEventListener('submit', function(e){
+      e.preventDefault(); runAstro();
+    });
+
+    var lastAstroBirth = null;
+
+    function mountNav(){
+      var host = document.getElementById('navHost');
+      if(!host) return;
+      host.hidden = false;
+      if(window.DivNav) DivNav.mount({ host:'navHost' });
+    }
+
+    function runAstro(){
+      try{
+        var y=parseInt(yEl.value,10), mo=parseInt(mEl.value,10), d=parseInt(dEl.value,10);
+        var h=parseInt(hEl.value,10)+parseInt(miEl.value,10)/60;
+        var lat=parseFloat(document.getElementById('lat').value);
+        var lng=parseFloat(document.getElementById('lng').value);
+        var tz=parseFloat(document.getElementById('tz').value);
+        // 引擎内部按 +8 处理 lng，我们转换 lng 为 +8 时区下的等效经度
+        var localLng = lng - (tz - 8) * 15;
+        var result = A.computeNatal(y, mo, d, h, lat, localLng);
+        render(result);
+        lastAstroBirth = { year:y, month:mo, day:d, hour:Math.round(h*100)/100, lat:lat, lng:lng, tz:tz };
+        mountNav();
+      }catch(err){
+        document.getElementById('output').innerHTML = '<p class="error-msg">'+(err&&err.message?err.message:'计算出错')+'</p>';
+      }
+    }
+
+    // ===== 分享适配器：分享本命星盘的生辰输入，开启连结自动重算 =====
+    window.__SHARE_TYPE__ = 'astro';
+    if(window.ShareKit){
+      ShareKit.registerAdapter('astro', {
+        type:'astro',
+        getState: function(){ return lastAstroBirth; },
+        emptyHint:'请先绘制星盘再分享',
+        restore: function(s){
+          if(!s) return;
+          var totalMin = Math.round(s.hour * 60);
+          var hh = Math.floor(totalMin/60) % 24;
+          var mm = totalMin % 60; mm = Math.round(mm/5)*5; if(mm===60){ mm=0; hh=(hh+1)%24; }
+          yEl.value = s.year; mEl.value = s.month; dEl.value = s.day; hEl.value = hh; miEl.value = mm;
+          document.getElementById('lat').value = s.lat;
+          document.getElementById('lng').value = s.lng;
+          document.getElementById('tz').value = s.tz;
+          runAstro();
+        }
+      });
+      ShareKit.restoreOnLoad();
+    }
+  })();
+  </script>
+  <script src="assets/site-util.js?v=20260914a"></script>
+</body>
+</html>

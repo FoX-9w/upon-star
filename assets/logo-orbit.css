@@ -1,0 +1,113 @@
+/* =========================================================
+   Upon Star — assets/logo-orbit.css
+   徽标「公转一周」入场动效（可复用模块，配 logo-orbit.js）
+
+   结构（必须一致）：
+     .lo-stage[data-lo]
+       └ .lo-box                     容器，aspect-ratio 锁定画布比例
+           ├ svg.lo-overlay          轨道引导线 + 拱顶眼辉（z:0，在拱门之后）
+           ├ img.lo-mark             底座：拱门/立柱/眼睛/丝带（z:1，星辰处已挖空）
+           └ .lo-star-g[data-lo-star] 中央 8 芒星，独立一层可动（z:2）
+
+   素材：
+     assets/logo-mark.webp  2290×1510  透明底座（星辰位置挖空，零残留）
+     assets/logo-star.webp   480×480   中央 8 芒星
+
+   坐标系 = 底座坐标（画布 2290×1510）：
+     静止星心 (1130, 911) · 星辰盒 480×480 @ (890, 671)
+     拱顶眼睛 (1140, 106)
+     轨道椭圆 cx=1132.5 cy=729.5 rx=941 ry=196 倾角 −8.8°
+       —— 取自原画里那条手绘淡椭圆。旧素材 logo-arch.webp（1500×1165）实测为
+          (960,743,941,196,−8.8)，与星心对齐后平移 (+142.5,+10.5) 得此值。
+       ⚠️ 红丝带（Wish upon a Star）是绶带装饰，不是轨道，勿混。
+
+   对页面的公开契约：
+     <html> 上的两个 class 由 logo-orbit.js 维护，页面可用它们同步自己的入场元素：
+       html.lo-armed  起幕前（本模块内 .lo-box 保持不可见，避免静止态先闪一下）
+       html.lo-play   正在播放（本模块内各层开始入场）
+     · 页面的主体元素请挂在 html.lo-play 之后入场，勿挂在 lo-armed 上做隐藏以外的用途
+     · 若 JS 整体失效，lo-armed 不会被挂上，页面呈现静止终态（不会白屏）
+   ========================================================= */
+
+/* ---------- 入场节拍：单一真相源，CSS 与 logo-orbit.js 共用 ----------
+   t0 (.50) + hook×2 (.50×2) + dur (3.20) = end (4.70)，三者必须自洽 */
+:root{
+  --lo-t0:   .50s;    /* 星辰离开中心 */
+  --lo-hook: .50s;    /* 离位 / 归位的短程接驳 */
+  --lo-dur:  3.20s;   /* 公转一圈 */
+  --lo-end:  4.70s;   /* = t0 + hook×2 + dur，归返中心并爆闪 */
+  --lo-rest: 5.40s;   /* 常态浮现 */
+}
+
+.lo-stage{position:relative;width:100%;}
+.lo-box{position:relative;aspect-ratio:2290/1510;}
+
+/* 起幕前先藏起来（终态见下方 .lo-play 的 keyframes） */
+html.lo-armed:not(.lo-play) .lo-box{opacity:0;}
+/* 兜底：万一 logo-orbit.js 没跑起来，3.5s 后无论如何把画面亮出来 */
+html.lo-armed:not(.lo-play) .lo-box{animation:loSafety 0s linear 3.5s forwards;}
+@keyframes loSafety{to{opacity:1;}}
+
+.lo-overlay{position:absolute;inset:0;width:100%;height:100%;z-index:0;overflow:visible;}
+.lo-mark{position:absolute;inset:0;width:100%;height:100%;z-index:1;
+  user-select:none;-webkit-user-drag:none;}
+
+/* 轨道线：视觉权重放在 stroke-opacity，动画只动整层 opacity，两层相乘可控 */
+.lo-orbit-g{opacity:.42;}
+.lo-orbit-line{fill:none;stroke:var(--gold);stroke-width:2.6;stroke-opacity:.34;
+  stroke-dasharray:3 17;animation:loFlow 140s linear infinite;}
+@keyframes loFlow{to{stroke-dashoffset:-1600;}}
+
+/* 拱顶眼辉 */
+.lo-eyeglow{transform-box:fill-box;transform-origin:center;
+  animation:loEye 5s ease-in-out infinite;}
+@keyframes loEye{0%,100%{opacity:.20;}50%{opacity:.62;}}
+
+/* 星辰层（整块可动：光晕 + 星体 + 归位爆闪） */
+.lo-star-g{position:absolute;left:38.864%;top:44.437%;width:20.961%;
+  z-index:2;transform-origin:center;will-change:transform;}
+.lo-star{position:relative;z-index:2;display:block;width:100%;height:auto;
+  user-select:none;-webkit-user-drag:none;}
+
+.lo-star-halo,.lo-star-flash{position:absolute;left:50%;top:50%;
+  width:196%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+  /* 取色自 --gold-light #e0c078 / --gold #c8a45c */
+  background:radial-gradient(circle, rgba(224,192,120,.62) 0%, rgba(200,164,92,.22) 42%, rgba(200,164,92,0) 70%);
+  pointer-events:none;}
+.lo-star-halo{z-index:1;animation:loHalo 6.5s ease-in-out infinite;}
+@keyframes loHalo{0%,100%{opacity:.42;transform:translate(-50%,-50%) scale(.92);}
+                  50%{opacity:.92;transform:translate(-50%,-50%) scale(1.06);}}
+.lo-star-flash{z-index:0;opacity:0;}
+
+/* ============================================================
+   入场序列（<html> 挂 .lo-play 后生效）
+   底座浮现 → 眼辉亮起 → 星辰离位 → 公转一周 → 归返爆闪 → 画面交还
+   ============================================================ */
+.lo-play .lo-box{animation:loStageIn 1.05s cubic-bezier(.22,.61,.36,1) both;}
+@keyframes loStageIn{from{opacity:0;transform:translateY(14px) scale(1.02);}to{opacity:1;transform:none;}}
+
+.lo-play .lo-mark{animation:loFadeIn 1.30s ease .10s both;}
+.lo-play .lo-eye-g{animation:loFadeIn 1.00s ease .40s both;}
+@keyframes loFadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* 起幕时轨道线先亮到基准，落定后退到 .42，把画面还给拱门 */
+.lo-play .lo-orbit-g{animation:loFadeIn 1.10s ease .05s both,
+                     loOrbitRest 1.3s ease var(--lo-rest) forwards;}
+@keyframes loOrbitRest{to{opacity:.42;}}
+
+/* 归返中心的一次爆闪 */
+.lo-play .lo-star-flash{animation:loFlash 1.05s cubic-bezier(.18,.72,.32,1) var(--lo-end) both;}
+@keyframes loFlash{0%{opacity:0;transform:translate(-50%,-50%) scale(.72);}
+                   20%{opacity:.92;transform:translate(-50%,-50%) scale(1.14);}
+                   52%{opacity:.38;transform:translate(-50%,-50%) scale(1.36);}
+                   100%{opacity:0;transform:translate(-50%,-50%) scale(1.6);}}
+
+/* ---------- 动效降级：全部定格在终态 ---------- */
+@media (prefers-reduced-motion:reduce){
+  .lo-orbit-line,.lo-star-halo,.lo-eyeglow{animation:none;}
+  .lo-star-flash{display:none;}
+  html.lo-armed:not(.lo-play) .lo-box{opacity:1;animation:none;}
+  .lo-play .lo-box,.lo-play .lo-mark,.lo-play .lo-orbit-g,.lo-play .lo-star-flash{
+    animation:none;opacity:1;transform:none;}
+  .lo-play .lo-eye-g{animation:none;opacity:1;}
+}

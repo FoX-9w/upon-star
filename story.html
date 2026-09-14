@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Upon Star — 我的故事</title>
+  <meta name="description" content="Upon Star 的来处：姥姥的小六壬、爸爸的八字，十六岁被点的那句话，以及这些年走过的路。东方易卦与西方星象，汇于一星。">
+  <meta property="og:title" content="Upon Star — 我的故事">
+  <meta property="og:description" content="星在上，人在下，中间是我们想弄明白的事。">
+  <meta property="og:type" content="article">
+  <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" as="image" href="assets/logo-mark.webp" fetchpriority="high">
+  <link rel="stylesheet" href="assets/base.css?v=20260914c">
+  <style>
+  /* ============================================================
+     我的故事（独立成页）—— 首屏 8 芒星公转 + 逐幕通往功能页
+     · 素材：assets/logo-mark.webp（拱门/立柱/眼睛/丝带，星辰处已挖空）
+             assets/logo-star.webp（中央 8 芒星，单独一层可动）
+     · 坐标一律用「底座坐标」，画布 2290×1510（= 原图 2290×1600 上移 24、左补 30）
+         星辰静止中心 (1130, 911) · 星辰盒 480×480 @ (890, 671)
+         拱顶眼睛 (1140, 106)
+         轨道椭圆 cx=1132.5 cy=729.5 rx=941 ry=196 倾角 −8.8°
+           —— 轨道取原画里那条手绘淡椭圆；旧素材（1500×1165）实测为
+              (960,743,941,196,−8.8)，与星心对齐后平移 (+142.5, +10.5) 得此值。
+              注意：红丝带（Wish upon a Star）是绶带装饰，不是轨道，勿混。
+     · 轨道只在 JS 里定义一次，SVG 线由同一份参数生成，杜绝线/动不同步
+     ============================================================ */
+
+  /* ---------- 入场节拍：单一真相源，CSS 与脚本共用 ----------
+     t0 (.50) + hook×2 (.50×2) + dur (3.20) = end (4.70)，三者必须自洽 */
+  :root{
+    --os-t0:   .50s;     /* 星辰离开中心 */
+    --os-hook: .50s;     /* 离位 / 归位的短程接驳 */
+    --os-dur: 3.20s;     /* 公转一圈 */
+    --os-end: 4.70s;     /* = t0 + hook×2 + dur，归返中心并爆闪 */
+    --os-rest:5.40s;     /* 常态浮现 */
+  }
+
+  /* ---------- 通用：滚动显影 ---------- */
+  .os-rise{opacity:0;transform:translateY(30px);
+    transition:opacity .95s cubic-bezier(.22,.61,.36,1),transform .95s cubic-bezier(.22,.61,.36,1);}
+  .os-rise.is-in{opacity:1;transform:none;}
+  .os-rise[data-d="1"]{transition-delay:.10s;}
+  .os-rise[data-d="2"]{transition-delay:.22s;}
+  .os-rise[data-d="3"]{transition-delay:.34s;}
+  .os-rise[data-d="4"]{transition-delay:.46s;}
+
+  /* ============================================================
+     幕 0 · 星下
+     ============================================================ */
+  .os-hero{
+    position:relative;min-height:calc(100svh - 60px);   /* 60px ≈ 吸顶导航高度 */
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:clamp(14px,2.4vh,30px);
+    padding:clamp(26px,5vh,58px) var(--space-md) clamp(30px,5vh,54px);
+    overflow:hidden;
+  }
+  .os-stars{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+  .os-stars i{position:absolute;border-radius:50%;background:var(--text);
+    animation:osTwinkle 4s ease-in-out infinite;}
+  @keyframes osTwinkle{0%,100%{opacity:.16;}50%{opacity:.72;}}
+
+  /* 舞台：宽高比与底座一致，轨道不会出画 */
+  .os-stage{position:relative;z-index:2;width:min(1200px,96vw,94vh);}
+  .os-stage-box{position:relative;aspect-ratio:2290/1510;}
+
+  /* z 序：轨道线（0）在拱门之后——与原画里那条淡线一样从立柱后穿过；
+     星辰（2）在前，是这场戏的主角 */
+  .os-overlay{position:absolute;inset:0;width:100%;height:100%;z-index:0;overflow:visible;}
+  .os-mark{position:absolute;inset:0;width:100%;height:100%;z-index:1;
+    user-select:none;-webkit-user-drag:none;}
+
+  /* 轨道线：视觉权重放在 stroke-opacity，动画只动整层 opacity，两层相乘可控 */
+  .os-orbit-line{fill:none;stroke:var(--gold);stroke-width:2.6;stroke-opacity:.34;
+    stroke-dasharray:3 17;animation:osFlow 140s linear infinite;}
+  @keyframes osFlow{to{stroke-dashoffset:-1600;}}
+
+  /* 拱顶眼辉 */
+  .os-eyeglow{transform-box:fill-box;transform-origin:center;
+    animation:osEye 5s ease-in-out infinite;}
+  @keyframes osEye{0%,100%{opacity:.20;}50%{opacity:.62;}}
+
+  /* 星辰层（整块可动：光晕 + 星体） */
+  .os-star-g{position:absolute;left:38.864%;top:44.437%;width:20.961%;
+    z-index:2;transform-origin:center;will-change:transform;}
+  .os-star{position:relative;z-index:2;display:block;width:100%;height:auto;
+    user-select:none;-webkit-user-drag:none;}
+  .os-star-halo,.os-star-flash{position:absolute;left:50%;top:50%;
+    width:196%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
+    background:radial-gradient(circle, rgba(224,192,120,.62) 0%, rgba(200,164,92,.22) 42%, rgba(200,164,92,0) 70%);
+    pointer-events:none;}
+  .os-star-halo{z-index:1;animation:osHalo 6.5s ease-in-out infinite;}
+  @keyframes osHalo{0%,100%{opacity:.42;transform:translate(-50%,-50%) scale(.92);}
+                    50%{opacity:.92;transform:translate(-50%,-50%) scale(1.06);}}
+  /* 归返中心的一次爆闪 */
+  .os-star-flash{z-index:0;opacity:0;}
+  .os-play .os-star-flash{animation:osFlash 1.05s cubic-bezier(.18,.72,.32,1) var(--os-end) both;}
+  @keyframes osFlash{0%{opacity:0;transform:translate(-50%,-50%) scale(.72);}
+                     20%{opacity:.92;transform:translate(-50%,-50%) scale(1.14);}
+                     52%{opacity:.38;transform:translate(-50%,-50%) scale(1.36);}
+                     100%{opacity:0;transform:translate(-50%,-50%) scale(1.6);}}
+
+  .os-head{position:relative;z-index:2;text-align:center;}
+  .os-title{font-family:var(--font-display);color:var(--text);
+    font-size:clamp(1.9rem,6vw,3.5rem);letter-spacing:.14em;margin:0 0 8px;
+    text-shadow:0 0 44px rgba(200,164,92,.30);}
+  .os-title span{color:var(--gold-light);}
+  .os-tag{font-family:var(--font-serif);color:var(--text-dim);
+    font-size:clamp(.82rem,2.2vw,.98rem);letter-spacing:.22em;margin:0;}
+
+  /* ---------- 入场序列 ---------- */
+  .os-play .os-stage{animation:osStageIn 1.05s cubic-bezier(.22,.61,.36,1) both;}
+  @keyframes osStageIn{from{opacity:0;transform:translateY(14px) scale(1.02);}to{opacity:1;transform:none;}}
+  .os-play .os-mark{animation:osFadeIn 1.30s ease .10s both;}
+  .os-play .os-eye-g{animation:osFadeIn 1.00s ease .40s both;}
+  .os-play .os-head{animation:osHeadIn .85s cubic-bezier(.22,.61,.36,1) .35s both;}
+  @keyframes osFadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes osHeadIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+  /* 起幕时轨道线先亮到基准，落定后退到很淡，把画面还给拱门 */
+  .os-play .os-orbit-g{animation:osFadeIn 1.10s ease .05s both,
+                       osOrbitRest 1.3s ease var(--os-rest) forwards;}
+  @keyframes osOrbitRest{to{opacity:.42;}}
+
+  .os-hint{margin-top:clamp(6px,1.4vh,14px);font-family:var(--font-sans);
+    font-size:.68rem;letter-spacing:.30em;color:var(--text-dim);opacity:.55;
+    animation:osBob 2.6s ease-in-out infinite;}
+  @keyframes osBob{0%,100%{transform:translateY(0);}50%{transform:translateY(7px);}}
+
+  /* ============================================================
+     序 · 旁白
+     ============================================================ */
+  .os-prologue{position:relative;display:flex;flex-direction:column;justify-content:center;
+    min-height:70svh;padding:var(--space-xl) var(--space-md);
+    text-align:center;max-width:860px;margin:0 auto;}
+  .os-prologue p{font-family:var(--font-serif);color:var(--text-dim);
+    font-size:clamp(1.05rem,3vw,1.5rem);line-height:2.1;letter-spacing:.05em;margin:0 0 14px;}
+  .os-prologue p:last-child{margin-bottom:0;}
+  .os-prologue em{font-style:normal;color:var(--gold-light);}
+
+  /* ============================================================
+     我的故事 · 五幕
+     ============================================================ */
+  .os-story-wrap{position:relative;max-width:1180px;margin:0 auto;
+    padding:0 var(--space-md) clamp(70px,12vh,140px);
+    display:grid;gap:clamp(28px,4.5vw,60px);grid-template-columns:minmax(0,1fr);}
+  @media (min-width:960px){
+    .os-story-wrap{grid-template-columns:minmax(0,.58fr) minmax(0,1fr);}
+    .os-aside{position:sticky;top:100px;align-self:start;}
+  }
+  .os-aside{position:relative;}
+  .os-kicker{font-family:var(--font-sans);font-size:.70rem;letter-spacing:.36em;
+    color:var(--gold);text-transform:uppercase;margin:0 0 var(--space-sm);}
+  .os-story-title{font-family:var(--font-display);color:var(--text);
+    font-size:clamp(1.8rem,5.2vw,2.9rem);letter-spacing:.06em;line-height:1.26;margin:0 0 var(--space-sm);}
+  .os-story-en{font-family:var(--font-serif);font-style:italic;color:var(--text-dim);
+    font-size:.95rem;letter-spacing:.06em;line-height:1.85;margin:0 0 var(--space-md);}
+  .os-rule{height:1px;border:0;margin:var(--space-md) 0 0;
+    background:linear-gradient(90deg,var(--gold),transparent);}
+
+  .os-acts{display:grid;gap:clamp(46px,8vh,90px);}
+  .os-act{position:relative;}
+  .os-act-head{display:flex;align-items:baseline;gap:12px;margin:0 0 var(--space-sm);}
+  .os-act-num{font-family:var(--font-decor);color:var(--gold);font-size:1.55rem;letter-spacing:.06em;line-height:1;}
+  .os-act-name{font-family:var(--font-display);color:var(--text);
+    font-size:clamp(1.15rem,3.2vw,1.5rem);letter-spacing:.10em;margin:0;font-weight:400;}
+  .os-act-body{font-family:var(--font-serif);color:var(--text);
+    font-size:clamp(.98rem,2.4vw,1.08rem);line-height:2.1;letter-spacing:.02em;margin:0;}
+  .os-act-body + .os-act-body{margin-top:var(--space-sm);}
+  .os-act-body--quiet{color:var(--text-dim);}
+  .os-act-body--strong{color:var(--gold-light);font-size:clamp(1.02rem,2.6vw,1.18rem);line-height:1.95;}
+
+  /* 时间轴 */
+  .os-timeline{list-style:none;margin:0;padding:0;border-left:1px solid var(--line);}
+  .os-timeline li{position:relative;padding:0 0 var(--space-md) var(--space-md);}
+  .os-timeline li:last-child{padding-bottom:0;}
+  .os-timeline li::before{content:"";position:absolute;left:-3.5px;top:.62em;
+    width:6px;height:6px;border-radius:50%;background:var(--gold);
+    box-shadow:0 0 10px rgba(200,164,92,.6);}
+  .os-tl-year{display:block;font-family:var(--font-decor);color:var(--gold);
+    font-size:.86rem;letter-spacing:.14em;margin:0 0 4px;}
+  .os-tl-text{font-family:var(--font-serif);color:var(--text-dim);
+    font-size:clamp(.92rem,2.3vw,1rem);line-height:1.95;margin:0;}
+
+  /* ============================================================
+     幕末 · 入口（滑到这里就进对应功能页）
+     ============================================================ */
+  .os-gates{display:grid;gap:var(--space-sm);margin-top:clamp(26px,4.2vh,44px);}
+  @media (min-width:660px){ .os-gates--pair{grid-template-columns:1fr 1fr;} }
+  .os-gate{display:flex;align-items:center;gap:var(--space-md);
+    padding:var(--space-sm) var(--space-md);
+    border:1px solid var(--line);border-radius:var(--radius);
+    background:linear-gradient(90deg, rgba(200,164,92,.07), rgba(200,164,92,0) 72%);
+    transition:border-color .3s,transform .3s,box-shadow .3s,background .3s;}
+  .os-gate:hover,.os-gate:focus-visible{border-color:var(--gold);transform:translateY(-3px);
+    box-shadow:0 14px 40px -18px rgba(0,0,0,.85);outline:none;}
+  .os-gate-sym{flex:0 0 auto;width:42px;height:42px;display:grid;place-items:center;
+    border:1px solid var(--line);border-radius:50%;color:var(--gate,var(--gold));
+    transition:border-color .3s;}
+  .os-gate-sym svg{width:22px;height:22px;}
+  .os-gate:hover .os-gate-sym{border-color:var(--gate,var(--gold));}
+  .os-gate-txt{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .os-gate-kicker{font-family:var(--font-sans);font-size:.62rem;letter-spacing:.30em;
+    color:var(--gate,var(--gold));text-transform:uppercase;}
+  .os-gate-name{font-family:var(--font-display);color:var(--text);
+    font-size:clamp(1.05rem,2.8vw,1.22rem);letter-spacing:.10em;line-height:1.3;}
+  .os-gate-desc{font-family:var(--font-serif);color:var(--text-dim);font-size:.86rem;letter-spacing:.04em;}
+  .os-gate-go{margin-left:auto;flex:0 0 auto;font-family:var(--font-sans);font-size:.78rem;
+    letter-spacing:.12em;color:var(--text-dim);transition:color .3s;white-space:nowrap;}
+  .os-gate:hover .os-gate-go{color:var(--gold-light);}
+  .os-gate-arrow{display:inline-block;margin-left:6px;transition:transform .3s;}
+  .os-gate:hover .os-gate-arrow{transform:translateX(5px);}
+
+  /* 收尾 */
+  .os-coda{margin-top:clamp(40px,7vh,80px);padding-top:var(--space-md);
+    border-top:1px solid var(--line);text-align:center;}
+  .os-coda-line{font-family:var(--font-display);color:var(--gold-light);
+    font-size:clamp(1.1rem,3.1vw,1.55rem);letter-spacing:.10em;line-height:1.7;margin:0 0 10px;}
+  .os-coda-sub{font-family:var(--font-serif);font-style:italic;color:var(--text-dim);
+    font-size:1rem;letter-spacing:.08em;margin:0;}
+  .os-coda .os-gates{text-align:left;}
+
+  /* 免责声明 */
+  .os-disclaimer{max-width:820px;margin:clamp(40px,7vh,72px) auto var(--space-xl);
+    padding:0 var(--space-md);text-align:center;
+    font-family:var(--font-sans);font-size:.78rem;line-height:1.9;color:var(--text-dim);opacity:.8;}
+
+  /* 右侧星点导航 */
+  .os-dots{position:fixed;right:22px;top:50%;transform:translateY(-50%);
+    z-index:60;display:flex;flex-direction:column;gap:14px;
+    opacity:0;pointer-events:none;transition:opacity .5s ease;}
+  .os-dots.is-vis{opacity:1;pointer-events:auto;}
+  .os-dots a{display:block;width:9px;height:9px;border-radius:50%;
+    border:1px solid var(--gold);background:transparent;
+    transition:background .3s ease,transform .3s ease,box-shadow .3s ease;}
+  .os-dots a:hover{transform:scale(1.35);}
+  .os-dots a.is-on{background:var(--gold);transform:scale(1.3);
+    box-shadow:0 0 12px rgba(200,164,92,.75);}
+  @media (max-width:959px){.os-dots{display:none;}}
+
+  /* 窄屏：分类导航改为横向滚动，别把页面撑破（base.css 目前无此约定） */
+  @media (max-width:760px){
+    .nav-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+    .nav-tabs::-webkit-scrollbar{display:none;}
+    .nav-tabs a{padding:7px 11px;font-size:.8rem;}
+    .os-gate{flex-wrap:wrap;}
+    .os-gate-go{margin-left:0;flex-basis:100%;padding-left:calc(42px + var(--space-md));}
+  }
+
+  /* 降级 */
+  @media (prefers-reduced-motion:reduce){
+    .os-orbit-line,.os-star-halo,.os-eyeglow,.os-stars i,.os-hint{animation:none;}
+    .os-star-flash{display:none !important;}
+    .os-hint{opacity:.55;}
+    .os-rise{opacity:1;transform:none;transition:none;}
+  }
+  </style>
+  <link rel="canonical" href="https://upon-star.com/story.html">
+  <meta property="og:url" content="https://upon-star.com/story.html">
+  <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
+</head>
+<body>
+  <div class="sacred-light" aria-hidden="true"></div>
+
+  <header class="site-nav">
+    <a class="brand" href="divination-homepage.html">Upon Star<small>UPON STAR</small></a>
+    <nav class="nav-tabs" aria-label="分类导航">
+      <a href="east.html">东方</a>
+      <a href="west.html">西方</a>
+      <a href="fusion.html">融合</a>
+      <a href="mbti.html">人格</a>
+      <a href="pair.html">配对</a>
+      <a href="today.html">今日</a>
+      <a href="user.html">我的</a>
+    </nav>
+  </header>
+
+  <nav class="os-dots" id="osDots" aria-label="章节导航">
+    <a href="#act0" title="星下"></a>
+    <a href="#act1" title="来处"></a>
+    <a href="#act2" title="点名"></a>
+    <a href="#act3" title="远行"></a>
+    <a href="#act4" title="同行的人"></a>
+    <a href="#act5" title="现在"></a>
+  </nav>
+
+  <main>
+    <!-- ==================== 幕 0 · 星下 ==================== -->
+    <section class="os-hero" id="act0">
+      <div class="os-stars" id="osStars" aria-hidden="true"></div>
+
+      <div class="os-stage">
+        <div class="os-stage-box" id="osBox">
+          <!-- 轨道线由脚本用与运动同一份参数生成：见 JS 的 ORBIT -->
+          <svg class="os-overlay" viewBox="0 0 2290 1510" aria-hidden="true">
+            <defs>
+              <radialGradient id="osHaloGrad">
+                <stop offset="0%" stop-color="#e0c078" stop-opacity=".8"/>
+                <stop offset="45%" stop-color="#c8a45c" stop-opacity=".28"/>
+                <stop offset="100%" stop-color="#c8a45c" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <g class="os-orbit-g"><path class="os-orbit-line" id="osOrbit" d=""/></g>
+            <g class="os-eye-g">
+              <circle class="os-eyeglow" cx="1140" cy="106" r="92" fill="url(#osHaloGrad)"/>
+            </g>
+          </svg>
+
+          <img class="os-mark" src="assets/logo-mark.webp" width="2290" height="1510"
+               alt="Upon Star 标志：白色拱门与立柱，拱顶一只全视之眼，红丝带写着 Wish upon a Star 环绕成环">
+
+          <!-- 中央 8 芒星：单独一层，沿轨道公转一圈后回到中心 -->
+          <div class="os-star-g" id="osStarG" aria-hidden="true">
+            <span class="os-star-flash"></span>
+            <span class="os-star-halo"></span>
+            <img class="os-star" src="assets/logo-star.webp" width="480" height="480" alt="">
+          </div>
+        </div>
+      </div>
+
+      <div class="os-head">
+        <h1 class="os-title">Upon <span>Star</span></h1>
+        <p class="os-tag">东西方文化研究</p>
+      </div>
+
+      <div class="os-hint" aria-hidden="true">SCROLL</div>
+    </section>
+
+    <!-- ==================== 序 · 旁白 ==================== -->
+    <section class="os-prologue">
+      <p class="os-rise">小时候心一乱，姥姥就掐着指头念两句。</p>
+      <p class="os-rise" data-d="2">她说：<em>问一次，心就定一次。</em></p>
+    </section>
+
+    <!-- ==================== 我的故事 ==================== -->
+    <section class="os-story-wrap" id="story">
+      <div class="os-aside os-rise">
+        <p class="os-kicker">My Story</p>
+        <h2 class="os-story-title">我的<br>故事</h2>
+        <p class="os-story-en">星在上，人在下，<br>中间是我们想弄明白的事。</p>
+        <hr class="os-rule">
+      </div>
+
+      <div class="os-acts">
+        <!-- 一 · 来处 -->
+        <article class="os-act" id="act1">
+          <div class="os-act-head os-rise">
+            <span class="os-act-num">I</span>
+            <h3 class="os-act-name">来处</h3>
+          </div>
+          <div class="os-rise" data-d="1">
+            <p class="os-act-body">我从小在两种声音里长大：姥姥掐指念的小六壬，爸爸纸上排的八字。那时不懂，只当是家里的家常话。</p>
+            <p class="os-act-body os-act-body--quiet">很多年后才知道，那是我最早听见的、关于「怎么理解一件事」的两种讲法。</p>
+          </div>
+          <div class="os-gates os-rise" data-d="2" style="--gate:var(--east)">
+            <a class="os-gate" href="east.html">
+              <span class="os-gate-sym" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="21" stroke="currentColor" stroke-width="2"/><path d="M24 3a21 21 0 0 1 0 42a10.5 10.5 0 0 1 0-21a10.5 10.5 0 0 0 0-21z" fill="currentColor"/></svg></span>
+              <span class="os-gate-txt">
+                <span class="os-gate-kicker">Eastern</span>
+                <span class="os-gate-name">东方</span>
+                <span class="os-gate-desc">六爻 · 八字 · 纳甲</span>
+              </span>
+              <span class="os-gate-go">从家里的两种声音开始<span class="os-gate-arrow">→</span></span>
+            </a>
+          </div>
+        </article>
+
+        <!-- 二 · 点名 -->
+        <article class="os-act" id="act2">
+          <div class="os-act-head os-rise">
+            <span class="os-act-num">II</span>
+            <h3 class="os-act-name">点名</h3>
+          </div>
+          <div class="os-rise" data-d="1">
+            <p class="os-act-body">16 岁那年，遇上一位道士。他看了我一眼，说我会做这一行。</p>
+            <p class="os-act-body os-act-body--quiet">我当时没当回事，笑着就过去了。后来人生绕了几圈，才想起那个下午。</p>
+          </div>
+          <div class="os-gates os-rise" data-d="2" style="--gate:var(--gold)">
+            <a class="os-gate" href="mbti.html">
+              <span class="os-gate-sym" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 3l21 21-21 21L3 24z" fill="currentColor"/><path d="M24 24L14 14M24 24l10-10M24 24l-10 10M24 24l10 10" stroke="var(--bg)" stroke-width="2.5"/></svg></span>
+              <span class="os-gate-txt">
+                <span class="os-gate-kicker">MBTI</span>
+                <span class="os-gate-name">人格</span>
+                <span class="os-gate-desc">十六型 · 自我探索</span>
+              </span>
+              <span class="os-gate-go">先弄清楚自己是哪一种<span class="os-gate-arrow">→</span></span>
+            </a>
+          </div>
+        </article>
+
+        <!-- 三 · 远行 -->
+        <article class="os-act" id="act3">
+          <div class="os-act-head os-rise">
+            <span class="os-act-num">III</span>
+            <h3 class="os-act-name">远行</h3>
+          </div>
+          <ul class="os-timeline">
+            <li class="os-rise" data-d="1">
+              <span class="os-tl-year">2018</span>
+              <p class="os-tl-text">开始自己找资料看星盘、占星。没人带，全靠翻书和比对，一翻就是两年。</p>
+            </li>
+            <li class="os-rise" data-d="1">
+              <span class="os-tl-year">2020 年底</span>
+              <p class="os-tl-text">开始给身边的朋友看盘，一直免费。</p>
+            </li>
+            <li class="os-rise" data-d="2">
+              <span class="os-tl-year">2021 · 10</span>
+              <p class="os-tl-text">第一位朋友郑重地请我做了一次完整的解读——那算是我真正的开始。</p>
+            </li>
+            <li class="os-rise" data-d="2">
+              <span class="os-tl-year">2022 · 03 · 16</span>
+              <p class="os-tl-text">排期排不过来，我辞掉了实习。从那一天起，这件事成了我唯一的正业。</p>
+            </li>
+            <li class="os-rise" data-d="3">
+              <span class="os-tl-year">2022 · 07</span>
+              <p class="os-tl-text">我遇见雷诺曼。拿到牌就会，说不清为什么。</p>
+            </li>
+            <li class="os-rise" data-d="3">
+              <span class="os-tl-year">2024 初</span>
+              <p class="os-tl-text">我做了一套自己的雷诺曼牌，43 张，不到两个月画完。一切都顺理成章。</p>
+            </li>
+            <li class="os-rise" data-d="4">
+              <span class="os-tl-year">2025 底</span>
+              <p class="os-tl-text">机缘巧合买了一本《易经》，开始学六爻——到今天还不满一年，仍在学。</p>
+            </li>
+          </ul>
+          <div class="os-gates os-rise" data-d="2" style="--gate:var(--west)">
+            <a class="os-gate" href="tarot.html">
+              <span class="os-gate-sym" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 2l4 18 18 4-18 4-4 18-4-18-18-4 18-4z" fill="currentColor"/></svg></span>
+              <span class="os-gate-txt">
+                <span class="os-gate-kicker">Western</span>
+                <span class="os-gate-name">西方</span>
+                <span class="os-gate-desc">塔罗 · 雷诺曼 · 占星</span>
+              </span>
+              <span class="os-gate-go">走上我翻过很多遍的那条路<span class="os-gate-arrow">→</span></span>
+            </a>
+          </div>
+        </article>
+
+        <!-- 四 · 同行的人 -->
+        <article class="os-act" id="act4">
+          <div class="os-act-head os-rise">
+            <span class="os-act-num">IV</span>
+            <h3 class="os-act-name">同行的人</h3>
+          </div>
+          <div class="os-rise" data-d="1">
+            <p class="os-act-body">迷茫过、焦虑过吗？说没有那是假话。但这一路给我的，更多的是幸福。</p>
+            <p class="os-act-body">微信里的好友来来往往，也有好多人一直陪我到现在。有时候我很难说清，我和大家究竟是什么关系——从客户、从同行，最后变成了亲密无间的朋友，甚至有外地的朋友搭飞机过来见面。</p>
+            <p class="os-act-body os-act-body--strong">每次想到这些，除了幸福，就是感激。</p>
+          </div>
+          <div class="os-gates os-rise" data-d="2" style="--gate:var(--gold-light)">
+            <a class="os-gate" href="pair.html">
+              <span class="os-gate-sym" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 6v36M34 6v36M8 13h12M28 13h12M8 35h12M28 35h12"/></svg></span>
+              <span class="os-gate-txt">
+                <span class="os-gate-kicker">Pair</span>
+                <span class="os-gate-name">配对</span>
+                <span class="os-gate-desc">MBTI · 星座 · 星盘 · 五行</span>
+              </span>
+              <span class="os-gate-go">把两个人放在一起看<span class="os-gate-arrow">→</span></span>
+            </a>
+          </div>
+        </article>
+
+        <!-- 五 · 现在 -->
+        <article class="os-act" id="act5">
+          <div class="os-act-head os-rise">
+            <span class="os-act-num">V</span>
+            <h3 class="os-act-name">现在</h3>
+          </div>
+          <div class="os-rise" data-d="1">
+            <p class="os-act-body">到今天，是我全职做占星师和卡牌师的第五年。接触这一行多少年，我自己也数不清了。</p>
+            <p class="os-act-body os-act-body--quiet">我知道自己不算特殊、也不算多厉害的那一个，只是有幸有一些天赋，还有幸有一些运气。</p>
+            <p class="os-act-body">大家总说我风格直接，几乎都是大白话——好吧，或许看起来没那么「专业」也没关系。因为这不只是我的工作，这也是我的生活。</p>
+          </div>
+          <div class="os-gates os-rise" data-d="2" style="--gate:var(--gold)">
+            <a class="os-gate" href="today.html">
+              <span class="os-gate-sym" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="9" fill="currentColor"/><g stroke-linecap="round" stroke-width="2.6"><line x1="24" y1="3" x2="24" y2="9"/><line x1="24" y1="39" x2="24" y2="45"/><line x1="3" y1="24" x2="9" y2="24"/><line x1="39" y1="24" x2="45" y2="24"/><line x1="9" y1="9" x2="13" y2="13"/><line x1="35" y1="35" x2="39" y2="39"/><line x1="9" y1="39" x2="13" y2="35"/><line x1="35" y1="9" x2="39" y2="13"/></g></svg></span>
+              <span class="os-gate-txt">
+                <span class="os-gate-kicker">Today</span>
+                <span class="os-gate-name">今日</span>
+                <span class="os-gate-desc">每日一牌 · 一卦</span>
+              </span>
+              <span class="os-gate-go">从今天这一下开始<span class="os-gate-arrow">→</span></span>
+            </a>
+          </div>
+        </article>
+
+        <!-- 收尾 -->
+        <div class="os-coda os-rise">
+          <p class="os-coda-line">星在上，人在下，<br>中间是我们想弄明白的事。</p>
+          <p class="os-coda-sub">很高兴认识你。</p>
+          <div class="os-gates os-gates--pair">
+            <a class="os-gate" href="fusion.html" style="--gate:var(--fusion)">
+              <span class="os-gate-sym" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 3l21 21-21 21L3 24z" stroke="currentColor" stroke-width="2.5"/><path d="M24 15l9 9-9 9-9-9z" fill="currentColor"/></svg></span>
+              <span class="os-gate-txt">
+                <span class="os-gate-kicker">Fusion</span>
+                <span class="os-gate-name">融合</span>
+                <span class="os-gate-desc">东西对照 · 月度指引 · 周运</span>
+              </span>
+              <span class="os-gate-go">两条路汇成一星<span class="os-gate-arrow">→</span></span>
+            </a>
+            <a class="os-gate" href="user.html" style="--gate:var(--text-dim)">
+              <span class="os-gate-sym" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M24 3l19 33H5z" fill="currentColor"/><path d="M24 45L5 12h38z" fill="currentColor"/></svg></span>
+              <span class="os-gate-txt">
+                <span class="os-gate-kicker">Profile</span>
+                <span class="os-gate-name">我的</span>
+                <span class="os-gate-desc">人格档案 · 记录对比</span>
+              </span>
+              <span class="os-gate-go">留住自己<span class="os-gate-arrow">→</span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <p class="os-disclaimer">
+      本平台内容仅用于文化研究与心理探索参考，不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    <nav class="links" aria-label="页脚导航">
+      <a href="about.html">关于</a>
+      <a href="faq.html">常见问题</a>
+      <a href="guestbook.html">画廊</a>
+      <a href="terms.html">条款</a>
+      <a href="privacy.html">隐私</a>
+      <a href="refund.html">费用</a>
+    </nav>
+    <p class="disclaimer" style="max-width:680px;margin:var(--space-sm) auto 0;text-align:center;">
+      本平台内容仅用于文化研究与心理探索参考，不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。
+    </p>
+    <div class="footer-legal">
+      <details>
+        <summary>法律信息与免责声明</summary>
+        <div class="legal-body">
+          本平台内容仅用于文化研究与心理探索参考，不构成任何专业建议。所有推演计算均在您的设备本地完成，我们不会存储您的个人数据，也不写入 Cookie。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</div>
+      </details>
+    </div>
+  </footer>
+
+  <script>
+  (function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---------- 星空层 ---------- */
+    var layer = document.getElementById('osStars');
+    if (layer && !reduce) {
+      var n = window.innerWidth < 720 ? 46 : 88;
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < n; i++) {
+        var s = document.createElement('i');
+        var size = Math.random() * 1.8 + 0.6;
+        s.style.width = size + 'px';
+        s.style.height = size + 'px';
+        s.style.left = (Math.random() * 100) + '%';
+        s.style.top = (Math.random() * 100) + '%';
+        s.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
+        s.style.opacity = (Math.random() * 0.4 + 0.1).toFixed(2);
+        frag.appendChild(s);
+      }
+      layer.appendChild(frag);
+    }
+
+    /* ---------- 滚动显影 ---------- */
+    var rises = document.querySelectorAll('.os-rise');
+    var forEach = Array.prototype.forEach;
+    if (reduce || !('IntersectionObserver' in window)) {
+      forEach.call(rises, function(el){ el.classList.add('is-in'); });
+    } else {
+      var io = new IntersectionObserver(function(entries){
+        forEach.call(entries, function(e){
+          if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+        });
+      }, { rootMargin: '0px 0px -12% 0px', threshold: 0.12 });
+      forEach.call(rises, function(io_el){ io.observe(io_el); });
+    }
+
+    /* ---------- 右侧星点导航 ---------- */
+    var dots = document.getElementById('osDots');
+    var anchors = dots ? dots.querySelectorAll('a') : [];
+    if (dots && anchors.length) {
+      var targets = [];
+      forEach.call(anchors, function(a){
+        var el = document.querySelector(a.getAttribute('href'));
+        if (el) targets.push({ dot: a, el: el });
+      });
+      var toggleDots = function(){
+        if (window.scrollY > window.innerHeight * 0.55) dots.classList.add('is-vis');
+        else dots.classList.remove('is-vis');
+      };
+      var syncDots = function(){
+        var mid = (window.innerHeight || 1) * 0.38, current = null;
+        for (var k = 0; k < targets.length; k++) {
+          if (targets[k].el.getBoundingClientRect().top <= mid) current = targets[k].dot;
+        }
+        forEach.call(anchors, function(a){ a.classList.remove('is-on'); });
+        if (current) current.classList.add('is-on');
+      };
+      var onNav = function(){ toggleDots(); syncDots(); };
+      window.addEventListener('scroll', onNav, { passive: true });
+      window.addEventListener('resize', onNav);
+      onNav();
+    }
+  })();
+
+  /* ============================================================
+     入场序列：8 芒星自中心离位 → 沿轨道公转整整一周 → 归返中心
+     轨道参数在这里定义一次，SVG 引导线与运动轨迹都由它派生
+     ============================================================ */
+  (function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- 底座坐标系（画布 2290×1510）---- */
+    var VW = 2290, VH = 1510;
+    var ORBIT = { cx: 1132.5, cy: 729.5, rx: 941, ry: 196, rot: -8.8 };
+    var REST  = { x: 1130, y: 911 };          /* 星辰盒中心 = 静止位置 */
+    var PHI   = ORBIT.rot * Math.PI / 180;
+
+    function pt(th){
+      var x = ORBIT.rx * Math.cos(th), y = ORBIT.ry * Math.sin(th);
+      return { x: ORBIT.cx + x * Math.cos(PHI) - y * Math.sin(PHI),
+               y: ORBIT.cy + x * Math.sin(PHI) + y * Math.cos(PHI) };
+    }
+
+    /* 轨道引导线（两段半椭圆，与运动同一参数） */
+    var A = pt(0), B = pt(Math.PI);
+    var orbitEl = document.getElementById('osOrbit');
+    if (orbitEl) {
+      orbitEl.setAttribute('d',
+        'M ' + A.x.toFixed(2) + ' ' + A.y.toFixed(2) +
+        ' A ' + ORBIT.rx + ' ' + ORBIT.ry + ' ' + ORBIT.rot + ' 1 1 ' + B.x.toFixed(2) + ' ' + B.y.toFixed(2) +
+        ' A ' + ORBIT.rx + ' ' + ORBIT.ry + ' ' + ORBIT.rot + ' 1 1 ' + A.x.toFixed(2) + ' ' + A.y.toFixed(2));
+    }
+
+    /* 离静止点最近的轨道点：作为进出轨道的接驳点 */
+    var ENTRY = null, TH0 = 0, bestD = Infinity;
+    for (var i = 0; i < 1440; i++) {
+      var th = i / 1440 * Math.PI * 2, p = pt(th);
+      var d = (p.x - REST.x) * (p.x - REST.x) + (p.y - REST.y) * (p.y - REST.y);
+      if (d < bestD) { bestD = d; TH0 = th; ENTRY = p; }
+    }
+
+    var starG = document.getElementById('osStarG');
+    var box = document.getElementById('osBox');
+    if (!starG || !box) return;
+
+    /* ---- 时序读自 :root，与 CSS 同源 ---- */
+    var cs = window.getComputedStyle ? getComputedStyle(document.documentElement) : null;
+    function sec(name, def){
+      if (!cs) return def;
+      var v = parseFloat(cs.getPropertyValue(name));
+      return isNaN(v) ? def : v;
+    }
+    var T0   = sec('--os-t0',   .50);
+    var HOOK = sec('--os-hook', .50);
+    var DUR  = sec('--os-dur', 3.20);
+
+    /* 缓入缓出：离星不急、归位不顿，掺一点线性起步才不粘 */
+    function ease(p){ return .62 * (.5 - .5 * Math.cos(Math.PI * p)) + .38 * p; }
+
+    var raf = 0, t0 = 0;
+
+    function paint(dx, dy, sc){
+      var k = (box.clientWidth || VW) / VW;         /* 底座单位 → CSS px */
+      starG.style.transform =
+        'translate(' + (dx * k).toFixed(2) + 'px,' + (dy * k).toFixed(2) + 'px) scale(' + sc.toFixed(4) + ')';
+    }
+
+    function frame(now){
+      if (!t0) t0 = now;
+      var t = (now - t0) / 1000, dx = 0, dy = 0, sc = 1;
+      var off = ENTRY.x - REST.x, offy = ENTRY.y - REST.y;
+
+      if (t < T0) {                                   /* 未起 */
+        paint(0, 0, 1);
+      } else if (t < T0 + HOOK) {                     /* 离位：中心 → 接驳点 */
+        var u = ease((t - T0) / HOOK);
+        dx = off * u; dy = offy * u;
+        sc = 1 + .10 * Math.sin(Math.PI * u);
+        paint(dx, dy, sc);
+      } else if (t < T0 + HOOK + DUR) {               /* 公转整整一周 */
+        var uu = ease((t - T0 - HOOK) / DUR);
+        var p = pt(TH0 + uu * Math.PI * 2);
+        paint(p.x - REST.x, p.y - REST.y, 1);
+      } else if (t < T0 + HOOK * 2 + DUR) {           /* 归返：接驳点 → 中心 */
+        var u2 = ease((t - T0 - HOOK - DUR) / HOOK);
+        paint(off * (1 - u2), offy * (1 - u2), 1 + .14 * Math.sin(Math.PI * u2));
+      } else {                                        /* 落定 */
+        paint(0, 0, 1);
+        raf = 0;
+        return;
+      }
+      raf = window.requestAnimationFrame(frame);
+    }
+
+    var END = T0 + HOOK * 2 + DUR;
+
+    /* 缩窗时按新比例重画静止位置 */
+    window.addEventListener('resize', function(){
+      if (!raf) paint(0, 0, 1);
+    });
+
+    /* 是否起幕：首次进入本站才播，二次进入直接给最终态 */
+    var forced = /[?&]intro=1\b/.test(location.search);
+    var seen = false;
+    try { seen = sessionStorage.getItem('osIntro') === '1'; } catch (e) {}
+
+    paint(0, 0, 1);
+    if (reduce) return;                                /* 降级：定格在中心 */
+
+    if (seen && !forced) return;
+
+    function begin(){
+      document.documentElement.classList.add('os-play');
+      try { sessionStorage.setItem('osIntro', '1'); } catch (e) {}
+      t0 = 0;
+      if (raf) window.cancelAnimationFrame(raf);
+      raf = window.requestAnimationFrame(frame);
+      /* 兜底：即使 rAF 被节流，也在行程结束后把星辰钉回中心 */
+      window.setTimeout(function(){ if (!raf) paint(0, 0, 1); }, (END + .4) * 1000);
+    }
+
+    var mark = document.querySelector('.os-mark');
+    if (mark && !mark.complete) {
+      mark.addEventListener('load',  function(){ window.setTimeout(begin, 60); }, false);
+      mark.addEventListener('error', begin, false);
+      window.setTimeout(begin, 1500);
+    } else {
+      window.setTimeout(begin, 30);
+    }
+  })();
+  </script>
+  <script src="assets/site-util.js?v=20260914a"></script>
+</body>
+</html>
