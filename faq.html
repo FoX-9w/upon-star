@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>常见问题 · Upon Star</title>
+<style>
+@font-face { font-family: 'CrimsonPro'; src: url('./_shared/fonts/CrimsonPro-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'CrimsonPro'; src: url('./_shared/fonts/CrimsonPro-Bold.ttf') format('truetype'); font-weight: 700; }
+@font-face { font-family: 'Outfit'; src: url('./_shared/fonts/Outfit-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'Outfit'; src: url('./_shared/fonts/Outfit-Bold.ttf') format('truetype'); font-weight: 700; }
+@font-face { font-family: 'Italiana'; src: url('./_shared/fonts/Italiana-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'PoiretOne'; src: url('./_shared/fonts/PoiretOne-Regular.ttf') format('truetype'); font-weight: 400; }
+
+:root {
+  --bg: #040408; --bg2: #08080e; --surface: #0c0c14; --surface-light: #12121e;
+  --ink: #f0ece4; --ink-dim: #a09888; --muted: #605850;
+  --rule: rgba(200,164,92,0.12); --rule-bright: rgba(200,164,92,0.25);
+  --gold: #c8a45c; --gold-light: #e0c078; --gold-dim: #8a7040;
+  --radius: 6px; --radius-card: 10px;
+  --font-serif: 'CrimsonPro', Georgia, 'Songti SC', serif;
+  --font-sans: 'Outfit', 'SF Pro Text', 'PingFang SC', system-ui, sans-serif;
+  --font-display: 'Italiana', 'CrimsonPro', Georgia, serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--ink); font: 400 15px/1.8 var(--font-sans); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+
+.sacred-light { position: fixed; top: -30%; left: 50%; transform: translateX(-50%); width: 1400px; height: 900px; background: radial-gradient(ellipse at center, rgba(200,164,92,0.05) 0%, transparent 65%); pointer-events: none; z-index: 1; }
+.sticky-nav { position: sticky; top: 0; z-index: 100; background: rgba(4,4,8,0.88); backdrop-filter: blur(16px); border-bottom: 1px solid var(--rule); padding: 14px 0; }
+.nav-inner { max-width: 900px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+.logo { font: 400 20px var(--font-display); color: var(--gold); letter-spacing: 4px; text-transform: uppercase; text-decoration: none; }
+.logo span { color: var(--ink-dim); font-size: 14px; }
+.nav-back { color: var(--ink-dim); text-decoration: none; font: 400 12px var(--font-sans); letter-spacing: 1.5px; text-transform: uppercase; transition: color 0.3s; }
+.nav-back:hover { color: var(--gold); }
+
+.faq-wrap { position: relative; z-index: 2; max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+.faq-hero { text-align: center; margin-bottom: 48px; }
+.faq-hero h1 { font: 400 40px/1.2 var(--font-display); letter-spacing: 2px; margin-bottom: 12px; }
+.faq-hero p { color: var(--ink-dim); font: 400 14px var(--font-sans); letter-spacing: 1px; }
+.gold-line { width: 80px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent); margin: 24px auto; opacity: 0.5; }
+
+.faq-category { margin-bottom: 48px; }
+.faq-category h2 { font: 400 22px var(--font-display); color: var(--gold-light); letter-spacing: 2px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+.faq-item { border: 1px solid var(--rule); border-radius: var(--radius-card); margin-bottom: 12px; background: var(--surface); overflow: hidden; transition: border-color 0.3s; }
+.faq-item:hover { border-color: var(--rule-bright); }
+.faq-q { padding: 18px 24px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; user-select: none; -webkit-tap-highlight-color: transparent; }
+.faq-q h3 { font: 500 15px var(--font-sans); color: var(--ink); letter-spacing: 0.5px; flex: 1; }
+.faq-q .arrow { font-size: 12px; color: var(--gold-dim); transition: transform 0.3s; flex-shrink: 0; }
+.faq-item.open .faq-q .arrow { transform: rotate(180deg); color: var(--gold); }
+.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+.faq-item.open .faq-a { max-height: 500px; }
+.faq-a-inner { padding: 0 24px 20px; font: 400 14px/1.8 var(--font-sans); color: var(--ink-dim); }
+.faq-a-inner a { color: var(--gold); text-decoration: none; border-bottom: 1px dashed var(--gold-dim); transition: border-color 0.3s; }
+.faq-a-inner a:hover { border-bottom-color: var(--gold); }
+.faq-a-inner strong { color: var(--gold-light); font-weight: 600; }
+
+.cta-section { text-align: center; margin-top: 48px; padding: 40px 24px; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius-card); }
+.cta-section h3 { font: 400 20px var(--font-display); color: var(--gold-light); letter-spacing: 2px; margin-bottom: 12px; }
+.cta-section p { color: var(--ink-dim); font: 400 13px var(--font-sans); margin-bottom: 20px; }
+.cta-section a { display: inline-block; padding: 12px 32px; border-radius: 999px; border: 1px solid var(--gold-dim); color: var(--gold-light); font: 500 13px var(--font-sans); letter-spacing: 2px; text-decoration: none; transition: all 0.3s; }
+.cta-section a:hover { background: rgba(200,164,92,0.08); box-shadow: 0 0 24px rgba(200,164,92,0.08); }
+
+footer { text-align: center; padding: 48px 24px; border-top: 1px solid var(--rule); position: relative; z-index: 2; }
+.footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 24px; margin-bottom: 16px; }
+.footer-links a { color: var(--muted); text-decoration: none; font: 400 11px var(--font-sans); letter-spacing: 1px; transition: color 0.3s; }
+.footer-links a:hover { color: var(--gold); }
+footer p { font: 400 12px var(--font-serif); color: var(--muted); }
+footer p+p { font-size: 10px; opacity: 0.6; margin-top: 6px; }
+
+@media (max-width: 600px) {
+  .faq-hero h1 { font-size: 28px; }
+  .faq-category h2 { font-size: 18px; }
+  .faq-q { padding: 14px 16px; }
+  .faq-q h3 { font-size: 14px; }
+  .faq-a-inner { padding: 0 16px 16px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<div class="sacred-light"></div>
+
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <a href="./divination-homepage.html" class="logo">UPON STAR<span> · 占卜</span></a>
+    <a href="./divination-homepage.html" class="nav-back">← 返回首页</a>
+  </div>
+</nav>
+
+<div class="faq-wrap">
+  <div class="faq-hero">
+    <h1>常见问题</h1>
+    <p>关于 Upon Star 的常见疑问与解答</p>
+    <div class="gold-line"></div>
+  </div>
+
+  <!-- 关于占卜 -->
+  <div class="faq-category">
+    <h2>关于占卜</h2>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <h3>这些占卜结果准确吗？可以相信吗？</h3>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        占卜是一种<strong>文化研究与心理探索工具</strong>，不是科学预测。我们的六爻、塔罗、八字等内容均基于传统算法和符号体系，旨在提供一种自我反思的视角。建议将占卜结果视为<strong>娱乐参考</strong>，不构成任何人生决策依据。
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <h3>六爻和塔罗有什么区别？</h3>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <strong>六爻（东方）</strong>：基于周易六十四卦，通过三枚铜钱六次起卦，结合纳甲、六亲、六神等体系分析事情的发展趋势。适合问具体问题，如"这件事能成吗？"<br><br>
+        <strong>塔罗（西方）</strong>：基于 78 张塔罗牌，通过牌阵布局解读当下能量状态与心理投射。更适合探索内心，如"我该如何面对这段关系？"
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <h3>同一问题可以反复占卜吗？</h3>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        传统上不建议对同一问题反复占卜。占卜反映的是<strong>当下的能量状态</strong>，短时间内的结果不会有本质变化。建议间隔至少<strong>一周</strong>后再重新占卜同一问题，或在情况有重大变化时重新起卦。
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <h3>八字排盘需要准确出生时间吗？</h3>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        是的，八字排盘需要<strong>年、月、日、时</strong>四个参数。时辰的准确性会影响时柱的计算。如果不确定准确出生时间，可以输入大致时间（如中午 12:00），但排盘结果中时柱的准确性会受影响。系统会自动处理农历/公历转换。
+      </div></div>
+    </div>
+  </div>
+
+  <!-- 付费与深度解读 -->
+  <div class="faq-category">
+    <h2>深度解读服务</h2>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <h3>深度解读和免费内容有什么区别？</h3>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        <strong>免费内容</strong>：包含卦象排盘、牌面展示、基础解读文字，所有公共领域可获取的占卜知识均免费开放。<br><br>
+        <strong>深度解读</strong>：由专业解读师根据您的卦象/牌面提供一对一深度分析，结合东方易理与西方神秘学，针对您的具体问题给予个性化解读。¥88/次，通过微信客服预约。
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <h3>如何预约深度解读？</h3>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        添加微信客服 <strong>uponstar_wx</strong>，告知您需要的解读类型（六爻/塔罗/八字/星盘/融合对照），并提供您的占卜结果截图。客服会为您安排解读师，通常在<strong>24 小时内</strong>完成解读并发送给您。
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <h3>深度解读可以退款吗？</h3>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        深度解读为<strong>定制化服务</strong>，一经交付原则上不支持退款。如对解读内容有疑问，可在收到解读后 48 小时内联系客服沟通，我们会尽力为您解答。详细政策请查看<a href="./refund.html">退款政策</a>。
+      </div></div>
+    </div>
+  </div>
+
+  <!-- 技术 & 隐私 -->
+  <div class="faq-category">
+    <h2>技术与隐私</h2>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <h3>我的占卜数据会被保存吗？</h3>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        所有占卜计算均在<strong>您的浏览器本地</strong>完成，我们不会上传或存储您的占卜问题、排盘结果。分享功能生成的链接仅包含编码后的结果数据，不包含个人信息。详见<a href="./privacy.html">隐私政策</a>。
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <h3>这个网站使用什么技术？</h3>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        八字排盘基于 MIT 开源协议授权的 <strong>@openfate/bazi-engine</strong>；星盘使用公共领域的 <strong>VSOP87 行星理论</strong>自主实现；六爻排盘采用自主开发的纳甲六亲六神算法；塔罗和雷诺曼的卡牌内容为自主整理。所有素材均使用开源字体，无版权风险。
+      </div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <h3>网站合法吗？需要备案吗？</h3>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">
+        Upon Star 定位为<strong>文化研究与心理探索平台</strong>，所有内容仅供娱乐参考。网站遵循《互联网信息服务管理办法》相关要求。如在中国大陆部署，建议进行 ICP 备案；境外 VPS 部署则无需备案。我们不提供算命、风水等需资质认证的服务。
+      </div></div>
+    </div>
+  </div>
+
+  <div class="cta-section">
+    <h3>还没有找到答案？</h3>
+    <p>欢迎通过留言板或微信客服联系我们</p>
+    <a href="./guestbook.html">前往留言板</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-links">
+    <a href="./divination-homepage.html">首页</a>
+    <a href="./about.html">关于</a>
+    <a href="./faq.html">常见问题</a>
+    <a href="./guestbook.html">留言板</a>
+    <a href="./terms.html">用户协议</a>
+    <a href="./privacy.html">隐私政策</a>
+    <a href="./refund.html">退款政策</a>
+  </div>
+  <p>Upon Star · 中西占卜探索平台</p>
+  <p style="font-size:10px;opacity:0.6;margin-top:6px;">本平台内容仅供娱乐参考，不构成人生决策建议</p>
+</footer>
+
+<script>
+function toggleFaq(el) {
+  var item = el.parentElement;
+  item.classList.toggle('open');
+}
+</script>
+
+</body>
+</html>

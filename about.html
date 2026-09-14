@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关于 Upon Star · 中西占卜</title>
+
+<style>
+@font-face { font-family: 'CrimsonPro'; src: url('./_shared/fonts/CrimsonPro-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'CrimsonPro'; src: url('./_shared/fonts/CrimsonPro-Bold.ttf') format('truetype'); font-weight: 700; }
+@font-face { font-family: 'Outfit'; src: url('./_shared/fonts/Outfit-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'Outfit'; src: url('./_shared/fonts/Outfit-Bold.ttf') format('truetype'); font-weight: 700; }
+@font-face { font-family: 'Italiana'; src: url('./_shared/fonts/Italiana-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'PoiretOne'; src: url('./_shared/fonts/PoiretOne-Regular.ttf') format('truetype'); font-weight: 400; }
+
+:root {
+  --bg: #040408; --bg2: #08080e; --surface: #0c0c14; --surface-light: #12121e;
+  --ink: #f0ece4; --ink-dim: #a09888; --muted: #605850;
+  --rule: rgba(200,164,92,0.12); --rule-bright: rgba(200,164,92,0.25);
+  --gold: #c8a45c; --gold-light: #e0c078; --gold-dim: #8a7040;
+  --east: #b06040; --west: #5078a0; --fusion: #7858a0;
+  --radius: 6px; --radius-card: 10px; --radius-full: 999px;
+  --font-serif: 'CrimsonPro', Georgia, 'Songti SC', serif;
+  --font-sans: 'Outfit', 'SF Pro Text', 'PingFang SC', system-ui, sans-serif;
+  --font-display: 'Italiana', 'CrimsonPro', Georgia, serif;
+  --font-elegant: 'PoiretOne', 'CrimsonPro', serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background:var(--bg); color:var(--ink);
+  font:400 15px/1.7 var(--font-sans); -webkit-font-smoothing:antialiased;
+  min-height:100vh; overflow-x:hidden;
+}
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--gold-dim); border-radius:3px; }
+
+.sacred-light {
+  position:fixed; top:-30%; left:50%; transform:translateX(-50%);
+  width:1400px; height:900px;
+  background:radial-gradient(ellipse at center, rgba(200,164,92,0.05) 0%, transparent 65%);
+  pointer-events:none; z-index:1;
+}
+.rim-light-left, .rim-light-right {
+  position:fixed; top:0; width:120px; height:100vh; pointer-events:none; z-index:1;
+}
+.rim-light-left { left:0; background:linear-gradient(to right, rgba(200,164,92,0.04), transparent); }
+.rim-light-right { right:0; background:linear-gradient(to left, rgba(200,164,92,0.04), transparent); }
+
+.container { max-width:900px; margin:0 auto; padding:0 24px; }
+
+.sticky-nav {
+  position:sticky; top:0; z-index:100;
+  background:rgba(4,4,8,0.88); backdrop-filter:blur(16px) saturate(1.2);
+  border-bottom:1px solid var(--rule); padding:12px 0 10px;
+}
+.nav-inner {
+  max-width:1100px; margin:0 auto; padding:0 24px;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+}
+.logo {
+  font:400 20px var(--font-display); color:var(--gold);
+  letter-spacing:4px; text-transform:uppercase; text-decoration:none;
+}
+.logo span { color:var(--ink-dim); font-size:14px; }
+.nav-links { display:flex; gap:24px; align-items:center; justify-content:center; }
+.nav-links a {
+  color:var(--ink-dim); text-decoration:none;
+  font:400 12px var(--font-sans); letter-spacing:1.5px;
+  text-transform:uppercase; transition:color 0.3s;
+}
+.nav-links a:hover { color:var(--gold); }
+.nav-links a.active { color:var(--gold); }
+
+/* Fortune circle */
+.nav-links a.fortune-circle {
+  width:40px; height:40px; border-radius:50%;
+  border:1px solid var(--rule-bright); background:rgba(200,164,92,0.06);
+  box-shadow:0 0 18px rgba(200,164,92,0.08), inset 0 0 12px rgba(200,164,92,0.03);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  color:var(--gold-light); font:600 10px/1.3 var(--font-sans); letter-spacing:1px;
+  text-decoration:none; transition:all 0.3s; -webkit-tap-highlight-color:transparent;
+  position:relative; flex-shrink:0; text-align:center;
+}
+.nav-links a.fortune-circle span { display:block; line-height:1.3; }
+.nav-links a.fortune-circle:hover {
+  border-color:var(--gold); color:var(--gold-light);
+  box-shadow:0 0 28px rgba(200,164,92,0.18), inset 0 0 16px rgba(200,164,92,0.06);
+  transform:translateY(-1px);
+}
+
+/* HERO */
+.about-hero {
+  position:relative; text-align:center;
+  padding:80px 24px 48px; z-index:2;
+}
+.about-hero .label {
+  font:400 11px var(--font-sans); color:var(--gold);
+  letter-spacing:5px; text-transform:uppercase; margin-bottom:20px;
+}
+.about-hero h1 {
+  font:400 48px/1.2 var(--font-display);
+  letter-spacing:3px; margin-bottom:16px;
+}
+.about-hero h1 em {
+  font-style:normal;
+  background:linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.about-hero .subtitle {
+  font:400 15px/1.8 var(--font-sans);
+  color:var(--ink-dim); max-width:520px; margin:0 auto;
+}
+.gold-line {
+  width:120px; height:1px;
+  background:linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+  margin:32px auto; opacity:0.5;
+}
+
+/* SECTIONS */
+.about-section { position:relative; z-index:2; padding:48px 0; }
+.about-section h2 {
+  font:400 28px/1.3 var(--font-display);
+  letter-spacing:2px; color:var(--gold-light);
+  margin-bottom:20px; padding-bottom:12px;
+  border-bottom:1px solid var(--rule);
+}
+.about-section p {
+  font:400 16px/1.9 var(--font-serif);
+  color:var(--ink); margin-bottom:16px;
+}
+.about-section strong { color:var(--gold-light); font-weight:700; }
+.about-section em { font-style:italic; color:var(--ink-dim); }
+
+/* Stats grid */
+.stats-grid {
+  display:grid; grid-template-columns:repeat(4, 1fr);
+  gap:16px; margin:32px 0;
+}
+.stat-card {
+  text-align:center; padding:24px 12px;
+  background:var(--surface); border:1px solid var(--rule);
+  border-radius:var(--radius-card); transition:all 0.4s;
+}
+.stat-card:hover {
+  border-color:var(--rule-bright);
+  box-shadow:0 0 32px rgba(200,164,92,0.06);
+  transform:translateY(-3px);
+}
+.stat-num {
+  font:400 36px var(--font-display);
+  background:linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  margin-bottom:8px;
+}
+.stat-label {
+  font:400 11px var(--font-sans); color:var(--muted);
+  letter-spacing:1.5px; text-transform:uppercase;
+}
+
+/* Skill bars */
+.skill-list { margin:24px 0; }
+.skill-item { margin-bottom:20px; }
+.skill-header {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:8px;
+}
+.skill-name { font:500 14px var(--font-sans); color:var(--ink); letter-spacing:0.5px; }
+.skill-tag {
+  font:400 11px var(--font-sans); color:var(--gold-dim);
+  letter-spacing:1px;
+}
+.skill-bar {
+  height:4px; background:rgba(200,164,92,0.06);
+  border-radius:2px; overflow:hidden; position:relative;
+}
+.skill-fill {
+  height:100%; border-radius:2px;
+  background:linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-light));
+  transition:width 1s ease; position:relative;
+}
+.skill-fill.east { background:linear-gradient(90deg, var(--east), var(--gold)); }
+.skill-fill.west { background:linear-gradient(90deg, var(--west), var(--gold)); }
+.skill-fill.fusion { background:linear-gradient(90deg, var(--fusion), var(--gold)); }
+
+/* Quote */
+.about-quote {
+  margin:48px 0; padding:32px 40px;
+  border-left:2px solid var(--gold-dim);
+  background:rgba(200,164,92,0.03);
+  border-radius:0 8px 8px 0;
+}
+.about-quote p {
+  font:400 17px/1.8 var(--font-serif);
+  color:var(--ink-dim); font-style:italic; margin-bottom:12px;
+}
+.about-quote .author {
+  font:500 13px var(--font-sans); color:var(--gold);
+  letter-spacing:1px; text-transform:uppercase;
+}
+
+/* Values grid */
+.values-grid {
+  display:grid; grid-template-columns:repeat(3, 1fr);
+  gap:16px; margin:32px 0;
+}
+.value-card {
+  padding:24px 20px; background:var(--surface);
+  border:1px solid var(--rule); border-radius:var(--radius-card);
+  text-align:center; transition:all 0.4s;
+}
+.value-card:hover {
+  border-color:var(--rule-bright);
+  box-shadow:0 0 32px rgba(200,164,92,0.06);
+  transform:translateY(-3px);
+}
+.value-icon {
+  font-size:28px; margin-bottom:12px;
+  display:inline-block;
+}
+.value-card h3 {
+  font:500 14px var(--font-sans); color:var(--gold-light);
+  letter-spacing:1px; margin-bottom:8px;
+}
+.value-card p {
+  font:400 13px/1.7 var(--font-sans); color:var(--ink-dim);
+  margin:0;
+}
+
+/* CTA */
+.about-cta {
+  text-align:center; padding:48px 24px; margin-top:32px;
+  border-top:1px solid var(--rule); position:relative; z-index:2;
+}
+.about-cta h2 {
+  font:400 28px/1.3 var(--font-display);
+  letter-spacing:2px; color:var(--gold-light); margin-bottom:16px;
+}
+.about-cta p {
+  color:var(--ink-dim); font:400 14px var(--font-sans);
+  max-width:480px; margin:0 auto 28px;
+}
+.cta-buttons { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.cta-btn {
+  display:inline-block; padding:14px 28px;
+  border-radius:var(--radius-full); text-decoration:none;
+  font:500 13px var(--font-sans); letter-spacing:1px;
+  transition:all 0.3s; border:1px solid var(--rule);
+}
+.cta-btn.primary {
+  background:rgba(200,164,92,0.08); border-color:var(--gold-dim);
+  color:var(--gold-light);
+}
+.cta-btn.primary:hover {
+  background:rgba(200,164,92,0.12); border-color:var(--gold);
+  box-shadow:0 0 28px rgba(200,164,92,0.12); transform:translateY(-2px);
+}
+.cta-btn.secondary {
+  color:var(--ink-dim); background:rgba(12,12,20,0.6);
+}
+.cta-btn.secondary:hover {
+  border-color:var(--rule-bright); color:var(--gold);
+}
+
+/* Footer */
+footer {
+  text-align:center; padding:40px 24px;
+  border-top:1px solid var(--rule); position:relative; z-index:2;
+}
+footer p { font:400 12px var(--font-sans); color:var(--muted); letter-spacing:1px; }
+footer .footer-links { margin-bottom:16px; display:flex; gap:24px; justify-content:center; }
+footer .footer-links a { color:var(--muted); text-decoration:none; font:400 12px var(--font-sans); transition:color 0.3s; }
+footer .footer-links a:hover { color:var(--gold); }
+
+@media (max-width:768px) {
+  .stats-grid { grid-template-columns:repeat(2,1fr); }
+  .values-grid { grid-template-columns:1fr; }
+  .about-hero h1 { font-size:32px; }
+  .nav-inner { padding:0 16px; }
+  .logo { font-size:16px; letter-spacing:2px; }
+  .logo span { font-size:11px; }
+  .nav-links { flex-wrap:wrap; justify-content:center; gap:14px; }
+  .nav-links a { font-size:10px; }
+  .nav-links a.fortune-circle { width:34px; height:34px; font-size:8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="sacred-light"></div>
+<div class="rim-light-left"></div>
+<div class="rim-light-right"></div>
+
+<!-- NAV -->
+<div class="sticky-nav">
+  <div class="nav-inner">
+    <a href="./divination-homepage.html" class="logo">Upon Star <span>·</span> 占卜</a>
+    <nav class="nav-links">
+      <a href="./daily-fortune.html" class="fortune-circle" aria-label="每日运势"><span>每日</span><span>运势</span></a>
+      <a href="./liuyao.html">六爻</a>
+      <a href="./tarot.html">塔罗</a>
+    </nav>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="about-hero">
+  <div class="label">about upon star</div>
+  <h1>wish upon a <em>star</em></h1>
+  <div class="gold-line"></div>
+  <p class="subtitle">
+    东方八字、西方占星、中西合参——一个将千年玄学智慧凝聚为现代探索工具的平台。<br>
+    传统文化科普 · 占卜信息收集 · 娱乐探索一站式体验
+  </p>
+</section>
+
+<!-- BRAND STORY -->
+<section class="about-section">
+  <div class="container">
+    <h2>品牌缘起</h2>
+    <p>
+      「Upon Star」取意「wish upon a star」——向星辰许愿。<br>
+      人类自古以来便仰望星空，试图从日月运行中窥见命运的轨迹。东方先贤创造了<strong>周易六爻</strong>，以铜钱三枚推演天地变化；西方先哲建立了<strong>占星学</strong>，以行星方位解读人生蓝图。
+    </p>
+    <p>
+      这两种体系，一个诞生于黄河流域的卜筮传统，一个孕育于两河流域的星象观测，殊途同归地指向了同一个命题：<em>人如何理解自身与世界的关系。</em>
+    </p>
+    <p>
+      Upon Star 的创立初衷，便是将这两条平行流淌的智慧之河汇聚一处，让每一位访客都能以一次提问，获得东西方两种视角的对照解读——不是为了预测命运，而是为了<strong>理解自己</strong>。
+    </p>
+
+    <div class="about-quote">
+      <p>「占卜之道，不在于预知未来，而在于审视当下。卦象也好，星盘也好，都是一面镜子，映照出你内心已有的答案。」</p>
+      <div class="author">— Upon Star 创始理念</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="about-section">
+  <div class="container">
+    <h2>平台数据</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num">7</div>
+        <div class="stat-label">占卜体系</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">64</div>
+        <div class="stat-label">周易卦象</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">78+36</div>
+        <div class="stat-label">塔罗+雷诺曼</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">探索可能</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DIVINER BACKGROUND -->
+<section class="about-section">
+  <div class="container">
+    <h2>占卜师简介</h2>
+    <p>
+      Upon Star 的占卜体系由一位<strong>中西玄学兼修</strong>的研习者构建。
+      多年来潜心研究东方命理与西方神秘学，在实践中不断验证、反思、整合两套体系的精要。
+    </p>
+
+    <div class="skill-list">
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">六爻纳甲 · 周易六十四卦</span>
+          <span class="skill-tag">东方 · 精研</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill east" style="width:90%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">四柱八字 · 十神大运</span>
+          <span class="skill-tag">东方 · 熟练</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill east" style="width:80%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">塔罗牌 · 78张全牌阵</span>
+          <span class="skill-tag">西方 · 精研</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill west" style="width:85%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">雷诺曼卡牌 · 36张体系</span>
+          <span class="skill-tag">西方 · 熟练</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill west" style="width:75%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">西方占星 · 行星宫位相位</span>
+          <span class="skill-tag">西方 · 熟练</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill west" style="width:78%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">中西对照 · 八字×星盘融合解读</span>
+          <span class="skill-tag">融合 · 独创</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill fusion" style="width:70%"></div></div>
+      </div>
+    </div>
+
+    <div class="about-quote">
+      <p>「学易之人，不可不知星；观星之人，不可不读易。东西方的智慧从来不是对立的，它们只是同一片星空的不同解读方式。」</p>
+      <div class="author">— 占卜师手记</div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="about-section">
+  <div class="container">
+    <h2>平台理念</h2>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">☯</div>
+        <h3>传统文化科普</h3>
+        <p>周易卦象、纳甲六亲、十神五行——让晦涩的命理知识变得清晰可读，传承千年智慧。</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">✦</div>
+        <h3>中西合参对照</h3>
+        <p>同一问题，六爻与塔罗并观；同一生辰，八字与星盘同参。东西方双视角的深度对话。</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">⚝</div>
+        <h3>娱乐探索为主</h3>
+        <p>占卜是认识自我的工具，不是决定命运的裁判。所有内容仅供娱乐参考，不构成决策建议。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH -->
+<section class="about-section">
+  <div class="container">
+    <h2>技术合规</h2>
+    <p>
+      Upon Star 在技术实现上<strong>完全合法合规</strong>，不使用任何侵权的计算引擎或商业授权数据：
+    </p>
+    <div class="skill-list">
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">八字排盘引擎</span>
+          <span class="skill-tag">MIT 开源协议 · @openfate/bazi-engine</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill east" style="width:100%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">星盘计算逻辑</span>
+          <span class="skill-tag">公共领域 · VSOP87 行星理论自主实现</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill west" style="width:100%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">六爻排盘系统</span>
+          <span class="skill-tag">自主开发 · 纳甲六亲六神算法</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill east" style="width:100%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-header">
+          <span class="skill-name">卡牌占卜系统</span>
+          <span class="skill-tag">自主开发 · 塔罗/雷诺曼抽牌逻辑</span>
+        </div>
+        <div class="skill-bar"><div class="skill-fill west" style="width:100%"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="about-cta">
+  <div class="container">
+    <h2>开始你的探索之旅</h2>
+    <p>选择一种占卜方式，带着你的问题，向星辰许愿。</p>
+    <div class="cta-buttons">
+      <a href="./liuyao.html" class="cta-btn primary">☯ 六爻起卦</a>
+      <a href="./tarot.html" class="cta-btn primary">✦ 塔罗占卜</a>
+      <a href="./guestbook.html" class="cta-btn secondary">留言反馈</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-links">
+    <a href="./divination-homepage.html">首页</a>
+    <a href="./about.html">关于</a>
+    <a href="./faq.html">常见问题</a>
+    <a href="./guestbook.html">留言板</a>
+    <a href="./terms.html">用户协议</a>
+    <a href="./privacy.html">隐私政策</a>
+    <a href="./refund.html">退款政策</a>
+  </div>
+  <p>Upon Star · 中西占卜探索平台</p>
+  <p style="font-size:10px;opacity:0.6;margin-top:6px;">本平台内容仅供娱乐参考，不构成人生决策建议</p>
+</footer>
+
+</body>
+</html>

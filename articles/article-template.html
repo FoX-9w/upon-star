@@ -1,0 +1,409 @@
+<!-- ============================================================
+   Upon Star · 文章模板
+   ============================================================
+   使用方法：
+   1. 复制此文件，重命名为你的文章（如 qian-gua.html）
+   2. 修改 [EDIT] 标记处的内容
+   3. 在首页 divination-homepage.html 中将卡片链接指向新文件
+   ============================================================ -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- EDIT: 修改为你的文章标题 -->
+<title>文章标题 · Upon Star</title>
+
+<style>
+@font-face { font-family: 'CrimsonPro'; src: url('../_shared/fonts/CrimsonPro-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'CrimsonPro'; src: url('../_shared/fonts/CrimsonPro-Bold.ttf') format('truetype'); font-weight: 700; }
+@font-face { font-family: 'Outfit'; src: url('../_shared/fonts/Outfit-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'Outfit'; src: url('../_shared/fonts/Outfit-Bold.ttf') format('truetype'); font-weight: 700; }
+@font-face { font-family: 'Italiana'; src: url('../_shared/fonts/Italiana-Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'PoiretOne'; src: url('../_shared/fonts/PoiretOne-Regular.ttf') format('truetype'); font-weight: 400; }
+
+:root {
+  --bg: #040408;
+  --bg2: #08080e;
+  --surface: #0c0c14;
+  --surface-light: #12121e;
+  --ink: #f0ece4;
+  --ink-dim: #a09888;
+  --muted: #605850;
+  --rule: rgba(200, 164, 92, 0.12);
+  --rule-bright: rgba(200, 164, 92, 0.25);
+  --gold: #c8a45c;
+  --gold-light: #e0c078;
+  --gold-dim: #8a7040;
+  --east: #b06040;
+  --west: #5078a0;
+  --fusion: #7858a0;
+  --radius: 6px;
+  --radius-card: 10px;
+  --font-serif: 'CrimsonPro', Georgia, 'Songti SC', serif;
+  --font-sans: 'Outfit', 'SF Pro Text', 'PingFang SC', system-ui, sans-serif;
+  --font-display: 'Italiana', 'CrimsonPro', Georgia, serif;
+  --font-elegant: 'PoiretOne', 'CrimsonPro', serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.7 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+
+/* Sacred light */
+.sacred-light {
+  position: fixed; top: -30%; left: 50%; transform: translateX(-50%);
+  width: 1400px; height: 900px;
+  background: radial-gradient(ellipse at center, rgba(200,164,92,0.05) 0%, transparent 65%);
+  pointer-events: none; z-index: 1;
+}
+
+/* Sticky nav */
+.sticky-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(4,4,8,0.88);
+  backdrop-filter: blur(16px) saturate(1.2);
+  border-bottom: 1px solid var(--rule);
+  padding: 14px 0;
+}
+.nav-inner {
+  max-width: 900px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  font: 400 20px var(--font-display);
+  color: var(--gold); letter-spacing: 4px; text-transform: uppercase;
+  text-decoration: none;
+}
+.logo span { color: var(--ink-dim); font-size: 14px; }
+.nav-back {
+  color: var(--ink-dim); text-decoration: none;
+  font: 400 12px var(--font-sans); letter-spacing: 1.5px;
+  text-transform: uppercase; transition: color 0.3s;
+}
+.nav-back:hover { color: var(--gold); }
+
+/* Article container */
+.article-wrap {
+  position: relative; z-index: 2;
+  max-width: 760px; margin: 0 auto; padding: 48px 24px 80px;
+}
+
+/* Article hero */
+.article-hero { text-align: center; margin-bottom: 48px; }
+.article-cat {
+  display: inline-block;
+  font: 500 11px var(--font-sans);
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold);
+  padding: 6px 16px;
+  border: 1px solid var(--rule-bright);
+  border-radius: 999px;
+  background: rgba(200,164,92,0.04);
+  margin-bottom: 24px;
+}
+.article-cat.east { color: var(--east); border-color: rgba(176,96,64,0.25); background: rgba(176,96,64,0.04); }
+.article-cat.west { color: var(--west); border-color: rgba(80,120,160,0.25); background: rgba(80,120,160,0.04); }
+.article-cat.fusion { color: var(--fusion); border-color: rgba(120,88,160,0.25); background: rgba(120,88,160,0.04); }
+
+.article-title {
+  font: 400 36px/1.3 var(--font-display);
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+.article-subtitle {
+  font: 400 15px/1.7 var(--font-sans);
+  color: var(--ink-dim);
+  max-width: 520px; margin: 0 auto 24px;
+}
+.article-meta {
+  display: flex; gap: 16px; justify-content: center; align-items: center;
+  font: 400 12px var(--font-sans);
+  color: var(--muted); letter-spacing: 1px;
+}
+.article-meta span { display: flex; align-items: center; gap: 6px; }
+.article-meta .dot { width: 3px; height: 3px; background: var(--gold-dim); border-radius: 50%; }
+
+.gold-line {
+  width: 80px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+  margin: 32px auto; opacity: 0.5;
+}
+
+/* Article body */
+.article-body {
+  font: 400 16px/1.9 var(--font-serif);
+  color: var(--ink);
+}
+.article-body h2 {
+  font: 400 24px/1.4 var(--font-display);
+  letter-spacing: 1.5px;
+  color: var(--gold-light);
+  margin: 40px 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.article-body h3 {
+  font: 600 18px/1.5 var(--font-sans);
+  color: var(--ink);
+  margin: 32px 0 12px;
+  letter-spacing: 0.5px;
+}
+.article-body p { margin-bottom: 20px; }
+.article-body strong { color: var(--gold-light); font-weight: 700; }
+.article-body em { font-style: italic; color: var(--ink-dim); }
+
+/* Blockquote */
+.article-body blockquote {
+  margin: 28px 0;
+  padding: 20px 28px;
+  border-left: 2px solid var(--gold-dim);
+  background: rgba(200,164,92,0.03);
+  border-radius: 0 6px 6px 0;
+  font: 400 15px/1.8 var(--font-serif);
+  color: var(--ink-dim);
+  font-style: italic;
+}
+.article-body blockquote strong { font-style: normal; }
+
+/* Image */
+.article-body img {
+  max-width: 100%;
+  border-radius: var(--radius-card);
+  margin: 28px 0;
+  border: 1px solid var(--rule);
+}
+.article-body figure { margin: 28px 0; }
+.article-body figcaption {
+  text-align: center;
+  font: 400 12px var(--font-sans);
+  color: var(--muted);
+  margin-top: 8px;
+  letter-spacing: 0.5px;
+}
+
+/* Lists */
+.article-body ul, .article-body ol {
+  margin: 16px 0 20px 20px;
+}
+.article-body li { margin-bottom: 8px; }
+.article-body ul li { list-style: none; position: relative; padding-left: 18px; }
+.article-body ul li::before {
+  content: '✦'; position: absolute; left: 0; top: 0;
+  color: var(--gold-dim); font-size: 10px;
+}
+.article-body ol li { list-style: decimal; color: var(--ink); }
+.article-body ol li::marker { color: var(--gold-dim); }
+
+/* Code / highlight box */
+.article-body .highlight-box {
+  margin: 24px 0;
+  padding: 20px 24px;
+  background: rgba(200,164,92,0.04);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  font: 400 14px/1.7 var(--font-sans);
+  color: var(--ink-dim);
+}
+
+/* Divider */
+.article-body hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--rule-bright), transparent);
+  margin: 40px 0;
+}
+
+/* Article footer */
+.article-footer {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+.article-footer p {
+  font: 400 12px var(--font-sans);
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+.article-footer .back-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px;
+  border: 1px solid var(--rule-bright);
+  border-radius: 999px;
+  color: var(--gold);
+  text-decoration: none;
+  font: 500 13px var(--font-sans);
+  letter-spacing: 1px;
+  transition: all 0.3s;
+}
+.article-footer .back-link:hover {
+  background: rgba(200,164,92,0.06);
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 24px rgba(200,164,92,0.06);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 40px 24px;
+  border-top: 1px solid var(--rule);
+  position: relative; z-index: 2;
+}
+footer p { font: 400 12px var(--font-sans); color: var(--muted); letter-spacing: 1px; }
+footer .disclaimer { font-size: 10px; opacity: 0.6; margin-top: 6px; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .article-title { font-size: 26px; }
+  .article-body { font-size: 15px; }
+  .article-body h2 { font-size: 20px; }
+  .nav-inner { flex-direction: column; gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="sacred-light"></div>
+
+<!-- ===== NAV ===== -->
+<div class="sticky-nav">
+  <div class="nav-inner">
+    <a href="../divination-homepage.html" class="logo">Upon Star <span>·</span> 文章</a>
+    <a href="../divination-homepage.html" class="nav-back">← 返回首页</a>
+  </div>
+</div>
+
+<!-- ===== ARTICLE ===== -->
+<article class="article-wrap">
+
+  <!-- EDIT: 文章头部信息 -->
+  <header class="article-hero">
+    <!-- EDIT: 分类标签，可选 east / west / fusion -->
+    <span class="article-cat east">周易 · 64卦</span>
+
+    <!-- EDIT: 文章标题 -->
+    <h1 class="article-title">乾卦解读：天行健，君子以自强不息</h1>
+
+    <!-- EDIT: 副标题/摘要 -->
+    <p class="article-subtitle">乾为天，刚健中正。从卦象到爻辞，全面解读六十四卦之首的深邃智慧。</p>
+
+    <div class="article-meta">
+      <!-- EDIT: 日期 -->
+      <span>2026年7月26日</span>
+      <span class="dot"></span>
+      <!-- EDIT: 阅读时间 -->
+      <span>4分钟阅读</span>
+      <span class="dot"></span>
+      <!-- EDIT: 作者 -->
+      <span>Upon Star</span>
+    </div>
+  </header>
+
+  <div class="gold-line"></div>
+
+  <!-- ===== ARTICLE BODY ===== -->
+  <div class="article-body">
+
+    <!-- EDIT: 正文内容从这里开始 -->
+
+    <p>乾卦，六十四卦之首，象征天、象征阳、象征刚健。它是《周易》的开篇，也是理解整个易学体系的基石。</p>
+
+    <h2>卦象解析</h2>
+
+    <p>乾卦由六个阳爻组成，上下皆乾，纯阳无阴。<strong>「天行健」</strong>——天的运行刚强劲健，永不停息。这是乾卦的核心精神：自强不息，奋斗不止。</p>
+
+    <blockquote>
+      「大哉乾元，万物资始，乃统天。」<br>
+      <strong>——《彖传》</strong>
+    </blockquote>
+
+    <p>乾卦的卦辞只有四个字：<strong>元、亨、利、贞</strong>。这四个字被称为「乾之四德」：</p>
+
+    <ul>
+      <li><strong>元</strong>——万物之始，善之长也</li>
+      <li><strong>亨</strong>——万物之长，嘉之会也</li>
+      <li><strong>利</strong>——万物之遂，义之和也</li>
+      <li><strong>贞</strong>——万物之成，事之干也</li>
+    </ul>
+
+    <h2>爻辞解读</h2>
+
+    <p>乾卦六爻以<em>「龙」</em>为象，从潜龙到亢龙，描绘了一个完整的发展周期：</p>
+
+    <div class="highlight-box">
+      <strong>初九：潜龙勿用。</strong><br>
+      龙潜于渊，时机未到，不宜妄动。此爻告诫我们在能力不足或时机不成熟时，应当韬光养晦，积蓄力量。
+    </div>
+
+    <div class="highlight-box">
+      <strong>九二：见龙在田，利见大人。</strong><br>
+      龙出现在田野，已初露锋芒。此时利于见到有德之人，获得提携与指引。
+    </div>
+
+    <div class="highlight-box">
+      <strong>九五：飞龙在天，利见大人。</strong><br>
+      龙飞于天，至尊至贵。这是乾卦最吉之爻，象征事业达到巅峰，功德圆满。
+    </div>
+
+    <h2>象辞启示</h2>
+
+    <blockquote>
+      「天行健，君子以自强不息。」<br>
+      <strong>——《象传》</strong>
+    </blockquote>
+
+    <p>这是乾卦流传最广的一句话。它告诉我们：君子应当效法天道运行的精神，刚健有为，永不懈怠。无论遭遇何种困境，都应保持内心的力量，不断进取。</p>
+
+    <hr>
+
+    <h2>实践应用</h2>
+
+    <p>在占卜中得乾卦，通常意味着：</p>
+
+    <ol>
+      <li>当前正处于上升期，有利进取</li>
+      <li>需要刚健中正，不可偏激</li>
+      <li>注意「亢龙有悔」——盛极必衰，懂得适可而止</li>
+    </ol>
+
+    <p>乾卦提醒我们：真正的力量不是一味向前冲，而是在刚健中保持中正，在进取中懂得收敛。</p>
+
+    <!-- EDIT: 正文内容到这里结束 -->
+
+  </div>
+
+  <!-- ===== ARTICLE FOOTER ===== -->
+  <div class="article-footer">
+    <p>— END —</p>
+    <a href="../divination-homepage.html" class="back-link">返回首页</a>
+  </div>
+
+</article>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <p>Upon Star · 中西占卜探索平台</p>
+  <p class="disclaimer">本平台内容仅供娱乐参考，不构成人生决策建议</p>
+  <div style="display:flex;gap:16px;justify-content:center;margin-top:10px;">
+    <a href="../terms.html" style="color:var(--muted);font:400 11px 'Outfit','PingFang SC',sans-serif;text-decoration:none;letter-spacing:1px;">用户协议</a>
+    <a href="../privacy.html" style="color:var(--muted);font:400 11px 'Outfit','PingFang SC',sans-serif;text-decoration:none;letter-spacing:1px;">隐私政策</a>
+    <a href="../refund.html" style="color:var(--muted);font:400 11px 'Outfit','PingFang SC',sans-serif;text-decoration:none;letter-spacing:1px;">退款政策</a>
+  </div>
+</footer>
+
+<script src="../assets/div-nav.js"></script>
+</body>
+</html>
