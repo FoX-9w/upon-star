@@ -6,12 +6,12 @@
    ========================================================= */
 
 /* ---------- 字体（本地 TTF，零外部依赖） ---------- */
-@font-face{font-family:'Italiana';src:url('../_shared/fonts/Italiana-Regular.ttf?v=20260914d') format('truetype');font-weight:400;font-style:normal;font-display:swap;}
-@font-face{font-family:'Crimson Pro';src:url('../_shared/fonts/CrimsonPro-Regular.ttf?v=20260914d') format('truetype');font-weight:400;font-display:swap;}
-@font-face{font-family:'Crimson Pro';src:url('../_shared/fonts/CrimsonPro-Bold.ttf?v=20260914d') format('truetype');font-weight:700;font-display:swap;}
-@font-face{font-family:'Outfit';src:url('../_shared/fonts/Outfit-Regular.ttf?v=20260914d') format('truetype');font-weight:400;font-display:swap;}
-@font-face{font-family:'Outfit';src:url('../_shared/fonts/Outfit-Bold.ttf?v=20260914d') format('truetype');font-weight:700;font-display:swap;}
-@font-face{font-family:'Poiret One';src:url('../_shared/fonts/PoiretOne-Regular.ttf?v=20260914d') format('truetype');font-weight:400;font-display:swap;}
+@font-face{font-family:'Italiana';src:url('../_shared/fonts/Italiana-Regular.ttf?v=20260914e') format('truetype');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'Crimson Pro';src:url('../_shared/fonts/CrimsonPro-Regular.ttf?v=20260914e') format('truetype');font-weight:400;font-display:swap;}
+@font-face{font-family:'Crimson Pro';src:url('../_shared/fonts/CrimsonPro-Bold.ttf?v=20260914e') format('truetype');font-weight:700;font-display:swap;}
+@font-face{font-family:'Outfit';src:url('../_shared/fonts/Outfit-Regular.ttf?v=20260914e') format('truetype');font-weight:400;font-display:swap;}
+@font-face{font-family:'Outfit';src:url('../_shared/fonts/Outfit-Bold.ttf?v=20260914e') format('truetype');font-weight:700;font-display:swap;}
+@font-face{font-family:'Poiret One';src:url('../_shared/fonts/PoiretOne-Regular.ttf?v=20260914e') format('truetype');font-weight:400;font-display:swap;}
 
 /* ---------- 设计令牌 ---------- */
 :root{
@@ -139,7 +139,7 @@ p{margin:0 0 1em;}
 
 /* ---------- Hero（星点动画 + 氛围光） ---------- */
 .hero{position:relative;min-height:62vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;overflow:hidden;
-  background:url('../assets/hero-bg.webp?v=20260914d') center/cover no-repeat,var(--bg);}
+  background:url('../assets/hero-bg.webp?v=20260914e') center/cover no-repeat,var(--bg);}
 .hero::before{content:"";position:absolute;inset:0;
   background:
     radial-gradient(ellipse at 30% 40%, rgba(176,96,64,.10) 0%, transparent 55%),
