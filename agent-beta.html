@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>探索顾问 · 内测 — Upon Star</title>
+  <meta name="description" content="Upon Star 探索顾问内测页：与 AI 顾问围绕塔罗、占星等东西方文化符号进行对话探索。内容仅供文化研究与心理探索参考，不构成命运定论。">
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="assets/base.css?v=20260914c">
+  <style>
+  /* ============================================================
+     agent-beta.html — 探索顾问内测页（扣子 Agent 接入）
+     · 默认「演示模式」：不连任何 API，预置合规回复
+     · 填入 COZE_CONFIG.botId + pat 后自动切「扣子模式」
+     · 底部免责常驻；每条回复自带参考声明
+     ============================================================ */
+  html,body{height:100%;}
+  .ab-page{display:flex;flex-direction:column;height:100dvh;}
+
+  /* ---------- 头部 ---------- */
+  .ab-head{flex:none;display:flex;align-items:center;justify-content:space-between;
+    gap:var(--space-sm);padding:14px var(--space-md);border-bottom:1px solid var(--line);}
+  .ab-brand{font-family:var(--font-display);font-size:1.15rem;color:var(--text);
+    letter-spacing:.08em;line-height:1.2;}
+  .ab-brand small{display:block;font-family:var(--font-decor);font-size:.55rem;
+    color:var(--gold-dim);letter-spacing:.32em;margin-top:3px;}
+  .ab-head-right{display:flex;align-items:center;gap:10px;}
+  .ab-mode{font-family:var(--font-sans);font-size:.68rem;letter-spacing:.12em;
+    padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--gold);}
+  .ab-mode.is-live{color:var(--on-accent);background:var(--gold);border-color:var(--gold);}
+  .ab-clear{padding:6px 14px;border:1px solid var(--line);border-radius:999px;
+    background:transparent;color:var(--text-dim);font-size:.78rem;cursor:pointer;transition:.25s;}
+  .ab-clear:hover{color:var(--gold);border-color:var(--gold);}
+
+  /* ---------- 对话区 ---------- */
+  .ab-chat{flex:1;overflow-y:auto;padding:var(--space-md);
+    display:flex;flex-direction:column;gap:var(--space-sm);
+    background:radial-gradient(ellipse 90% 40% at 50% -8%, rgba(200,164,92,.07), transparent 70%);}
+  .ab-msg{max-width:min(560px,86%);display:flex;flex-direction:column;gap:4px;}
+  .ab-msg.is-user{align-self:flex-end;align-items:flex-end;}
+  .ab-msg.is-ai{align-self:flex-start;align-items:flex-start;}
+  .ab-bubble{padding:12px 16px;border-radius:var(--radius);font-size:.94rem;
+    line-height:1.75;white-space:pre-wrap;word-break:break-word;}
+  .is-user .ab-bubble{background:rgba(200,164,92,.16);border:1px solid rgba(200,164,92,.42);
+    color:var(--text);border-top-right-radius:4px;}
+  .is-ai .ab-bubble{background:rgba(12,12,20,.72);border:1px solid var(--line);
+    color:var(--text);border-top-left-radius:4px;}
+  .ab-note{font-size:.66rem;color:var(--text-dim);letter-spacing:.04em;padding:0 4px;}
+  .ab-note.is-demo{color:var(--gold-dim);}
+  .ab-dot{display:inline-flex;gap:5px;padding:14px 18px;}
+  .ab-dot i{width:5px;height:5px;border-radius:50%;background:var(--gold-dim);
+    animation:abBlink 1.2s ease-in-out infinite;}
+  .ab-dot i:nth-child(2){animation-delay:.2s;}
+  .ab-dot i:nth-child(3){animation-delay:.4s;}
+  @keyframes abBlink{0%,100%{opacity:.25;}50%{opacity:1;}}
+  @media (prefers-reduced-motion: reduce){ .ab-dot i{animation:none;opacity:.6;} }
+
+  /* 欢迎卡片 */
+  .ab-welcome{align-self:center;max-width:min(560px,92%);text-align:center;
+    padding:var(--space-md) var(--space-md);border:1px solid var(--line);
+    border-radius:var(--radius);background:rgba(12,12,20,.5);}
+  .ab-welcome h1{font-size:1.25rem;color:var(--gold-light);letter-spacing:.1em;margin-bottom:6px;}
+  .ab-welcome p{font-size:.86rem;color:var(--text-dim);margin:0 0 8px;}
+  .ab-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px;}
+  .ab-chip{padding:7px 14px;border:1px solid var(--line);border-radius:999px;
+    color:var(--gold-light);font-size:.8rem;cursor:pointer;transition:.25s;background:transparent;}
+  .ab-chip:hover{background:var(--gold);color:var(--on-accent);border-color:var(--gold);}
+
+  /* ---------- 输入区 + 免责 ---------- */
+  .ab-foot{flex:none;border-top:1px solid var(--line);padding:10px var(--space-md) 12px;
+    background:rgba(4,4,8,.9);}
+  .ab-input-row{display:flex;gap:10px;max-width:720px;margin:0 auto;}
+  .ab-input{flex:1;resize:none;padding:11px 16px;border-radius:999px;
+    border:1px solid var(--line);background:rgba(12,12,20,.7);color:var(--text);
+    font-family:var(--font-sans);font-size:.92rem;line-height:1.5;outline:none;transition:border-color .25s;}
+  .ab-input:focus{border-color:var(--gold);}
+  .ab-input::placeholder{color:var(--text-dim);}
+  .ab-send{flex:none;padding:11px 24px;border-radius:999px;border:1px solid var(--gold);
+    background:var(--gold);color:var(--on-accent);font-size:.9rem;letter-spacing:.08em;
+    cursor:pointer;transition:.25s;}
+  .ab-send:hover{background:var(--gold-light);}
+  .ab-send:disabled{opacity:.4;cursor:not-allowed;}
+  .ab-disclaim{max-width:720px;margin:8px auto 0;text-align:center;
+    font-size:.66rem;color:var(--text-dim);line-height:1.7;}
+  .ab-disclaim a{color:var(--gold-dim);}
+  </style>
+</head>
+<body>
+<div class="ab-page">
+
+  <header class="ab-head">
+    <div class="ab-brand">Upon Star · 探索顾问<small>EXPLORATION ADVISOR · BETA</small></div>
+    <div class="ab-head-right">
+      <span class="ab-mode" id="abMode">演示模式</span>
+      <button class="ab-clear" id="abClear" type="button">清空对话</button>
+    </div>
+  </header>
+
+  <main class="ab-chat" id="abChat" aria-live="polite">
+    <div class="ab-welcome" id="abWelcome">
+      <h1>星下，聊一聊</h1>
+      <p>我是探索顾问，可以陪你聊塔罗、雷诺曼、八字、占星这些东西方文化符号背后的意象，把它们变成一面自我观察的镜子。</p>
+      <p>我不替任何人断言结果，也不替你做决定——但符号常常能帮我们把心里模糊的感觉说清楚。</p>
+      <div class="ab-chips" id="abChips">
+        <button class="ab-chip" type="button" data-q="愚人这张牌怎么理解？">愚人牌怎么理解</button>
+        <button class="ab-chip" type="button" data-q="最近水星逆行，有什么影响吗？">水星逆行</button>
+        <button class="ab-chip" type="button" data-q="你能帮我看看星盘吗？">能看星盘吗</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="ab-foot">
+    <div class="ab-input-row">
+      <textarea class="ab-input" id="abInput" rows="1"
+        placeholder="说说你想探索的话题…（Enter 发送）"></textarea>
+      <button class="ab-send" id="abSend" type="button" disabled>发送</button>
+    </div>
+    <p class="ab-disclaim">
+      本页为功能内测页。AI 生成内容仅供文化研究与心理探索参考，不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议。<a href="terms.html">使用条款</a> · <a href="privacy.html">隐私政策</a>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     接入配置（改这里）
+     ------------------------------------------------------------
+     · 扣子发布页「发布为 API」可拿 Bot ID；令牌在个人设置→API
+     · pat 只填 PAT（个人访问令牌）。留空则保持演示模式。
+     · ⚠ PAT 属个人密钥：内测页可接受，正式上线请换扣子
+       Web SDK（免 token）或经服务端代理，否则访问者可提取令牌。
+     ============================================================ */
+  var COZE_CONFIG = {
+    botId: "",        // 例："7412345678901234567"
+    pat: "",          // 例："pat_xxxxxxxx……"
+    apiBase: "https://api.coze.cn/v3/chat",
+    userId: "uponstar-beta-" + Math.random().toString(36).slice(2, 8)
+  };
+
+  var chat   = document.getElementById("abChat");
+  var input  = document.getElementById("abInput");
+  var send   = document.getElementById("abSend");
+  var modeEl = document.getElementById("abMode");
+  var chips  = document.getElementById("abChips");
+  var welcome= document.getElementById("abWelcome");
+
+  var IS_LIVE = !!(COZE_CONFIG.botId && COZE_CONFIG.pat);
+  var busy = false;
+
+  /* ---------- 工具 ---------- */
+  function escapeHtml(s){
+    var map = {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"};
+    return String(s).replace(/[&<>"']/g, function(ch){ return map[ch]; });
+  }
+  function scrollBottom(){
+    requestAnimationFrame(function(){ chat.scrollTop = chat.scrollHeight; });
+  }
+  function setBusy(v){
+    busy = v;
+    send.disabled = v || !input.value.trim();
+    input.disabled = v;
+  }
+
+  var FOOT_NOTE = "——以上为文化研究与自我探索参考，不构成命运定论。";
+
+  function addUserMsg(text){
+    var d = document.createElement("div");
+    d.className = "ab-msg is-user";
+    d.innerHTML = '<div class="ab-bubble"></div>';
+    d.querySelector(".ab-bubble").textContent = text;
+    chat.appendChild(d);
+    scrollBottom();
+  }
+
+  function addAiMsg(text, opts){
+    opts = opts || {};
+    var d = document.createElement("div");
+    d.className = "ab-msg is-ai";
+    var note = IS_LIVE
+      ? '<span class="ab-note">AI 生成 · ' + (opts.demo ? "演示语料" : "文化研究参考") + '</span>'
+      : '<span class="ab-note is-demo">演示回复（预置语料）· 接入后为实时对话</span>';
+    d.innerHTML = '<div class="ab-bubble"></div>' + note;
+    d.querySelector(".ab-bubble").textContent = text;
+    chat.appendChild(d);
+    scrollBottom();
+    return d.querySelector(".ab-bubble");
+  }
+
+  function addTyping(){
+    var d = document.createElement("div");
+    d.className = "ab-msg is-ai";
+    d.innerHTML = '<div class="ab-bubble ab-dot"><i></i><i></i><i></i></div>';
+    chat.appendChild(d);
+    scrollBottom();
+    return d;
+  }
+
+  function addSystemMsg(text){
+    var d = document.createElement("div");
+    d.className = "ab-msg is-ai";
+    d.innerHTML = '<div class="ab-bubble"></div><span class="ab-note"></span>';
+    d.querySelector(".ab-bubble").textContent = text;
+    d.querySelector(".ab-note").textContent = "提示：更换回复由 agent/system-prompt.md 控制";
+    chat.appendChild(d);
+    scrollBottom();
+  }
+
+  /* ---------- 演示模式：预置合规回复 ---------- */
+  var MOCK_REPLIES = [
+    { re: /愚人|塔罗|牌/,
+      text: "塔罗文化里，愚人描绘一位仰望天空、行至悬崖边的旅人：背负轻便行囊，手持白玫瑰。它常被用来观察「新起点」这个主题——提醒的不是往前冲，而是「轻装」：出发时带着什么，又把什么留在了身后。\n\n或许可以想一想：最近有什么是你想开始、却迟迟没迈出第一步的事？\n\n" + FOOT_NOTE },
+    { re: /水星|逆行|水逆/,
+      text: "水星逆行其实是一种视觉天文现象：从地球看，水星运行方向看似倒退，每年约三次、每次约三周。流行文化把它简化成了「水逆」，当成一个「慢下来检查」的提醒符号——确认合同细节、备份文件、把说过的话再核对一遍。\n\n这些动作任何时候做都有益，逆行只是给它们一个文化上的「档期」。你最近有想再核对一遍的事吗？\n\n" + FOOT_NOTE },
+    { re: /星盘|八字|生辰|排盘|看盘/,
+      text: "我这边不替你排盘，但网站的工具可以在本地帮你把盘面生成出来：星盘在「占星」页，八字在「八字」页。生成后把结果发给我，我们可以一起看看里面的文化意象。\n\n在那之前，你更想先从哪边开始——东方的干支符号，还是西方的行星语言？\n\n" + FOOT_NOTE },
+    { re: /缘分|配对|合盘|合适|match/i,
+      text: "两个人的文化符号比对可以很好玩：网站「配对」页支持 MBTI、星座、星盘合盘与五行合婚四种角度，全部在本地完成。\n\n不过先说好：任何指数都只是观察角度，结果取决于两个人怎么相处。你更想看哪种角度的组合？\n\n" + FOOT_NOTE },
+    { re: /.*/,
+      text: "我目前主要能陪你聊这几类话题：塔罗与雷诺曼的牌面意象、八字与五行的文化符号、占星里的行星语言，以及它们怎么变成自我观察的角度。\n\n我不预言结果、不替你做决定，但符号常常能帮我们把心里模糊的感觉说清楚。你想从哪个开始？\n\n" + FOOT_NOTE }
+  ];
+
+  function mockReply(text){
+    for (var i = 0; i < MOCK_REPLIES.length; i++){
+      if (MOCK_REPLIES[i].re.test(text)) return MOCK_REPLIES[i].text;
+    }
+    return MOCK_REPLIES[MOCK_REPLIES.length - 1].text;
+  }
+
+  /* ---------- 扣子模式：SSE 流式对话 ---------- */
+  function cozeReply(text, bubble, msgEl){
+    return fetch(COZE_CONFIG.apiBase, {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + COZE_CONFIG.pat,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        bot_id: COZE_CONFIG.botId,
+        user_id: COZE_CONFIG.userId,
+        stream: true,
+        auto_save_history: true,
+        additional_messages: [{ role: "user", content: text, content_type: "text" }]
+      })
+    }).then(function(res){
+      if (!res.ok || !res.body){
+        throw new Error("HTTP " + res.status);
+      }
+      var reader = res.body.getReader();
+      var decoder = new TextDecoder("utf-8");
+      var buf = "";
+      var answer = "";
+      var finished = false;
+
+      function handleEvent(dataJson){
+        var obj;
+        try { obj = JSON.parse(dataJson); } catch (e) { return; }
+        var ev = obj.event || "";
+        if (ev === "conversation.message.completed" && obj.data && obj.data.type === "answer"){
+          answer = obj.data.content || answer;
+        } else if (ev === "conversation.chat.failed"){
+          throw new Error((obj.data && obj.data.last_error && obj.data.last_error.msg) || "扣子返回失败");
+        }
+      }
+
+      function pump(){
+        return reader.read().then(function(r){
+          if (r.done){
+            if (!finished && answer) { bubble.textContent = answer; }
+            if (!answer){
+              bubble.textContent = "（扣子未返回内容，请检查 Bot 是否已发布、知识库是否挂载）";
+            }
+            scrollBottom();
+            return;
+          }
+          buf += decoder.decode(r.value, { stream: true });
+          var lines = buf.split("\n");
+          buf = lines.pop();
+          for (var i = 0; i < lines.length; i++){
+            var line = lines[i].trim();
+            if (line.indexOf("data:") !== 0) continue;
+            var payload = line.slice(5).trim();
+            if (!payload || payload === "[DONE]") continue;
+            try { handleEvent(payload); } catch (e) {
+              finished = true;
+              bubble.textContent = "顾问暂时走神了（" + e.message + "），稍后再试试。";
+              scrollBottom();
+              return;
+            }
+          }
+          return pump();
+        });
+      }
+      return pump();
+    }).catch(function(err){
+      bubble.textContent = "连接扣子失败（" + err.message + "）。\n\n若为浏览器跨域(CORS)限制，请在扣子「发布」页改用 Web SDK 方式接入，或经服务端代理转发。详见 agent/README.md。";
+      scrollBottom();
+    });
+  }
+
+  /* ---------- 发送流程 ---------- */
+  function submit(){
+    var text = input.value.trim();
+    if (!text || busy) return;
+    if (welcome && welcome.parentNode){ welcome.parentNode.removeChild(welcome); }
+    addUserMsg(text);
+    input.value = "";
+    setBusy(true);
+    var msgEl = addTyping();
+    var bubble = msgEl.querySelector(".ab-bubble");
+
+    var done = function(){
+      msgEl.parentNode.removeChild(msgEl);
+    };
+
+    if (IS_LIVE){
+      cozeReply(text, bubble, msgEl).then(function(){
+        done();
+        setBusy(false);
+        input.focus();
+      });
+    } else {
+      setTimeout(function(){
+        done();
+        addAiMsg(mockReply(text));
+        setBusy(false);
+        input.focus();
+      }, 520 + Math.random() * 480);
+    }
+  }
+
+  /* ---------- 事件绑定 ---------- */
+  send.addEventListener("click", submit);
+  input.addEventListener("keydown", function(e){
+    if (e.key === "Enter" && !e.shiftKey){
+      e.preventDefault();
+      submit();
+    }
+  });
+  input.addEventListener("input", function(){
+    send.disabled = busy || !input.value.trim();
+  });
+  if (chips){
+    chips.addEventListener("click", function(e){
+      var btn = e.target.closest(".ab-chip");
+      if (!btn) return;
+      input.value = btn.getAttribute("data-q") || "";
+      submit();
+    });
+  }
+  document.getElementById("abClear").addEventListener("click", function(){
+    var nodes = Array.prototype.slice.call(chat.querySelectorAll(".ab-msg"));
+    nodes.forEach(function(n){ n.parentNode.removeChild(n); });
+    if (!document.getElementById("abWelcome")){ location.reload(); }
+    input.focus();
+  });
+
+  /* ---------- 初始化 ---------- */
+  if (IS_LIVE){
+    modeEl.textContent = "已接入扣子";
+    modeEl.classList.add("is-live");
+  }
+})();
+</script>
+</body>
+</html>
