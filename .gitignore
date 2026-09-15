@@ -1,0 +1,37 @@
+# Upon Star — git ignore
+# 站点仓只放要部署的内容；开发工具/文档/密钥类一律本地留存
+
+# 合规自检报告（本地产物）
+__compliance-report.txt
+
+# 开发与内部文件（不入库、不部署）
+server.js
+api/
+cloudfunctions/
+agent
+agent-beta.html
+__check-compliance.js
+__logo-preview.html
+__*.js
+__*.html
+.cloudbaseignore
+.workbuddy/
+DEPLOYMENT.md
+overview.md
+plan.md
+ICP-*.md
+PIVOT-*.md
+Compliance-*.md
+Strategy-*.md
+Budget-*.md
+Setup-*.md
+HANDOFF.md
+tarot-samples-preview.html
+theme-preview.html
+
+# 备份/临时/系统
+*.bak
+*.tmp
+Thumbs.db
+.DS_Store
+node_modules/
