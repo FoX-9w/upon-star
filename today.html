@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>今日指引 · Upon Star</title>
-  <meta name="description" content="每日一牌、每日运势、每日一卦、每日宜忌、今日抽签、本命星盘，六合一的当日指引。确定性、纯本地计算，同一天同一结果，免费开放。Upon Star 文化研究与心理探索参考。">
+  <meta name="description" content="每日一牌、每日运势、每日一卦、每日宜忌、今日抽签、本命星盘，六合一的当日指引。每人专属印记，同样的日子、只属于你的指引；纯本地计算，免费开放。Upon Star 文化研究与心理探索参考。">
   <meta property="og:title" content="今日指引 · Upon Star">
-  <meta property="og:description" content="每日一牌 · 每日运势 · 每日一卦 · 每日宜忌 · 今日抽签 · 本命星盘，免费开放的当日指引聚合页">
+  <meta property="og:description" content="每日一牌 · 每日运势 · 每日一卦 · 每日宜忌 · 今日抽签 · 本命星盘，免费开放的当日指引聚合页——每人专属印记，为你而占">
   <meta property="og:type" content="website">
   <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
@@ -153,7 +153,7 @@
   <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="今日指引 · Upon Star">
-  <meta name="twitter:description" content="每日一牌、每日运势、每日一卦、每日宜忌、今日抽签、本命星盘，免费开放的当日指引聚合页。">
+  <meta name="twitter:description" content="每日一牌、每日运势、每日一卦、每日宜忌、今日抽签、本命星盘，免费开放的当日指引聚合页。每人专属印记，为你而占。">
 </head>
 <body>
   <div class="sacred-light" aria-hidden="true"></div>
@@ -177,7 +177,7 @@
     <section class="tool-hero">
       <div class="kicker">Today · 今日指引</div>
       <h1>今日指引</h1>
-      <p class="lead">同一天，同一份指引。以下六项均由当天的日期确定性生成，免费、无需登录；本命星盘依你填写的生辰个性化。</p>
+      <p class="lead">同样的日子，只属于你的指引。以下内容由日期与你的专属印记共同推演——每人不同、当天稳定；免费、无需登录，本命星盘依你填写的生辰个性化。</p>
       <div class="today-date" id="todayDate"></div>
     </section>
 
@@ -200,6 +200,7 @@
           </div>
         </div>
         <p class="tap-hint">点击卡牌翻看今日指引</p>
+        <p class="uid-badge">印记 <span class="uid-num" id="uidBadgeCard">····</span> · 为你而占</p>
         <div class="card-cap" id="dailyCardCap" aria-live="polite"></div>
       </div>
     </section>
@@ -211,7 +212,7 @@
         <div class="zodiac-grid" id="zodiacGrid" role="listbox" aria-label="选择星座"></div>
       </div>
       <div class="fortune-bars" id="fortuneBars" aria-live="polite"></div>
-      <p class="fortune-note">评分与解读仅作今日能量参考，同一星座每天不同。点击的星座会自动记住，下次打开默认翻开你的星座。</p>
+      <p class="fortune-note">评分与解读由日期与你的专属印记共同推演，每人每天不同。点击的星座会自动记住，下次打开默认翻开你的星座。</p>
     </section>
 
     <!-- 每日一卦 -->
@@ -235,6 +236,7 @@
       </div>
       <button type="button" class="roll-btn" id="drawBtn">求一支签</button>
       <p class="qian-hint">手机摇一摇，或在签筒上按住来回滑动 / 拖动，亲手抽签</p>
+      <p class="uid-badge">印记 <span class="uid-num" id="uidBadgeQian">····</span> · 此签为你而求</p>
       <div class="qian-result" id="qianResult"></div>
     </section>
 
@@ -287,7 +289,7 @@
       </div>
     </section>
 
-    <p class="meta-note">以上结果由浏览器于本地依当天日期或你填写的生辰确定性推算，仅用于文化研究与心理探索参考，不构成任何建议。</p>
+    <p class="meta-note">以上结果由浏览器于本地依当天日期、你的专属印记或填写的生辰确定性推算，仅用于文化研究与心理探索参考，不构成任何建议。</p>
   </main>
 
   <footer class="site-footer">
@@ -306,7 +308,7 @@
   <script src="assets/cards/lunar-engine.js?v=20260914g"></script>
   <script src="assets/cards/lots-data.js?v=20260914g"></script>
   <script src="assets/cities.js?v=20260901c"></script>
-  <script src="assets/user-store.js?v=20260914g"></script>
+  <script src="assets/user-store.js?v=20261007a"></script>
   <script>
   (function(){
     'use strict';
@@ -318,6 +320,17 @@
     var Y = now.getFullYear(), M = now.getMonth()+1, D = now.getDate();
     var seed = Y*10000 + M*100 + D;
     $('todayDate').textContent = Y + ' 年 ' + M + ' 月 ' + D + ' 日 · 今日指引';
+
+    // 专属印记：hash(日期 + 印记) → 每人每天结果不同、当天稳定
+    // （黄历宜忌与本命星盘不走印记：前者是客观历法，后者依生辰）
+    var US = window.UserStore || {};
+    var ps = (typeof US.personalSeed === 'function') ? US.personalSeed(seed) : seed;
+    var uid = (typeof US.getUid === 'function') ? US.getUid() : '';
+    if (uid) {
+      var b1 = $('uidBadgeCard'), b2 = $('uidBadgeQian');
+      if (b1) b1.textContent = uid;
+      if (b2) b2.textContent = uid;
+    }
 
     // 简单可复现 PRNG（mulberry32）
     function mulberry32(a){
@@ -348,8 +361,8 @@
       var artCards = T.cards.filter(function(c){ return c.art && c.img && c.img.length > 0; });
       var pool = artCards.length ? artCards : T.cards.filter(function(c){ return c.img && c.img.length > 0; });
       if(!pool || !pool.length) return;
-      var idx = seed % pool.length;
-      var upright = (Math.floor(seed / pool.length) % 2) === 0;
+      var idx = ps % pool.length;
+      var upright = (Math.floor(ps / pool.length) % 2) === 0;
       var card = pool[idx];
       if(!card) return;
       var posLabel = upright ? '正位' : '逆位';
@@ -430,8 +443,8 @@
       }
       function render(i){
         var idx = parseInt(i,10);
-        var rv = mulberry32(seed * 131 + (idx+1) * 977);
-        var rp = mulberry32(seed * 991 + (idx+1) * 131);
+        var rv = mulberry32(ps * 131 + (idx+1) * 977);
+        var rp = mulberry32(ps * 991 + (idx+1) * 131);
         var vals = [];
         var html = '';
         DIMS.forEach(function(d){
@@ -462,7 +475,7 @@
     (function(){
       var YJ = window.YIJING, BH = window.YIJING_BAIHUA;
       if(!YJ || !YJ.guas) return;
-      var gi = seed % YJ.total;
+      var gi = ps % YJ.total;
       var gua = YJ.guas[gi];
       if(!gua) return;
       var bin = (gua.binary && gua.binary.length === 6) ? gua.binary : [0,0,0,0,0,0];
@@ -487,7 +500,7 @@
         lines.push('<b>主旨 · </b>' + esc(bh.theme));
         lines.push(esc(bh.text));
         var cats = [['love','感情'],['career','事业'],['wealth','财运'],['health','健康'],['study','学业'],['decision','抉择']];
-        var pick = cats[seed % cats.length];
+        var pick = cats[ps % cats.length];
         if(bh.cat && bh.cat[pick[0]]) lines.push('<b>' + pick[1] + ' · </b>' + esc(bh.cat[pick[0]]));
       } else {
         lines.push(esc(gua.guaci));
@@ -528,7 +541,7 @@
       var qianTube = $('qianTube');
       function todayKey(){ return 'uponstar_daily_qian_' + Y + '-' + M + '-' + D; }
       function todayLot(){
-        var idx = (seed * 9301 + 49297) % LOTS.LOTS.length;
+        var idx = (ps * 9301 + 49297) % LOTS.LOTS.length;
         return LOTS.LOTS[idx >= 0 ? idx : 0];
       }
       function renderLot(lot){

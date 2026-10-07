@@ -590,3 +590,10 @@ body.theme-neutral{
 .premium-note{max-width:520px;margin:var(--space-sm) auto 0;padding:10px 14px;
   font-family:var(--font-serif);font-size:.76rem;line-height:1.75;color:var(--text-dim);
   background:rgba(200,164,92,.06);border-left:2px solid var(--gold);border-radius:4px;text-align:left;}
+
+/* ===== 专属印记徽标（每日内容个性化，2026-10-07） ===== */
+.uid-badge{display:inline-flex;align-items:center;gap:6px;width:fit-content;margin:var(--space-xs) auto 0;padding:5px 14px;
+  font-family:var(--font-decor);font-size:.72rem;letter-spacing:.18em;color:var(--gold);
+  border:1px solid var(--line);border-radius:999px;background:rgba(200,164,92,.07);}
+.uid-badge .uid-num{font-family:var(--font-sans);letter-spacing:.24em;color:var(--gold-light);}
+@media (prefers-reduced-motion: reduce){ .uid-badge{transition:none;} }

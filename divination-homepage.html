@@ -306,8 +306,9 @@
       </header>
       <p class="hm-omen hm-rise" id="hmOmen">小时候心一乱，姥姥就掐着指头念两句。<em>她说：问一次，心就定一次。</em></p>
 
-      <div class="hm-act-reveal">
-        <p class="hm-date" id="hmDate"></p>
+        <div class="hm-act-reveal">
+          <p class="hm-date" id="hmDate"></p>
+          <p class="uid-badge">印记 <span class="uid-num" id="hmUidBadge">····</span> · 为你而占</p>
 
         <div class="hm-today-grid">
           <!-- 每日一牌 -->
@@ -514,11 +515,12 @@
     </div>
   </footer>
 
-  <!-- 今日内容的数据源（与 today.html 同一套，确定性算法逐字一致） -->
+  <!-- 今日内容的数据源（与 today.html 同一套：种子 = hash(日期 + 专属印记)，同一访客两页一致，不同访客各自不同） -->
   <script src="assets/cards/tarot-data.js?v=20260914g"></script>
   <script src="assets/cards/yijing-data.js?v=20260914g"></script>
   <script src="assets/cards/lots-data.js?v=20260914g"></script>
   <script src="assets/cards/lunar-engine.js?v=20260914g"></script>
+  <script src="assets/user-store.js?v=20261007a"></script>
   <script src="assets/site-util.js?v=20260914g"></script>
   <script>
   (function () {
@@ -580,11 +582,18 @@
     });
 
     /* ---------- 今日 · 引流 ----------
-       与 today.html 完全同一套确定性算法：seed = YYYYMMDD
-       —— 两页同一天必然指向同一张牌、同一卦，访客来回不会看到矛盾 */
+       与 today.html 完全同一套个性化算法：
+       种子 = hash(YYYYMMDD + 专属印记) —— 同一访客两页同天必然一致，
+       不同访客各自不同；印记存于本浏览器，不上传服务器 */
     var now = new Date();
     var Y = now.getFullYear(), M = now.getMonth() + 1, D = now.getDate();
     var seed = Y * 10000 + M * 100 + D;
+    var US = window.UserStore || {};
+    var ps = (typeof US.personalSeed === 'function') ? US.personalSeed(seed) : seed;
+    if (typeof US.getUid === 'function') {
+      var ub = $('hmUidBadge');
+      if (ub) ub.textContent = US.getUid();
+    }
 
     var dateEl = $('hmDate');
     if (dateEl) dateEl.textContent = Y + ' 年 ' + M + ' 月 ' + D + ' 日 · 今天';
@@ -597,8 +606,8 @@
       var artCards = T.cards.filter(function(c){ return c.art && c.img && c.img.length > 0; });
       if (!artCards.length) artCards = T.cards.filter(function(c){ return c.img && c.img.length > 0; });
       if (!artCards.length) return;
-      var idx = seed % artCards.length;
-      var upright = (Math.floor(seed / artCards.length) % 2) === 0;
+      var idx = ps % artCards.length;
+      var upright = (Math.floor(ps / artCards.length) % 2) === 0;
       var card = artCards[idx];
       if (!card) return;
       var img = $('hmCardImg');
@@ -614,7 +623,7 @@
     (function () {
       var YJ = window.YIJING;
       if (!YJ || !YJ.guas) return;
-      var gua = YJ.guas[seed % YJ.total];
+      var gua = YJ.guas[ps % YJ.total];
       if (!gua) return;
       var bin = (gua.binary && gua.binary.length === 6) ? gua.binary : [0, 0, 0, 0, 0, 0];
       var svg = '<svg viewBox="0 0 200 300" role="img" aria-label="' + esc(gua.name) + '卦卦象">';
@@ -659,7 +668,7 @@
       if (!btn || !res) return;
       function todayKey() { return 'uponstar_daily_qian_' + Y + '-' + M + '-' + D; }
       function todayLot() {
-        var idx = (seed * 9301 + 49297) % LOTS.LOTS.length;   /* 与 today.html 同式 */
+        var idx = (ps * 9301 + 49297) % LOTS.LOTS.length;   /* 与 today.html 同式（印记个性化） */
         return LOTS.LOTS[idx >= 0 ? idx : 0];
       }
       function renderLot(lot) {
