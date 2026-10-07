@@ -162,17 +162,9 @@
     font-size:.84rem;letter-spacing:.06em;margin:0 0 var(--space-md);text-align:center;}
   .hm-qian-row{display:flex;align-items:center;justify-content:center;
     gap:var(--space-lg);margin-bottom:var(--space-md);}
-  .hm-qian-tube{position:relative;width:56px;height:96px;flex:none;
-    border-radius:8px 8px 12px 12px;
-    background:linear-gradient(180deg,#caa06a,#8a5a2c);border:2px solid #6c4527;
-    box-shadow:0 8px 22px rgba(0,0,0,.45),inset 0 0 10px rgba(40,20,8,.5);
-    display:flex;align-items:flex-end;justify-content:center;gap:5px;padding-bottom:8px;}
-  .hm-qian-tube::before{content:"";position:absolute;top:-7px;left:50%;
-    transform:translateX(-50%);width:38px;height:9px;border-radius:5px;background:#6c4527;}
-  .hm-qian-tube i{width:4px;height:58%;border-radius:2px;
-    background:linear-gradient(180deg,#f0e6d2,#c8b890);box-shadow:0 0 4px rgba(0,0,0,.35);}
-  .hm-qian-tube i:nth-child(2){height:70%;}
-  .hm-qian-tube i:nth-child(3){height:52%;}
+  /* 签筒:手绘素材图(2026-10-07 替换 CSS 矢量桶),容器保留 shake 动画与拖动交互 */
+  .hm-qian-tube{position:relative;width:84px;height:126px;flex:none;}
+  .hm-qian-tube img{width:100%;height:100%;display:block;filter:drop-shadow(0 10px 22px rgba(0,0,0,.5));}
   .hm-qian-tube.shake{animation:hmShake .5s ease-in-out;}
   @keyframes hmShake{0%,100%{transform:rotate(0);}20%{transform:rotate(-7deg);}
     40%{transform:rotate(6deg);}60%{transform:rotate(-4deg);}80%{transform:rotate(3deg);}}
@@ -344,7 +336,7 @@
             <p class="hm-tcard-kicker">每日一签</p>
             <p class="hm-qian-note">问一次，心就定一次 · 每日限抽一支</p>
             <div class="hm-qian-row">
-              <div class="hm-qian-tube" id="hmQianTube" aria-hidden="true"><i></i><i></i><i></i></div>
+              <div class="hm-qian-tube" id="hmQianTube" aria-hidden="true"><img src="assets/qian-tube.webp?v=20261007a" alt="" loading="lazy" draggable="false"></div>
               <button class="btn btn--solid" id="hmQianBtn" type="button">求一支签</button>
             </div>
             <div class="hm-qian-result" id="hmQianResult" aria-live="polite"></div>
