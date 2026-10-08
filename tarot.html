@@ -124,7 +124,7 @@
     .quick-verdict .qv-line{font-family:var(--font-serif);font-size:.92rem;line-height:1.8;color:var(--text);margin:8px 0;padding:10px 14px;background:rgba(8,8,14,.45);border-left:3px solid var(--gold);border-radius:6px;text-align:left;}
     .quick-verdict .qv-line b{color:var(--gold-light);font-family:var(--font-decor);letter-spacing:.08em;margin-right:6px;font-size:.78rem;}
   </style>
-  <link rel="stylesheet" href="assets/west-theme.css?v=20261011a">
+  <link rel="stylesheet" href="assets/west-theme.css?v=20261011b">
   <link rel="canonical" href="https://upon-star.com/tarot.html">
   <meta property="og:url" content="https://upon-star.com/tarot.html">
   <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
@@ -239,12 +239,13 @@
   </footer>
 
   <script src="assets/cards/tarot-data.js?v=20260914g"></script>
+  <script src="assets/cards/tarot-plain.js?v=20261011a"></script>
   <script src="assets/cards/lenormand-data.js?v=20260914g"></script>
   <script src="assets/lib/tarot-card-meanings/tarot-card-meanings.js?v=20260914g"></script>
   <script src="assets/tablecloth.js?v=20260914g"></script>
   <script src="assets/common-questions.js?v=20260914g"></script>
   <script src="assets/question-classify.js?v=20261010a"></script>
-  <script src="assets/divination-tool.js?v=20261011a"></script>
+  <script src="assets/divination-tool.js?v=20261011b"></script>
   <script src="assets/share.js?v=20260914g"></script>
   <script src="assets/div-nav.js?v=20260914g"></script>
   <script>
@@ -351,10 +352,11 @@
       function reveal(){
         card.classList.add('flipped');
         var v = VERDICT[idx % 3];
-        var key = c.meaning;
-        var advice = (c.detail || c.meaning);
+        var PL = (window.TAROT_PLAIN && c.id) ? window.TAROT_PLAIN[c.id] : null;
+        var key = PL ? PL.u : c.meaning;
+        var advice = (c.detail || key);
         verdict.innerHTML =
-          '<div class="qv-line"><b>关键词</b>' + esc(key) + '</div>' +
+          '<div class="qv-line"><b>一句话</b>' + esc(key) + '</div>' +
           '<div class="qv-line"><b>倾向 · ' + v.k + '</b>' + esc(v.t) + '</div>' +
           '<div class="qv-line"><b>建议</b>' + esc(advice) + (q ? '　回到你的问题：「' + esc(q) + '」' : '') + '</div>';
         // 合规：本平台本平台内容全部免费开放，原付费引导卡片已移除。

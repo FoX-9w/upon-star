@@ -93,6 +93,11 @@
     }catch(eMode){}
     function saveMode(){ try{ localStorage.setItem(MODE_KEY, shuffleMode); }catch(eMode2){} }
 
+    // ---- 解读结果持久化 ----
+    // sessionStorage：同一页签刷新后自动恢复上一次解读（关掉页签即清，不留痕迹）
+    // localStorage（UserStore）：每次解读完成自动写入「我的」最近记录
+    var SESSION_KEY = 'uponstar_last_reading:' + (location.pathname || '');
+
     // 扇形几何（舞台逻辑宽 1000、16:10；牌沿圆弧排布并随弧旋转）
     var FAN_COUNT = 22;   // 扇面可见牌数（从洗匀牌堆前 22 张采样）
     var FAN_SPAN = 170;   // 扇形总张角（度）
@@ -397,7 +402,10 @@
     function buildQuestionBlock(card, rev, qCat, qText){
       var ctx = qCat ? QUESTION_CONTEXTS[qCat] : null;
       if(!ctx) return null;
-      var meaningText = rev ? (card.reversed || card.meaning || '') : (card.meaning || '');
+      // 大白话一句话优先（tarot-plain.js）；未收录的牌回落传统释义
+      var PL = (window.TAROT_PLAIN && card.id) ? window.TAROT_PLAIN[card.id] : null;
+      var meaningText = PL ? (rev ? PL.r : PL.u)
+        : (rev ? (card.reversed || card.meaning || '') : (card.meaning || ''));
       if(!meaningText) return null;
       var guide = (window.QUESTION_GUIDES && window.QUESTION_GUIDES[qCat]) || null;
       var guideText = guide ? (rev ? guide.rev : guide.up) : '';
@@ -568,6 +576,49 @@
       if(deckHint) deckHint.textContent = '';
       revealSummary();
       if(cur().premium) renderPremium();
+      persistReading();
+    }
+
+    // 解读完成后：存 sessionStorage（刷新自动恢复）+ 写入「我的」最近记录
+    function persistReading(){
+      try{ sessionStorage.setItem(SESSION_KEY, JSON.stringify(DivTool.getState())); }catch(eS){}
+      try{
+        if(window.UserStore && typeof window.UserStore.addRecord === 'function' && selected.length){
+          var qText = (questionEl && questionEl.value || '').trim();
+          if(!qText && questionSelEl && questionSelEl.selectedIndex >= 0){
+            qText = questionSelEl.options[questionSelEl.selectedIndex].textContent.trim();
+          }
+          var names = selected.map(function(ci){
+            var c = DATA.cards[ci];
+            return (c.nameCn || c.name || '') + (reversedMap[ci] ? '（逆位）' : '');
+          }).join('、');
+          window.UserStore.addRecord({
+            key: 'draw-' + Date.now(),
+            kind: cur().title || '卡牌解读',
+            title: qText ? ('提问：' + qText) : (cur().title || '卡牌解读'),
+            summary: names,
+            at: Date.now()
+          });
+        }
+      }catch(eU){}
+    }
+
+    // 刷新 / 回到本页时自动恢复上一次的解读结果（分享连结 #r= 优先）
+    function autoRestore(){
+      try{ if(/[#&]r=/.test(location.hash)) return; }catch(eH){}
+      var raw = null;
+      try{ raw = sessionStorage.getItem(SESSION_KEY); }catch(eS2){}
+      if(!raw) return;
+      var st = null;
+      try{ st = JSON.parse(raw); }catch(eP){ return; }
+      if(!st || !st.picks || !st.picks.length || !DivTool.restore) return;
+      setTimeout(function(){
+        try{
+          if(DivTool.restore(st) && deckHint){
+            deckHint.textContent = '已为你恢复上一次的解读结果；点击「洗牌」可开始新的一次。';
+          }
+        }catch(eR){}
+      }, 350);
     }
 
     function renderPremium(){
@@ -1024,6 +1075,9 @@
       if(rsec && rsec.scrollIntoView){ rsec.scrollIntoView({behavior:'smooth'}); }
       return true;
     };
+
+    // 初始化末尾：若本页签此前刚做过一次解读，则自动恢复（分享连结优先）
+    autoRestore();
   };
 
   window.DivTool = DivTool;

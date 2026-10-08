@@ -28,6 +28,13 @@
     .pair-field input:focus, .pair-field select:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 3px rgba(200,164,92,.22),0 0 14px rgba(200,164,92,.18);}
     .pair-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
     .pair-row.three{grid-template-columns:1fr 1fr 1fr;}
+    .pair-optional{margin:0 0 18px;border:1px dashed var(--line);border-radius:10px;padding:10px 14px;}
+    .pair-optional summary{cursor:pointer;font-family:var(--font-sans);font-size:.8rem;color:var(--gold);letter-spacing:.02em;user-select:none;list-style:none;}
+    .pair-optional summary::-webkit-details-marker{display:none;}
+    .pair-optional summary::before{content:'＋ ';}
+    .pair-optional[open] summary::before{content:'－ ';}
+    .pair-optional[open] summary{margin-bottom:14px;}
+    .pair-optional .pair-field:last-child{margin-bottom:4px;}
 
     .pair-actions{text-align:center;margin:var(--space-md) auto 0;max-width:880px;}
     .pair-go{padding:13px 40px;border-radius:999px;border:1px solid var(--gold);background:var(--gold);color:var(--on-accent);
@@ -124,7 +131,6 @@
     <section class="wizard-step show" id="step1">
       <div class="wizard-card">
         <h2 class="wstep-title">第一位 · 你</h2>
-        <div class="pair-field"><label>昵称</label><input id="aName" type="text" placeholder="如：小星" maxlength="12"></div>
         <div class="pair-field"><label>性别（五行合婚需要）</label>
           <select id="aGender"><option value="M">男</option><option value="F">女</option></select>
         </div>
@@ -133,15 +139,19 @@
             <select id="aYear"></select><select id="aMonth"></select><select id="aDay"></select>
           </div>
         </div>
-        <div class="pair-field"><label>出生时（0–23 时，用于星盘/八字）</label>
-          <select id="aHour"></select>
-        </div>
-        <div class="pair-field"><label>出生城市（用于经纬度）</label>
-          <select id="aCity"></select>
-        </div>
-        <div class="pair-field"><label>MBTI（可稍后填）</label>
-          <select id="aMbti"><option value="">未知 / 稍后填</option></select>
-        </div>
+        <details class="pair-optional">
+          <summary>更多信息（可不填 · 默认时辰按正午、城市按北京）</summary>
+          <div class="pair-field"><label>昵称</label><input id="aName" type="text" placeholder="如：小星" maxlength="12"></div>
+          <div class="pair-field"><label>出生时（0–23 时，用于星盘/八字）</label>
+            <select id="aHour"></select>
+          </div>
+          <div class="pair-field"><label>出生城市（用于经纬度）</label>
+            <select id="aCity"></select>
+          </div>
+          <div class="pair-field"><label>MBTI（可稍后填）</label>
+            <select id="aMbti"><option value="">未知 / 稍后填</option></select>
+          </div>
+        </details>
         <div class="wizard-nav"><button type="button" class="wiz-next" data-next="2">下一步：TA →</button></div>
       </div>
     </section>
@@ -149,7 +159,6 @@
     <section class="wizard-step" id="step2">
       <div class="wizard-card">
         <h2 class="wstep-title">第二位 · TA</h2>
-        <div class="pair-field"><label>昵称</label><input id="bName" type="text" placeholder="如：小月" maxlength="12"></div>
         <div class="pair-field"><label>性别（五行合婚需要）</label>
           <select id="bGender"><option value="F">女</option><option value="M">男</option></select>
         </div>
@@ -158,15 +167,19 @@
             <select id="bYear"></select><select id="bMonth"></select><select id="bDay"></select>
           </div>
         </div>
-        <div class="pair-field"><label>出生时（0–23 时，用于星盘/八字）</label>
-          <select id="bHour"></select>
-        </div>
-        <div class="pair-field"><label>出生城市（用于经纬度）</label>
-          <select id="bCity"></select>
-        </div>
-        <div class="pair-field"><label>MBTI（可稍后填）</label>
-          <select id="bMbti"><option value="">未知 / 稍后填</option></select>
-        </div>
+        <details class="pair-optional">
+          <summary>更多信息（可不填 · 默认时辰按正午、城市按北京）</summary>
+          <div class="pair-field"><label>昵称</label><input id="bName" type="text" placeholder="如：小月" maxlength="12"></div>
+          <div class="pair-field"><label>出生时（0–23 时，用于星盘/八字）</label>
+            <select id="bHour"></select>
+          </div>
+          <div class="pair-field"><label>出生城市（用于经纬度）</label>
+            <select id="bCity"></select>
+          </div>
+          <div class="pair-field"><label>MBTI（可稍后填）</label>
+            <select id="bMbti"><option value="">未知 / 稍后填</option></select>
+          </div>
+        </details>
         <div class="wizard-nav">
           <button type="button" class="wiz-back" data-back="1">← 返回</button>
           <button type="button" class="wiz-next" data-next="3">下一步：确认 →</button>
@@ -226,7 +239,7 @@
   <script src="assets/cards/astro-engine.js?v=20260914g"></script>
   <script src="assets/cards/bazi-engine.js?v=20260914g"></script>
   <script src="assets/cards/mbti-data.js?v=20260914g"></script>
-  <script src="assets/cities.js?v=20260901c"></script>
+  <script src="assets/cities.js?v=20261011a"></script>
   <script src="assets/user-store.js?v=20260914g"></script>
   <script src="assets/pair-engine.js?v=20260914g"></script>
   <script>
@@ -253,7 +266,7 @@
       fillSelect($(p+'Hour'), 0, 23, true, '未知（按 12 时算）');
       // 城市
       var city = $(p+'City');
-      city.innerHTML = '<option value="">选择城市（默认北京）</option>' + (window.UPON_Cities_API ? window.UPON_Cities_API.optionsHtml('0,0') : '');
+      city.innerHTML = '<option value="">选择城市（可不选，默认北京）</option>' + (window.UPON_Cities_API ? window.UPON_Cities_API.optionsHtml('0,0') : '');
       // MBTI
       var mb = $(p+'Mbti');
       if(window.MBTI){ Object.keys(window.MBTI.types).forEach(function(code){
@@ -285,10 +298,11 @@
     }catch(e){}
 
     function cityLatLng(sel){
-      if(!window.UPON_Cities_API) return {lat:39.9042,lng:116.4074};
+      var name = (sel && sel.selectedIndex >= 0 && sel.options[sel.selectedIndex]) ? sel.options[sel.selectedIndex].textContent : '';
+      if(!window.UPON_Cities_API) return {lat:39.9042,lng:116.4074,name:''};
       var v = sel.value; // "lat,lng" 形式，由 optionsHtml 的 value 决定
-      if(v && v.indexOf(',')>=0){ var p=v.split(','); return {lat:parseFloat(p[0]),lng:parseFloat(p[1])}; }
-      return {lat:39.9042,lng:116.4074}; // 默认北京
+      if(v && v.indexOf(',')>=0){ var p=v.split(','); return {lat:parseFloat(p[0]),lng:parseFloat(p[1]),name:name}; }
+      return {lat:39.9042,lng:116.4074,name:'',def:true}; // 默认北京
     }
 
     function readPerson(p){
@@ -423,7 +437,7 @@
       var A = readPerson('a'), B = readPerson('b');
       function fmt(p){
         var ymd = p.y+'年'+p.m+'月'+p.d+'日'+(p.h!==12 ? (' '+p.h+'时') : '（时辰未知，按12时算）');
-        var city = (!p.city || (p.city.lat===39.9042 && p.city.lng===116.4074)) ? '北京（默认）' : (p.city.lat.toFixed(2)+','+p.city.lng.toFixed(2));
+        var city = p.city && p.city.name ? p.city.name : (p.city && p.city.lat && !(p.city.lat===39.9042 && p.city.lng===116.4074) ? (p.city.lat.toFixed(2)+','+p.city.lng.toFixed(2)) : '北京（默认）');
         return '<b>'+escapeHtml(p.name)+'</b>：'+ymd+' · '+(p.mbti||'MBTI 未填')+' · '+(p.gender==='M'?'男':'女')+' · '+city;
       }
       $('confirmBox').innerHTML = fmt(A) + '<br><br>' + fmt(B) + '<br><br>确认无误后，点击「分析我们的缘分」。';
