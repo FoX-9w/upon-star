@@ -291,35 +291,10 @@
     function clearCeltic(){ var o = document.querySelector('.celtic-cross-wrap'); if(o) o.remove(); }
     function clearPremium(){ var pz = document.getElementById('premiumZone'); if(pz) pz.hidden = true; }
 
-    // 组合牌义内容（公开 + GitHub + 问题导向），供右栏「牌义」区块复用
+    // 组合牌义内容：只输出「针对你的问题」一个解读块（产品口径：不要通用牌面意思）
+    // 领域正文优先级：释义库领域行(enrich) → 卡牌核心义 → 领域指南(QUESTION_GUIDES)
     function buildMeaningContent(card, rev){
-      var deck = cur();
       var meaningEl = document.createElement('div'); meaningEl.className = 'slot-meaning';
-      var meaningText = rev ? (card.reversed || card.meaning || '') : (card.meaning || '');
-      var detailText = card.detail || '';
-      var pubWrap = document.createElement('div'); pubWrap.className = 'exp-block exp-public';
-      pubWrap.innerHTML = '<div class="exp-label">公开解释</div>';
-      var pubBody = document.createElement('div'); pubBody.className = 'exp-body';
-      pubBody.innerHTML = '<div class="sm-keyword">' + escapeHtml(meaningText) + '</div>'
-        + (detailText ? '<div class="sm-detail">' + escapeHtml(detailText) + '</div>' : '');
-      pubWrap.appendChild(pubBody);
-      meaningEl.appendChild(pubWrap);
-
-      var en = deck.enrich ? deck.enrich(card) : null;
-      if(en){
-        var ghWrap = document.createElement('div'); ghWrap.className = 'exp-block exp-github';
-        ghWrap.innerHTML = '<div class="exp-label">GitHub 解释</div>';
-        var ghBody = document.createElement('div'); ghBody.className = 'exp-body exp-github-body';
-        var seLines = [];
-        seLines.push('<div class="se-line se-en">' + escapeHtml(rev ? en.reversed : en.upright) + '</div>');
-        if(en.love)   seLines.push('<div class="se-line"><span class="se-k">爱情</span><span class="se-v">' + escapeHtml(en.love) + '</span></div>');
-        if(en.career) seLines.push('<div class="se-line"><span class="se-k">事业</span><span class="se-v">' + escapeHtml(en.career) + '</span></div>');
-        if(en.keywords && en.keywords.length) seLines.push('<div class="se-line se-kw">' + en.keywords.map(escapeHtml).join(' · ') + '</div>');
-        ghBody.innerHTML = seLines.join('');
-        ghWrap.appendChild(ghBody);
-        meaningEl.appendChild(ghWrap);
-      }
-
       var qInfo = currentQuestion();
       var qBlock = buildQuestionBlock(card, rev, qInfo.cat, qInfo.display);
       if(qBlock) meaningEl.appendChild(qBlock);
@@ -372,15 +347,20 @@
       return block;
     }
 
-    // 取得当前提问：领域 key + 选中的常见问题文字 + 自由输入文字
+    // 取得当前提问：自由输入优先（关键词自动识别领域），否则取下拉所选常见问题
+    // 二者必填其一（shuffle 处把关）；自由输入的文字将原文引用进解读
     function currentQuestion(){
+      var free = (questionEl && questionEl.value || '').trim();
+      if(free){
+        var fCat = window.QuestionClassify ? window.QuestionClassify.classify(free) : 'decision';
+        return { cat: fCat, text: free, free: free, display: free };
+      }
       var cat = questionSelEl ? (questionSelEl.value || '') : '';
       var text = '';
       if(cat && questionSelEl && questionSelEl.selectedIndex >= 0){
         text = questionSelEl.options[questionSelEl.selectedIndex].textContent.trim();
       }
-      var free = (questionEl && questionEl.value || '').trim();
-      return { cat: cat, text: text, free: free, display: text || free };
+      return { cat: cat, text: text, free: free, display: text };
     }
 
     function updateReadingQuestion(qLabel, q){
@@ -396,21 +376,19 @@
 
     function buildQuestionBlock(card, rev, qCat, qText){
       var ctx = qCat ? QUESTION_CONTEXTS[qCat] : null;
-      if(!ctx && !qText) return null;
+      if(!ctx) return null;
       var meaningText = rev ? (card.reversed || card.meaning || '') : (card.meaning || '');
       if(!meaningText) return null;
+      var guide = (window.QUESTION_GUIDES && window.QUESTION_GUIDES[qCat]) || null;
+      var guideText = guide ? (rev ? guide.rev : guide.up) : '';
       var wrap = document.createElement('div'); wrap.className = 'exp-block exp-question';
-      var label = '问题导向解读' + (ctx ? ' · ' + ctx.label : '');
+      var label = '针对你的问题' + (ctx ? ' · ' + ctx.label : '');
       wrap.innerHTML = '<div class="exp-label">' + escapeHtml(label) + '</div>';
       var body = document.createElement('div'); body.className = 'exp-body';
-      var leadHtml;
-      if(ctx){
-        leadHtml = (qText ? '针对「' + escapeHtml(qText) + '」，' : '') + escapeHtml(rev ? ctx.revLead : ctx.lead);
-      } else {
-        leadHtml = '针对「' + escapeHtml(qText) + '」，这张牌';
-      }
-      body.innerHTML = '<div class="q-lead">' + leadHtml + '</div>'
-        + '<div class="q-body">' + escapeHtml(meaningText) + '</div>';
+      body.innerHTML = (qText ? '<div class="q-quote">「' + escapeHtml(qText) + '」</div>' : '')
+        + '<div class="q-lead">' + escapeHtml(rev ? ctx.revLead : ctx.lead) + '</div>'
+        + '<div class="q-body">' + escapeHtml(meaningText) + '</div>'
+        + (guideText ? '<div class="q-guide">' + escapeHtml(guideText) + '</div>' : '');
       wrap.appendChild(body);
       return wrap;
     }
@@ -420,7 +398,7 @@
       if(!questionSelEl) return;
       var list = window.COMMON_QUESTIONS;
       if(!list || !list.length) return;
-      var html = '<option value="">— 选择常见问题（选填）—</option>';
+      var html = '<option value="">— 选择常见问题（与自由输入二选一）—</option>';
       list.forEach(function(g){
         html += '<optgroup label="' + escapeHtml(g.group) + '">';
         (g.items || []).forEach(function(q){
@@ -533,6 +511,19 @@
 
     // 自动发牌：先让用户看见「杂乱洗牌」过程，洗完后占星猫桌布慢慢淡出，随后牌张渐次浮现
     function shuffle(){
+      // 提问必填：常见问题下拉 与 自由输入 二选一；未填则引导并中止抽牌
+      var qCheck = currentQuestion();
+      if(!qCheck.display){
+        if(deckHint) deckHint.textContent = '请先在「你的提问」处选择一个常见问题，或输入你的问题（二选一），再开始抽牌。';
+        var qHost = questionEl || questionSelEl;
+        if(qHost){
+          qHost.classList.add('q-required');
+          setTimeout(function(){ qHost.classList.remove('q-required'); }, 1800);
+          if(qHost.scrollIntoView) qHost.scrollIntoView({ behavior:'smooth', block:'center' });
+          try{ qHost.focus({ preventScroll:true }); }catch(err){ qHost.focus(); }
+        }
+        return;
+      }
       selected = [];
       reversedMap = {};
       ringAngle = 0;

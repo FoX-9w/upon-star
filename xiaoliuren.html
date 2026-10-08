@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>小六壬 · Upon Star</title>
+  <meta name="description" content="掐指一算小六壬：填入日期与时辰，自动换算农历与十二时辰，月宫、日宫、时宫三步落宫，依所问之事给出领域化解读。本地计算，零外部依赖。Upon Star 文化研究与心理探索参考。">
+  <meta property="og:title" content="小六壬 · Upon Star">
+  <meta property="og:description" content="指尖六宫，月日时三步落宫；大安速喜小吉为吉，留连赤口空亡须缓。">
+  <meta property="og:type" content="website">
+  <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="assets/base.css?v=20260914g">
+  <style>
+    /* ===== 小六壬专属样式（沿用 base.css 设计令牌）===== */
+    .tool-hero{position:relative;text-align:center;padding:calc(var(--space-xl) + 8px) var(--space-md) var(--space-md);}
+    .tool-hero .kicker{font-family:var(--font-decor);letter-spacing:.32em;color:var(--gold-light);font-size:.8rem;text-transform:uppercase;}
+    .tool-hero h1{font-size:clamp(2.4rem,7vw,4rem);margin:8px 0 6px;color:var(--text);}
+    .tool-hero .lead{font-family:var(--font-serif);color:var(--text-dim);max-width:600px;margin:0 auto;line-height:1.85;}
+
+    .question-wrap{max-width:520px;margin:var(--space-md) auto 0;display:flex;flex-direction:column;gap:8px;}
+    .question-wrap select{width:100%;appearance:none;-webkit-appearance:none;
+      background:var(--surface);border:1px solid var(--line);border-radius:999px;
+      color:var(--text);font-family:var(--font-sans);font-size:.95rem;
+      padding:12px 44px 12px 22px;letter-spacing:.02em;transition:.25s;cursor:pointer;
+      background-image:linear-gradient(45deg,transparent 50%,var(--gold-light) 50%),linear-gradient(135deg,var(--gold-light) 50%,transparent 50%);
+      background-position:calc(100% - 22px) 50%,calc(100% - 16px) 50%;
+      background-size:6px 6px,6px 6px;background-repeat:no-repeat;}
+    .question-wrap select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,164,92,.18);}
+    .question-wrap select option{background:#1a0c06;color:var(--text);}
+    .question-wrap input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:999px;
+      color:var(--text);font-family:var(--font-sans);font-size:.95rem;padding:12px 22px;letter-spacing:.02em;transition:.25s;}
+    .question-wrap input::placeholder{color:var(--text-dim);}
+    .question-wrap input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,164,92,.18);}
+
+    /* ===== 起课台：日期 + 时辰 ===== */
+    .ke-stage{max-width:560px;margin:var(--space-lg) auto 0;text-align:center;}
+    .dt-row{display:flex;gap:10px;justify-content:center;margin-bottom:var(--space-md);}
+    .dt-row .dt-field{flex:1;max-width:220px;display:flex;flex-direction:column;gap:6px;text-align:left;}
+    .dt-row label{font-family:var(--font-decor);font-size:.72rem;letter-spacing:.22em;color:var(--gold-light);text-transform:uppercase;}
+    .dt-row input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+      color:var(--text);font-family:var(--font-sans);font-size:1rem;padding:12px 14px;color-scheme:dark;transition:.25s;}
+    .dt-row input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,164,92,.18);}
+
+    .ke-btn{font-family:var(--font-sans);font-size:1.05rem;letter-spacing:.1em;padding:14px 44px;border-radius:999px;
+      border:1px solid var(--gold);background:var(--gold);color:var(--bg);transition:.25s;}
+    .ke-btn:hover:not(:disabled){background:var(--gold-light);box-shadow:0 0 32px rgba(200,164,92,.45);}
+    .ke-hint{color:var(--text-dim);font-family:var(--font-serif);font-style:italic;margin-top:var(--space-md);font-size:.9rem;}
+
+    /* ===== 掐指三步（月宫→日宫→时宫） ===== */
+    .step-stack{max-width:520px;margin:var(--space-md) auto 0;display:flex;flex-direction:column;gap:6px;}
+    .ke-step{display:flex;align-items:center;gap:14px;padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:rgba(8,8,14,.4);opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s;}
+    .ke-step.show{opacity:1;transform:none;}
+    .ke-step .st-label{flex:0 0 150px;font-family:var(--font-decor);font-size:.74rem;color:var(--gold-light);letter-spacing:.12em;}
+    .ke-step .st-desc{flex:1;font-family:var(--font-serif);font-size:.84rem;color:var(--text-dim);line-height:1.6;}
+    .ke-step .st-pal{flex:0 0 auto;font-family:var(--font-display);font-size:1.02rem;color:var(--gold);}
+
+    /* ===== 落宫结果卡 ===== */
+    .result-block{max-width:880px;margin:var(--space-lg) auto 0;padding:var(--space-md);
+      background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);}
+    .result-block h3{font-family:var(--font-display);color:var(--gold-light);font-size:1.3rem;margin:0 0 6px;}
+    .result-block .gua-id{font-family:var(--font-decor);color:var(--gold-dim);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:var(--space-sm);}
+    .palace-hero{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:var(--space-xs);}
+    .palace-name{font-family:var(--font-display);font-size:2.6rem;color:var(--gold);line-height:1;}
+    .palace-luck{font-family:var(--font-decor);font-size:.86rem;letter-spacing:.2em;padding:3px 14px;border-radius:999px;border:1px solid var(--gold);}
+    .palace-luck.luck-ji{color:var(--gold-light);}
+    .palace-luck.luck-xiong{color:#d98a8a;border-color:#d98a8a;}
+    .palace-meta{font-family:var(--font-serif);font-size:.82rem;color:var(--text-dim);}
+    .palace-summary{font-family:var(--font-serif);color:var(--text);line-height:1.85;font-size:1rem;margin-bottom:var(--space-sm);padding:var(--space-sm) var(--space-md);background:rgba(8,8,14,.5);border-left:3px solid var(--gold);border-radius:6px;}
+    .palace-detail{font-family:var(--font-sans);color:var(--text-dim);line-height:1.9;font-size:.92rem;margin-bottom:var(--space-sm);}
+    .palace-advice,.palace-timing{font-family:var(--font-serif);color:var(--text-dim);line-height:1.8;font-size:.88rem;margin-top:6px;}
+    .palace-advice b,.palace-timing b{color:var(--gold-light);font-family:var(--font-decor);font-weight:400;letter-spacing:.1em;margin-right:8px;font-size:.76rem;}
+
+    /* ===== 针对问题的解读 ===== */
+    .q-answer .q-quote{font-family:var(--font-serif);font-size:.92rem;color:var(--gold-light);margin-bottom:10px;}
+    .q-answer .q-cat{font-family:var(--font-sans);color:var(--text);line-height:1.95;font-size:.98rem;
+      padding:12px 14px;background:rgba(8,8,14,.35);border-radius:8px;border-left:2px solid var(--gold);}
+    .q-answer .q-cat-tag{display:inline-block;margin-right:8px;padding:1px 9px;border-radius:999px;
+      background:rgba(200,164,92,.18);color:var(--gold-light);font-size:.74rem;letter-spacing:.06em;vertical-align:middle;}
+
+    .reading-actions{text-align:center;margin-top:var(--space-lg);}
+    .meta-note{text-align:center;color:var(--text-dim);font-size:.76rem;margin-top:var(--space-sm);font-family:var(--font-serif);font-style:italic;}
+
+    @media (max-width:560px){
+      .dt-row{flex-direction:column;align-items:stretch;}
+      .dt-row .dt-field{max-width:none;}
+      .ke-step .st-label{flex-basis:112px;font-size:.68rem;}
+      .palace-name{font-size:2.1rem;}
+    }
+    @media (prefers-reduced-motion:reduce){
+      .ke-step{transition:none;opacity:1;transform:none;}
+    }
+  </style>
+  <link rel="canonical" href="https://upon-star.com/xiaoliuren.html">
+  <meta property="og:url" content="https://upon-star.com/xiaoliuren.html">
+  <meta property="og:image" content="https://upon-star.com/assets/og-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="小六壬 · Upon Star">
+  <meta name="twitter:description" content="指尖六宫，月日时三步落宫；依所问之事给出领域化解读。本地计算，零外部依赖。">
+</head>
+<body class="theme-east cat-east">
+  <div class="sacred-light" aria-hidden="true"></div>
+
+  <header class="site-nav">
+    <a class="brand" href="divination-homepage.html">Upon Star<small>UPON STAR</small></a>
+    <nav class="nav-tabs" aria-label="分类导航">
+      <a href="east.html" class="active">东方</a>
+      <a href="west.html">西方</a>
+      <a href="fusion.html">融合</a>
+      <a href="mbti.html">人格</a>
+      <a href="pair.html">配对</a>
+      <a href="today.html">今日</a>
+      <a href="user.html">我的</a>
+    </nav></header>
+
+  <main class="container">
+    <nav class="breadcrumb" aria-label="面包屑"><a href="divination-homepage.html">首页</a> / <a href="east.html">东方</a> / 小六壬</nav>
+
+    <section class="tool-hero">
+      <div class="kicker">Xiao Liu Ren · Instant Insight</div>
+      <h1>小六壬</h1>
+      <p class="lead">指尖六宫：大安 · 留连 · 速喜 · 赤口 · 小吉 · 空亡。填入日期与时辰，自动换算农历与十二时辰，月、日、时三步落宫成课。</p>
+      <div class="question-wrap">
+        <select id="questionSel" class="question-select" aria-label="选择常见问题">
+          <option value="">— 选择常见问题（与自由输入二选一）—</option>
+        </select>
+        <input id="question" type="text" maxlength="80" placeholder="或自行输入你的问题（自由输入）" aria-label="自订问题">
+      </div>
+    </section>
+
+    <section class="ke-stage" aria-label="起课台">
+      <div class="dt-row">
+        <div class="dt-field">
+          <label for="keDate">日期</label>
+          <input type="date" id="keDate" aria-label="起课日期">
+        </div>
+        <div class="dt-field">
+          <label for="keTime">时间</label>
+          <input type="time" id="keTime" aria-label="起课时间">
+        </div>
+      </div>
+      <button type="button" class="ke-btn" id="keBtn">起 课</button>
+      <p class="ke-hint" id="keHint">心念所问之事，填入当下日期与时间，点击「起课」。</p>
+    </section>
+
+    <section id="reading" aria-live="polite">
+      <div class="step-stack" id="stepStack" hidden></div>
+
+      <div id="resultBlocks"></div>
+
+      <div class="reading-actions" id="actions" hidden>
+        <button type="button" class="btn" id="resetBtn">重新起课</button>
+        <p class="meta-note" id="metaNote"></p>
+      </div>
+    </section>
+
+    <hr class="gold-line">
+
+    <section class="section">
+      <p class="disclaimer" style="text-align:center;max-width:680px;margin:0 auto;font-size:.85rem;">
+        免责声明：本工具内容仅用于民俗文化研究与心理探索参考，不构成任何专业建议。所有推算均在您的设备本地完成，我们不会存储你的提问、日期或结果。农历换算基于通行历法数据，闰月按当月简化处理。本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <nav class="links" aria-label="页脚导航">
+      <a href="about.html">关于</a>
+      <a href="faq.html">常见问题</a>
+      <a href="guestbook.html">画廊</a>
+      <a href="terms.html">条款</a>
+      <a href="privacy.html">隐私</a>
+      <a href="refund.html">费用</a>
+    </nav>
+    <p class="disclaimer">本平台内容仅用于文化研究与心理探索参考，不构成任何专业建议。所有推演计算均在您的设备本地完成，我们不会存储你的个人数据，也不写入 Cookie。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
+  </footer>
+
+  <script src="assets/question-classify.js?v=20261008a"></script>
+  <script src="assets/common-questions.js?v=20260914g"></script>
+  <script src="assets/cards/lunar-engine.js?v=20260914g"></script>
+  <script src="assets/cards/xiaoliuren-data.js?v=20261009a"></script>
+  <script>
+  (function(){
+    'use strict';
+    var DATA = window.XIAOLIUREN;
+    var LUNAR = window.LUNAR;
+    if(!DATA || !DATA.palaces || !LUNAR || !LUNAR.solar2lunar){
+      document.getElementById('keHint').textContent = '数据载入失败，请确认 xiaoliuren-data.js 与 lunar-engine.js。';
+      return;
+    }
+
+    var PAL = ['大安','留连','速喜','赤口','小吉','空亡'];
+    var SC_NAME = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    var SC_RANGE = ['23:00–01:00','01:00–03:00','03:00–05:00','05:00–07:00','07:00–09:00','09:00–11:00',
+                    '11:00–13:00','13:00–15:00','15:00–17:00','17:00–19:00','19:00–21:00','21:00–23:00'];
+    var CAT_CONTEXTS = {
+      love:     { label:'感情 · 爱情关系' },
+      career:   { label:'事业 · 工作发展' },
+      wealth:   { label:'财运 · 金钱物质' },
+      health:   { label:'健康 · 身心状态' },
+      study:    { label:'学业 · 考试进修' },
+      decision: { label:'决策 · 当前抉择' }
+    };
+
+    function escapeHtml(s){
+      var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML;
+    }
+
+    var keDate = document.getElementById('keDate');
+    var keTime = document.getElementById('keTime');
+    var keBtn = document.getElementById('keBtn');
+    var keHint = document.getElementById('keHint');
+    var stepStack = document.getElementById('stepStack');
+    var resultBlocks = document.getElementById('resultBlocks');
+    var actionsEl = document.getElementById('actions');
+    var metaNote = document.getElementById('metaNote');
+    var resetBtn = document.getElementById('resetBtn');
+    var questionEl = document.getElementById('question');
+    var questionSelEl = document.getElementById('questionSel');
+
+    // 取得当前提问：自由输入优先（关键词自动识别领域），否则取下拉所选常见问题
+    function currentQuestion(){
+      var free = (questionEl && questionEl.value || '').trim();
+      if(free){
+        var fCat = window.QuestionClassify ? window.QuestionClassify.classify(free) : 'decision';
+        return { cat: fCat, text: free, free: free, display: free };
+      }
+      var cat = questionSelEl ? (questionSelEl.value || '') : '';
+      var text = '';
+      if(cat && questionSelEl && questionSelEl.selectedIndex >= 0){
+        text = questionSelEl.options[questionSelEl.selectedIndex].textContent.trim();
+      }
+      return { cat: cat, text: text, free: free, display: text };
+    }
+
+    // 以「常见问题」填充提问下拉
+    function populateQuestionSel(){
+      if(!questionSelEl) return;
+      var list = window.COMMON_QUESTIONS;
+      if(!list || !list.length) return;
+      var html = '<option value="">— 选择常见问题（与自由输入二选一）—</option>';
+      list.forEach(function(g){
+        html += '<optgroup label="' + escapeHtml(g.group) + '">';
+        (g.items || []).forEach(function(q){
+          html += '<option value="' + g.key + '">' + escapeHtml(q) + '</option>';
+        });
+        html += '</optgroup>';
+      });
+      questionSelEl.innerHTML = html;
+    }
+
+    // 时辰：小时(0-23) → 地支序号（子=0 … 亥=11）；子时跨 23:00–01:00
+    function shichenIdxOf(h){
+      return Math.floor(((h + 1) % 24) / 2);
+    }
+
+    // 默认填入当下日期与时间
+    function fillNow(){
+      var n = new Date();
+      var p2 = function(x){ return (x < 10 ? '0' : '') + x; };
+      if(keDate && !keDate.value) keDate.value = n.getFullYear() + '-' + p2(n.getMonth()+1) + '-' + p2(n.getDate());
+      if(keTime && !keTime.value) keTime.value = p2(n.getHours()) + ':' + p2(n.getMinutes());
+    }
+
+    function qRequired(){
+      keHint.textContent = '请先在上方选择一个常见问题，或输入你的问题（二选一），再起课。';
+      var qHost = questionEl || questionSelEl;
+      if(qHost){
+        qHost.classList.add('q-required');
+        setTimeout(function(){ qHost.classList.remove('q-required'); }, 1800);
+        if(qHost.scrollIntoView) qHost.scrollIntoView({ behavior:'smooth', block:'center' });
+        try{ qHost.focus({ preventScroll:true }); }catch(err){ qHost.focus(); }
+      }
+    }
+
+    function qRequiredMark(el){
+      el.classList.add('q-required');
+      setTimeout(function(){ el.classList.remove('q-required'); }, 1800);
+    }
+
+    function startKe(){
+      // 提问必填（二选一）
+      var q = currentQuestion();
+      if(!q.display){ qRequired(); return; }
+      // 日期与时间必填
+      if(!keDate.value){ qRequiredMark(keDate); keHint.textContent = '请选择日期。'; return; }
+      if(!keTime.value){ qRequiredMark(keTime); keHint.textContent = '请选择时间。'; return; }
+
+      var dp = keDate.value.split('-');
+      var tp = keTime.value.split(':');
+      var Y = parseInt(dp[0], 10), M = parseInt(dp[1], 10), D = parseInt(dp[2], 10);
+      var H = parseInt(tp[0], 10), Mi = parseInt(tp[1], 10);
+      if(!Y || !M || !D || isNaN(H)){ keHint.textContent = '日期或时间格式有误，请重新选择。'; return; }
+      if(Y < 1901 || Y > 2100){ keHint.textContent = '暂支持 1901–2100 年之间的日期。'; return; }
+
+      var lunar = LUNAR.solar2lunar(Y, M, D);
+      if(!lunar || !lunar.lMonth){ keHint.textContent = '该日期暂无法换算农历，请调整后重试。'; return; }
+
+      // 三步落宫：正月起大安数至农历月 → 起初一数至农历日 → 起子时数至本时辰
+      var mIdx = (lunar.lMonth - 1) % 6;
+      var dIdx = (mIdx + lunar.lDay - 1) % 6;
+      var sc = shichenIdxOf(H);
+      var hIdx = (dIdx + sc) % 6;
+      var palace = null;
+      for(var i = 0; i < DATA.palaces.length; i++){
+        if(DATA.palaces[i].name === PAL[hIdx]){ palace = DATA.palaces[i]; break; }
+      }
+      renderKe(lunar, sc, [mIdx, dIdx, hIdx], palace, q);
+    }
+
+    function renderKe(lunar, sc, idxs, palace, q){
+      keHint.textContent = '';
+      resultBlocks.innerHTML = '';
+      stepStack.hidden = false;
+      stepStack.innerHTML = '';
+
+      var steps = [
+        { label: '第一步 · 月宫', desc: '公历 ' + lunar.cYear + ' 年 ' + lunar.cMonth + ' 月 ' + lunar.cDay + ' 日，农历 ' + lunar.IMonthCn + (lunar.isLeap ? '（闰月按当月简化计）' : '') + '，从大安起正月数至本月', pal: PAL[idxs[0]] },
+        { label: '第二步 · 日宫', desc: '从「' + PAL[idxs[0]] + '」起初一，数至农历' + lunar.IDayCn, pal: PAL[idxs[1]] },
+        { label: '第三步 · 时宫', desc: '从「' + PAL[idxs[1]] + '」起子时，数至' + SC_NAME[sc] + '时（' + SC_RANGE[sc] + '）', pal: PAL[idxs[2]] }
+      ];
+      steps.forEach(function(st, i){
+        var row = document.createElement('div');
+        row.className = 'ke-step';
+        row.innerHTML = '<span class="st-label"></span><span class="st-desc"></span><span class="st-pal"></span>';
+        row.querySelector('.st-label').textContent = st.label;
+        row.querySelector('.st-desc').textContent = st.desc;
+        row.querySelector('.st-pal').textContent = '落 ' + st.pal;
+        stepStack.appendChild(row);
+        setTimeout(function(){ row.classList.add('show'); }, 120 + i * 420);
+      });
+
+      // 起课信息 + 落宫卡
+      var info = document.createElement('div');
+      info.className = 'result-block';
+      info.innerHTML = '<div class="gua-id">起课信息</div>'
+        + '<h3>' + escapeHtml(palace.name) + '（' + escapeHtml(palace.pinyin) + '）</h3>'
+        + '<div class="palace-hero">'
+        + '<span class="palace-name">' + escapeHtml(palace.name) + '</span>'
+        + '<span class="palace-luck ' + (palace.luck === '吉' ? 'luck-ji' : 'luck-xiong') + '">' + escapeHtml(palace.luck) + '</span>'
+        + '<span class="palace-meta">' + escapeHtml(palace.star + ' · ' + palace.wuxing) + '</span>'
+        + '</div>'
+        + '<div class="palace-summary">' + escapeHtml(palace.summary) + '</div>'
+        + '<div class="palace-detail">' + escapeHtml(palace.detail) + '</div>'
+        + '<div class="palace-advice"><b>宜忌</b>' + escapeHtml(palace.advice) + '</div>'
+        + '<div class="palace-timing"><b>应期</b>' + escapeHtml(palace.timing) + '</div>';
+      resultBlocks.appendChild(info);
+
+      // 针对你的问题
+      var ctx = q.cat ? CAT_CONTEXTS[q.cat] : null;
+      var catText = q.cat && palace.cat ? (palace.cat[q.cat] || '') : '';
+      var qa = document.createElement('div');
+      qa.className = 'result-block q-answer';
+      var label = '针对你的问题' + (ctx ? ' · ' + ctx.label : '');
+      qa.innerHTML = '<div class="gua-id">' + escapeHtml(label) + '</div>'
+        + '<div class="q-quote">「' + escapeHtml(q.display) + '」</div>'
+        + (catText ? '<div class="q-cat"><span class="q-cat-tag">' + escapeHtml(palace.name) + ' · ' + escapeHtml(ctx ? ctx.label : '') + '</span>' + escapeHtml(catText) + '</div>' : '');
+      resultBlocks.appendChild(qa);
+
+      actionsEl.hidden = false;
+      metaNote.textContent = '起课于 公历 ' + lunar.cYear + '.' + lunar.cMonth + '.' + lunar.cDay
+        + ' · 农历 ' + lunar.IMonthCn + lunar.IDayCn + ' · ' + SC_NAME[sc] + '时'
+        + ' · 三步落宫：' + PAL[idxs[0]] + ' → ' + PAL[idxs[1]] + ' → ' + PAL[idxs[2]]
+        + ' · 提问：「' + q.display + '」';
+
+      var rsec = document.getElementById('reading');
+      if(rsec && rsec.scrollIntoView) rsec.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    function resetKe(){
+      stepStack.hidden = true;
+      stepStack.innerHTML = '';
+      resultBlocks.innerHTML = '';
+      actionsEl.hidden = true;
+      keHint.textContent = '心念所问之事，填入当下日期与时间，点击「起课」。';
+      var rsec = document.getElementById('reading');
+      if(rsec) rsec.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    if(keBtn) keBtn.addEventListener('click', startKe);
+    if(resetBtn) resetBtn.addEventListener('click', resetKe);
+    // 修改提问后允许直接再次起课
+    if(questionSelEl) questionSelEl.addEventListener('change', function(){ keHint.textContent = ''; });
+    if(questionEl) questionEl.addEventListener('input', function(){ keHint.textContent = ''; });
+
+    populateQuestionSel();
+    fillNow();
+  })();
+  </script>
+</body>
+</html>

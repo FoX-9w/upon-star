@@ -167,24 +167,28 @@ body.theme-west .tc-seg.is-active{
 }
 body.theme-west .tc-seg:not(.is-active):hover{color:var(--gold-light);}
 
-/* 凯尔特十字布局（塔罗 10 张；从雷诺曼页切到塔罗时亦需，故放于共用样式） */
-body.theme-west .celtic-cross-wrap{display:flex;gap:var(--space-lg);justify-content:center;flex-wrap:wrap;max-width:1040px;margin:var(--space-md) auto 0;padding:var(--space-md) 0;}
-body.theme-west .celtic-cross{position:relative;width:340px;height:420px;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(6,1fr);gap:4px;}
-body.theme-west .celtic-cross .slot{position:absolute;width:68px;max-width:68px;display:flex;flex-direction:column;align-items:center;gap:4px;}
+/* 凯尔特十字布局（塔罗 10 张；从雷诺曼页切到塔罗时亦需，故放于共用样式）
+   卡牌尺寸统一：十字区与立柱区共用 --celtic-cw 同一卡宽 */
+body.theme-west .celtic-cross-wrap{--celtic-cw:104px;display:flex;gap:var(--space-lg);justify-content:center;flex-wrap:wrap;max-width:1040px;margin:var(--space-md) auto 0;padding:var(--space-md) 0;}
+body.theme-west .celtic-cross{position:relative;width:calc(var(--celtic-cw)*5);height:calc(var(--celtic-cw)*6.2);display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(6,1fr);gap:4px;}
+body.theme-west .celtic-cross .slot{position:absolute;width:var(--celtic-cw);max-width:var(--celtic-cw);display:flex;flex-direction:column;align-items:center;gap:4px;}
 body.theme-west .celtic-cross .slot .read-card{border-radius:8px;}
 body.theme-west .celtic-cross .slot .slot-caption{min-height:auto;}
 body.theme-west .celtic-cross .slot .slot-label{font-size:.58rem;letter-spacing:.08em;}
 body.theme-west .celtic-cross .slot .slot-name{font-size:.72rem;}
 body.theme-west .celtic-cross .slot .slot-rev{font-size:.56rem;}
 body.theme-west .celtic-cross .slot:nth-child(1){grid-column:2;grid-row:3;transform:rotate(0deg);z-index:3;}
-body.theme-west .celtic-cross .slot:nth-child(2){grid-column:2;grid-row:3;transform:rotate(90deg) translateY(34px) translateX(0);z-index:2;}
+body.theme-west .celtic-cross .slot:nth-child(2){grid-column:2;grid-row:3;transform:rotate(90deg) translateY(calc(var(--celtic-cw)/2)) translateX(0);z-index:2;}
 body.theme-west .celtic-cross .slot:nth-child(3){grid-column:1;grid-row:3;z-index:1;}
 body.theme-west .celtic-cross .slot:nth-child(4){grid-column:3;grid-row:3;z-index:1;}
 body.theme-west .celtic-cross .slot:nth-child(5){grid-column:2;grid-row:1;z-index:1;}
 body.theme-west .celtic-cross .slot:nth-child(6){grid-column:2;grid-row:5;z-index:1;}
 body.theme-west .celtic-staff{display:flex;flex-direction:column;gap:var(--space-sm);justify-content:center;}
-body.theme-west .celtic-staff .slot{max-width:160px;}
+body.theme-west .celtic-staff .slot{width:var(--celtic-cw);max-width:var(--celtic-cw);}
 body.theme-west .celtic-staff .slot .slot-label{writing-mode:horizontal-tc;}
+@media (max-width:620px){
+  body.theme-west .celtic-cross-wrap{--celtic-cw:58px;}
+}
 
 /* =========================================================
    牌种切换（塔罗 ⇄ 雷诺曼 可见入口）
@@ -269,9 +273,17 @@ body.theme-west .reading-question{
 body.theme-west .exp-block.exp-question .exp-label{
   color:#d2c2f4;border-left-color:#d2c2f4;
 }
+body.theme-west .exp-question .q-quote{
+  font-family:var(--font-serif);font-size:.78rem;line-height:1.6;
+  color:var(--gold-light);margin-bottom:6px;
+}
 body.theme-west .exp-question .q-lead{
   font-family:var(--font-decor);font-size:.74rem;letter-spacing:.06em;
   color:#d2c2f4;margin-bottom:4px;
+}
+body.theme-west .exp-question .q-guide{
+  font-family:var(--font-serif);font-size:.76rem;line-height:1.7;color:var(--text-dim);
+  margin-top:6px;padding-top:6px;border-top:1px dashed rgba(210,194,244,.3);
 }
 body.theme-west .exp-question .q-body{
   font-family:var(--font-serif);font-size:.8rem;line-height:1.66;color:var(--text-dim);

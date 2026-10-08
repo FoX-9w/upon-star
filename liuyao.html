@@ -223,6 +223,7 @@
     <p class="disclaimer">本平台内容仅用于文化研究与心理探索参考，不构成任何专业建议。所有推演计算均在您的设备本地完成，我们不会存储你的个人数据，也不写入 Cookie。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
   </footer>
 
+  <script src="assets/question-classify.js?v=20261008a"></script>
   <script src="assets/common-questions.js?v=20260914g"></script>
   <script src="assets/cards/yijing-data.js?v=20260914g"></script>
   <script src="assets/cards/yijing-baihua.js?v=20260914g"></script>
@@ -269,22 +270,26 @@
     var lines = []; // { yin:0/1, dynamic:0/1, sum:0..3 }
     var locked = false;
 
-    // 取得当前提问：领域 key + 选中的常见问题文字 + 自由输入文字
+    // 取得当前提问：自由输入优先（关键词自动识别领域），否则取下拉所选常见问题
     function currentQuestion(){
+      var free = (questionEl && questionEl.value || '').trim();
+      if(free){
+        var fCat = window.QuestionClassify ? window.QuestionClassify.classify(free) : 'decision';
+        return { cat: fCat, text: free, free: free, display: free };
+      }
       var cat = questionSelEl ? (questionSelEl.value || '') : '';
       var text = '';
       if(cat && questionSelEl && questionSelEl.selectedIndex >= 0){
         text = questionSelEl.options[questionSelEl.selectedIndex].textContent.trim();
       }
-      var free = (questionEl && questionEl.value || '').trim();
-      return { cat: cat, text: text, free: free, display: text || free };
+      return { cat: cat, text: text, free: free, display: text };
     }
     // 以「常见问题」填充提问下拉（若清单已载入）
     function populateQuestionSel(){
       if(!questionSelEl) return;
       var list = window.COMMON_QUESTIONS;
       if(!list || !list.length) return;
-      var html = '<option value="">— 选择常见问题（选填）—</option>';
+      var html = '<option value="">— 选择常见问题（与自由输入二选一）—</option>';
       list.forEach(function(g){
         html += '<optgroup label="' + escapeHtml(g.group) + '">';
         (g.items || []).forEach(function(q){
@@ -308,6 +313,18 @@
 
     function rollOnce(){
       if(locked) return;
+      // 提问必填：常见问题下拉 与 自由输入 二选一
+      if(!currentQuestion().display){
+        tossHint.textContent = '请先在上方选择一个常见问题，或输入你的问题（二选一），再开始摇卦。';
+        var qHost = questionEl || questionSelEl;
+        if(qHost){
+          qHost.classList.add('q-required');
+          setTimeout(function(){ qHost.classList.remove('q-required'); }, 1800);
+          if(qHost.scrollIntoView) qHost.scrollIntoView({ behavior:'smooth', block:'center' });
+          try{ qHost.focus({ preventScroll:true }); }catch(err){ qHost.focus(); }
+        }
+        return;
+      }
       locked = true;
       tossBtn.disabled = true;
       coinRow.setAttribute('data-state','rolling');
@@ -422,7 +439,7 @@
       var ctx = qInfo.cat ? QUESTION_CONTEXTS[qInfo.cat] : null;
       var b = document.createElement('div');
       b.className = 'result-block question-intro';
-      var label = '问题导向解读' + (ctx ? ' · ' + ctx.label : '');
+      var label = "针对你的问题" + (ctx ? " · " + ctx.label : "");
       var leadHtml = (qInfo.display ? '针对「' + escapeHtml(qInfo.display) + '」，' : '') + (ctx ? ctx.lead : '此卦提示');
       b.innerHTML = '<h3>' + escapeHtml(label) + '</h3><p class="q-lead">' + leadHtml + '</p>';
       return b;
