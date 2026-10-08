@@ -82,6 +82,26 @@
     var reversedMap = {};
     var tc = null;
 
+    // ---- 洗牌方式（用户可选，记住上一次的选择） ----
+    // fan   = 能量注入 + 扇形手选（逐张亲手抽）
+    // cloth = 占星猫桌布自动洗牌（原有方式）
+    var MODE_KEY = 'uponstar_shuffle_mode';
+    var shuffleMode = 'fan';
+    try{
+      var savedMode = localStorage.getItem(MODE_KEY);
+      if(savedMode === 'fan' || savedMode === 'cloth') shuffleMode = savedMode;
+    }catch(eMode){}
+    function saveMode(){ try{ localStorage.setItem(MODE_KEY, shuffleMode); }catch(eMode2){} }
+
+    // 扇形几何（舞台逻辑宽 1000、16:10；牌沿圆弧排布并随弧旋转）
+    var FAN_COUNT = 22;   // 扇面可见牌数（从洗匀牌堆前 22 张采样）
+    var FAN_SPAN = 170;   // 扇形总张角（度）
+    var FAN_R = 420;      // 弧半径（逻辑单位）
+    var FAN_TOP = 100;    // 顶点卡片中心的逻辑 y
+    var fanPicking = false;
+    var fanTimers = [];
+    function clearFanTimers(){ for(var ft=0; ft<fanTimers.length; ft++){ clearTimeout(fanTimers[ft]); } fanTimers = []; }
+
     // 旋转状态
     var ringAngle = 0;
     var dragging = false, dragMoved = false, lastAngle = 0, startX = 0, startY = 0;
@@ -556,7 +576,7 @@
       // 非商业内容交流入口，功能结果页不出现任何价格或服务引导。
     }
 
-    // 自动发牌：先让用户看见「杂乱洗牌」过程，洗完后占星猫桌布慢慢淡出，随后牌张渐次浮现
+    // 洗牌总入口：提问必填把关后，按用户选择的洗牌方式分流
     function shuffle(){
       // 提问必填：常见问题下拉 与 自由输入 二选一；未填则引导并中止抽牌
       var qCheck = currentQuestion();
@@ -575,6 +595,15 @@
       reversedMap = {};
       ringAngle = 0;
       buildDeckOrder();
+      var deck = cur();
+      clearPremium();
+      clearCeltic();
+      if(shuffleMode === 'fan'){ startFan(); }
+      else { shuffleCloth(); }
+    }
+
+    // 原有方式：占星猫桌布自动洗牌（自动抽牌）
+    function shuffleCloth(){
       var deck = cur();
       var picks = deckOrder.slice(0, target);
       picks.forEach(function(ci){
@@ -605,6 +634,185 @@
 
       if(tc && tc.playShuffle){ tc.playShuffle(reveal); }
       else { reveal(); }
+    }
+
+    // ---- 扇形手选：能量注入 → 大扇展开 → 用户逐张亲手抽牌 ----
+    function startFan(){
+      fanPicking = true;
+      clearFanTimers();
+      if(tcMount){ tcMount.style.display = 'none'; }
+      if(counterEl) counterEl.textContent = '';
+      if(deckHint) deckHint.textContent = '正在为牌堆注入能量……';
+      deckEl.className = 'fan-stage';
+      deckEl.classList.remove('completing','collapsed','full');
+      deckEl.style.display = '';
+      deckEl.innerHTML = '';
+
+      // 1) 能量注入覆盖层：竖立牌背 + 金色能量球脉动 + 法阵环旋转
+      var charge = document.createElement('div'); charge.className = 'fan-charge';
+      charge.innerHTML = '<div class="fc-wrap">'
+        + '<div class="fc-card"><img src="' + DATA.back + '" alt="牌堆">'
+        + '<div class="fc-orb" aria-hidden="true"></div><div class="fc-ring" aria-hidden="true"></div></div>'
+        + '<div class="fc-text">为牌堆注入能量…</div></div>';
+      deckEl.appendChild(charge);
+
+      // 2) 预建扇形牌张（全部叠在中心不可见，注入完成后展扇）
+      var F = Math.min(FAN_COUNT, deckOrder.length);
+      var fanIdx = deckOrder.slice(0, F);
+      var fanEls = [];
+      fanIdx.forEach(function(ci, i){
+        var el = document.createElement('div');
+        el.className = 'fan-card';
+        el.setAttribute('role','button');
+        el.setAttribute('tabindex','0');
+        el.setAttribute('data-ci', String(ci));
+        el.setAttribute('data-pos', String(i));
+        el.setAttribute('aria-label','扇形牌阵第 ' + (i+1) + ' 张（点击选取）');
+        el.innerHTML = '<img src="' + DATA.back + '" alt="牌背"><span class="pick-badge" hidden></span>';
+        el.style.left = '50%';
+        el.style.top = (FAN_TOP / 6.25) + '%';
+        el.style.transform = 'translate(-50%,-50%) rotate(0deg)';
+        el.addEventListener('click', function(){ fanPick(ci, el); });
+        el.addEventListener('keydown', function(e){
+          if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fanPick(ci, el); }
+        });
+        deckEl.appendChild(el);
+        fanEls.push(el);
+      });
+
+      // 3) 注入 1.6s → 覆盖层淡出 → 牌从中心叠态展成扇形
+      fanTimers.push(setTimeout(function(){
+        charge.classList.add('out');
+        fanTimers.push(setTimeout(function(){ if(charge.parentNode) charge.parentNode.removeChild(charge); }, 460));
+        fanEls.forEach(function(el, i){
+          var F2 = fanEls.length;
+          var t = F2 === 1 ? 0.5 : i / (F2 - 1);
+          var thetaDeg = -FAN_SPAN / 2 + t * FAN_SPAN;
+          var theta = thetaDeg * Math.PI / 180;
+          var xL = 500 + FAN_R * Math.sin(theta);
+          var yL = FAN_TOP + FAN_R * (1 - Math.cos(theta));
+          el.style.transitionDelay = (i * 26) + 'ms';
+          el.style.left = (xL / 10) + '%';                 // 舞台逻辑宽 1000 → %
+          el.style.top = (yL / 6.25) + '%';                // 逻辑高 625 → %
+          el.style.transform = 'translate(-50%,-50%) rotate(' + thetaDeg + 'deg)';
+          el.classList.add('dealt');
+          fanTimers.push(setTimeout(function(){ el.style.transitionDelay = ''; }, 900 + i * 26));
+        });
+        if(deckHint) deckHint.textContent = '牌阵已展开 · 从扇中点选第 1 张牌（共需 ' + target + ' 张）';
+      }, 1650));
+    }
+
+    // 扇形点选：再点已选的牌可取消，选满自动进入解读
+    function fanPick(ci, el){
+      if(!fanPicking) return;
+      var badge = el.querySelector('.pick-badge');
+      var idx = selected.indexOf(ci);
+      if(idx > -1){
+        selected.splice(idx, 1);
+        delete reversedMap[ci];
+        el.classList.remove('picked');
+        if(badge) badge.hidden = true;
+        renumberFanBadges();
+        if(deckHint) deckHint.textContent = '抽取第 ' + (selected.length + 1) + ' 张牌 · 已选 ' + selected.length + ' / ' + target;
+      } else {
+        if(selected.length >= target){
+          if(deckHint) deckHint.textContent = '已选满 ' + target + ' 张。点击已选中的牌可取消或更换。';
+          return;
+        }
+        selected.push(ci);
+        var deck = cur();
+        reversedMap[ci] = (deck.allowReverse && revChk && revChk.checked) ? (Math.random() < 0.5) : false;
+        el.classList.add('picked');
+        if(badge){ badge.textContent = String(selected.length); badge.hidden = false; }
+        renumberFanBadges();
+        if(selected.length === target){
+          fanPicking = false;
+          if(deckHint) deckHint.textContent = '';
+          deckEl.classList.add('full');
+          fanTimers.push(setTimeout(fanFinish, 460));
+        } else if(deckHint){
+          deckHint.textContent = '抽取第 ' + (selected.length + 1) + ' 张牌 · 已选 ' + selected.length + ' / ' + target;
+        }
+      }
+      updateCounter();
+    }
+
+    function renumberFanBadges(){
+      selected.forEach(function(ci, i){
+        var el = deckEl.querySelector('.fan-card[data-ci="' + ci + '"]');
+        var b = el ? el.querySelector('.pick-badge') : null;
+        if(b){ b.textContent = String(i + 1); }
+      });
+    }
+
+    // 选满：扇面淡出，进入逐张揭示
+    function fanFinish(){
+      deckEl.classList.add('completing');
+      var cards = deckEl.querySelectorAll('.fan-card');
+      for(var i=0;i<cards.length;i++){ cards[i].style.opacity = '0'; }
+      renderReading(false);
+      fanTimers.push(setTimeout(function(){
+        if(deckEl.classList.contains('completing')){
+          deckEl.classList.add('collapsed');
+          deckEl.style.display = 'none';
+        }
+      }, 720));
+    }
+
+    // 洗牌方式选择器（扇形手选 / 桌布速抽），插在牌阵 tab 之前
+    function buildModeTabs(){
+      if(!spreadTabsEl || spreadTabsEl.parentNode.querySelector('.shuffle-mode')) return;
+      var bar = document.createElement('div');
+      bar.className = 'shuffle-mode';
+      bar.setAttribute('role','tablist');
+      bar.setAttribute('aria-label','洗牌方式');
+      var defs = [
+        { key:'fan',   label:'扇形 · 手选抽牌' },
+        { key:'cloth', label:'桌布 · 自动抽牌' }
+      ];
+      defs.forEach(function(d){
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('role','tab');
+        b.setAttribute('data-mode', d.key);
+        b.textContent = d.label;
+        b.addEventListener('click', function(){
+          if(shuffleMode === d.key) return;
+          shuffleMode = d.key;
+          saveMode();
+          updateModeTabs(defs);
+          // 若扇形选牌正在进行中切换，则取消扇面回到待洗状态
+          var fanActive = fanPicking || (deckEl && deckEl.classList.contains('fan-stage') && deckEl.style.display !== 'none');
+          if(fanActive){
+            fanPicking = false;
+            clearFanTimers();
+            deckEl.classList.add('collapsed');
+            deckEl.style.display = 'none';
+          }
+          // 桌布舞台仅在「桌布速抽」且尚未出结果时可见
+          var readingShown = document.getElementById('readingCards') && document.getElementById('readingCards').children.length > 0;
+          if(tcMount){
+            tcMount.style.display = (shuffleMode === 'cloth' && !readingShown) ? '' : 'none';
+            if(shuffleMode === 'cloth' && !readingShown){ tcMount.style.opacity = '1'; }
+          }
+          if(deckHint) deckHint.textContent = (shuffleMode === 'fan')
+            ? '已切换为「扇形手选」——点击「洗牌」，注入能量后从扇中亲手抽牌。'
+            : '已切换为「桌布速抽」——点击桌布中央或「洗牌」按钮，自动为你抽牌。';
+        });
+        bar.appendChild(b);
+      });
+      spreadTabsEl.parentNode.insertBefore(bar, spreadTabsEl);
+      updateModeTabs(defs);
+    }
+    function updateModeTabs(defs){
+      var bar = document.querySelector('.shuffle-mode');
+      if(!bar) return;
+      var btns = bar.querySelectorAll('button[data-mode]');
+      for(var i=0;i<btns.length;i++){
+        var on = btns[i].getAttribute('data-mode') === shuffleMode;
+        btns[i].classList.toggle('active', on);
+        btns[i].setAttribute('aria-selected', on ? 'true' : 'false');
+      }
     }
 
     function buildSpreadTabs(){
@@ -754,11 +962,15 @@
     // 初始化
     populateQuestionSel();
     updateHero();
+    buildModeTabs();
     buildSpreadTabs();
     buildDeckOrder();
     if(deckEl){ deckEl.classList.add('collapsed'); deckEl.style.display = 'none'; }  // 轮盘选牌区已停用
+    if(tcMount && shuffleMode === 'fan'){ tcMount.style.display = 'none'; }          // 扇形模式不展示桌布舞台
     if(counterEl) counterEl.textContent = '';
-    if(deckHint) deckHint.textContent = '点击上方桌布中央，或下方「洗牌」按钮，自动为你抽牌。';
+    if(deckHint) deckHint.textContent = (shuffleMode === 'fan')
+      ? '点击下方「洗牌」按钮，为牌堆注入能量后从扇形牌阵中亲手抽牌。'
+      : '点击上方桌布中央，或下方「洗牌」按钮，自动为你抽牌。';
     // 对外 API：供 share.js / div-nav.js 使用（置于 init 作用域内，方能存取 cur/valid/selected 等）
     DivTool.getState = function(){
       var qi = currentQuestion();
