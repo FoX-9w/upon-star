@@ -136,7 +136,7 @@
   </footer>
 
   <script src="assets/lib/astronomy-engine/astronomy.browser.min.js?v=20260914g"></script>
-  <script src="assets/cards/astro-engine.js?v=20260914g"></script>
+  <script src="assets/cards/astro-engine.js?v=20261011c"></script>
   <script src="assets/cards/tarot-data.js?v=20260914g"></script>
   <script src="assets/user-store.js?v=20260914g"></script>
   <script src="assets/cards/mbti-data.js?v=20260914g"></script>
@@ -166,7 +166,7 @@
     function monthPlanets(y, m){
       var ascLng=116.40, lat=39.90;
       var natal=A.computeNatal(y, m, 15, 20, lat, ascLng); // 20:00 BJT = 12:00 UT
-      return natal.planets;
+      return natal.planets.filter(function(p){ return !p.isNode; });
     }
 
     // 十二星座评分：根据当月行星 vs 各个星座 ASC 位置形成的相位

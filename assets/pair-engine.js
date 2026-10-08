@@ -96,7 +96,9 @@
     var harm = 0, tense = 0;
     var ASP = [[0, 8], [60, 6], [90, 7], [120, 8], [180, 8]];
     cA.planets.forEach(function (pa) {
+      if (pa.isNode) return;
       cB.planets.forEach(function (pb) {
+        if (pb.isNode) return;
         var diff = Math.abs(pa.lon - pb.lon); if (diff > 180) diff = 360 - diff;
         ASP.forEach(function (a) {
           if (Math.abs(diff - a[0]) <= a[1]) {

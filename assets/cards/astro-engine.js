@@ -4,10 +4,10 @@
    基于 Meeus《Astronomical Algorithms》简化算法
    精度：约 ±1-2°（黄道经度），满足星座/宫位/相位查询
    支持：太阳/月亮/水星/金星/火星/木星/土星/天王/海王/冥王
+        + 北交点/南交点（平均交点，Meeus Ω 公式，不参与相位）
         + ASC 上升星座（简化 Placidus）+ 主要相位（合/六合/刑/冲/三合/六合）
    使用：window.ASTRO.computeNatal(year,month,day,hour,lat,lng)
-   ========================================================= */
-window.ASTRO = (function () {
+   ========================================================= */window.ASTRO = (function () {
   'use strict';
 
   // 12 星座
@@ -26,7 +26,7 @@ window.ASTRO = (function () {
     { name: '双鱼', en: 'Pisces', sym: '♓', wx: '水', ruler: '海王' }
   ];
 
-  // 10 行星
+  // 10 行星 + 南北交点（交点参与宫位/星座解读，不参与相位）
   var PLANETS = [
     { key: 'sun', name: '太阳', en: 'Sun', sym: '☉', isLumin: true },
     { key: 'moon', name: '月亮', en: 'Moon', sym: '☽', isLumin: true },
@@ -37,7 +37,9 @@ window.ASTRO = (function () {
     { key: 'saturn', name: '土星', en: 'Saturn', sym: '♄' },
     { key: 'uranus', name: '天王星', en: 'Uranus', sym: '♅' },
     { key: 'neptune', name: '海王星', en: 'Neptune', sym: '♆' },
-    { key: 'pluto', name: '冥王星', en: 'Pluto', sym: '♇' }
+    { key: 'pluto', name: '冥王星', en: 'Pluto', sym: '♇' },
+    { key: 'northnode', name: '北交点', en: 'North Node', sym: '☊', isNode: true },
+    { key: 'southnode', name: '南交点', en: 'South Node', sym: '☋', isNode: true }
   ];
 
   // 主要相位及其容许度（容许度 orb，度数）
@@ -197,6 +199,14 @@ window.ASTRO = (function () {
     return 0;
   }
 
+  // ============ 月球平均交点（南北交） ============
+  // Meeus：月球轨道对黄道的升交点平黄经 Ω（即平均北交点）
+  // 精度约 ±1.5°（真交点在平均交点附近摆动），与引擎整体精度口径一致
+  function meanNodeLon(T) {
+    var omega = 125.04452 - 1934.136261 * T + 0.0020708 * T * T + T * T * T / 450000;
+    return rev(omega);
+  }
+
   // ============ 上升星座 ASC ============
   // 简化：等分宫位（Equal House）系统
   // 1. 计算本地恒星时 LST
@@ -261,10 +271,17 @@ window.ASTRO = (function () {
       Math.floor(utcHour), Math.round((utcHour - Math.floor(utcHour)) * 60), 0
     ));
 
-    // 10 行星黄经
+    // 10 行星 + 南北交点黄经
     var planets = PLANETS.map(function (p) {
-      var lon = precisePlanetLon(p.key, utcDate);
-      if (lon === null) lon = planetLon(p.key, T);
+      var lon;
+      if (p.key === 'northnode') {
+        lon = meanNodeLon(T);
+      } else if (p.key === 'southnode') {
+        lon = rev(meanNodeLon(T) + 180);
+      } else {
+        lon = precisePlanetLon(p.key, utcDate);
+        if (lon === null) lon = planetLon(p.key, T);
+      }
       var info = lonToSign(lon);
       return {
         key: p.key, name: p.name, en: p.en, sym: p.sym,
@@ -299,10 +316,12 @@ window.ASTRO = (function () {
       p.house = houseIdx;
     });
 
-    // 主要相位（所有行星两两组合，过滤合/六合/刑/冲/三合）
+    // 主要相位（行星两两组合，交点不参与；过滤合/六合/刑/冲/三合）
     var aspectList = [];
     for (var i = 0; i < planets.length; i++) {
+      if (planets[i].isNode) continue;
       for (var j = i + 1; j < planets.length; j++) {
+        if (planets[j].isNode) continue;
         var diff = Math.abs(planets[i].lon - planets[j].lon);
         if (diff > 180) diff = 360 - diff;
         for (var k = 0; k < ASPECTS.length; k++) {
