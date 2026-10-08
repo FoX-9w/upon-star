@@ -409,6 +409,47 @@
       questionSelEl.innerHTML = html;
     }
 
+    // 结果收尾：总体总结（回扣提问 + 综合全部牌面 + 收束语 + 行动建议）
+    function buildSummaryBlock(){
+      var SG = window.QUESTION_SUMMARY || null;
+      if(!SG) return null;
+      var qInfo = currentQuestion();
+      var cat = (qInfo.cat && QUESTION_CONTEXTS[qInfo.cat]) ? qInfo.cat : 'decision';
+      var ctx = QUESTION_CONTEXTS[cat];
+      var sg = SG[cat];
+      if(!sg) return null;
+      var n = selected.length;
+      if(!n) return null;
+      var revCount = selected.filter(function(c){ return reversedMap[c]; }).length;
+      var tone = ((n - revCount) / n) >= 0.5 ? 'up' : 'rev';
+      var labels = cur().labels[target] || [];
+      var firstCi = selected[0], lastCi = selected[n-1];
+      var firstCard = DATA.cards[firstCi], lastCard = DATA.cards[lastCi];
+      var firstLab = labels[0] || '第 1 位', lastLab = labels[n-1] || ('第 ' + n + ' 位');
+      var base = '本次共 ' + n + ' 张牌' + (revCount ? ('，其中 ' + revCount + ' 张逆位') : '，全部正位')
+        + '。综合牌面，' + (tone === 'up' ? '整体基调偏顺。' : '整体基调偏紧。');
+      var arcs = '开局（' + firstLab + '）落在「' + (firstCard.nameCn || firstCard.name || '') + (firstCard.name ? ' · ' + firstCard.name : '') + (reversedMap[firstCi] ? '（逆位）' : '') + '」'
+        + '，收束（' + lastLab + '）落在「' + (lastCard.nameCn || lastCard.name || '') + (lastCard.name ? ' · ' + lastCard.name : '') + (reversedMap[lastCi] ? '（逆位）' : '') + '」'
+        + '——从起点到落点的这段路径，就是你眼下这件事的走向。';
+
+      var wrap = document.createElement('div'); wrap.className = 'exp-block exp-summary';
+      wrap.innerHTML = '<div class="exp-label">总体总结</div>';
+      var body = document.createElement('div'); body.className = 'exp-body';
+      body.innerHTML = (qInfo.display ? '<div class="q-quote">「' + escapeHtml(qInfo.display) + '」</div>' : '')
+        + '<div class="q-overview">' + escapeHtml(base) + '</div>'
+        + '<div class="q-arcs">' + escapeHtml(arcs) + '</div>'
+        + '<div class="q-verdict">' + escapeHtml(sg[tone]) + '</div>'
+        + '<div class="q-action"><b>建议</b>' + escapeHtml(sg.action) + '</div>'
+        + '<div class="q-note">以上为文化视角的整理与提醒，不构成命运定论，具体决定请结合你的现实情况。</div>';
+      wrap.appendChild(body);
+      return wrap;
+    }
+
+    function revealSummary(){
+      var sm = document.querySelector('#readingText .exp-summary');
+      if(sm) sm.classList.add('show');
+    }
+
     function renderReading(instant){
       var deck = cur();
       var labels = deck.labels[target] || [];
@@ -446,6 +487,10 @@
         textCol.appendChild(buildMeaningBlock(ci, labels[i] || ('No.' + (i+1))));
       });
 
+      // 收尾：总体总结（逐牌解读之后，作为整段结果的总括）
+      var summaryBlock = buildSummaryBlock();
+      if(summaryBlock) textCol.appendChild(summaryBlock);
+
       // 整体淡入（占星猫桌布淡出后，牌张与牌义渐次浮现）
       var split = document.querySelector('.reading-split');
       if(split){ split.classList.remove('in'); void split.offsetWidth; split.classList.add('in'); }
@@ -460,6 +505,7 @@
         var allM = textCol.querySelectorAll('.read-meaning');
         for(var si=0; si<allS.length; si++){ allS[si].classList.add('show'); }
         for(var mi=0; mi<allM.length; mi++){ allM[mi].classList.add('show'); }
+        revealSummary();
         actionsEl.hidden = false;
         if(deck.premium) renderPremium();
       } else {
@@ -500,6 +546,7 @@
     function finishDeal(){
       if(actionsEl) actionsEl.hidden = false;
       if(deckHint) deckHint.textContent = '';
+      revealSummary();
       if(cur().premium) renderPremium();
     }
 

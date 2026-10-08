@@ -289,6 +289,53 @@ body.theme-west .exp-question .q-body{
   font-family:var(--font-serif);font-size:.8rem;line-height:1.66;color:var(--text-dim);
 }
 
+/* 总体总结区块（金色调，作为整段结果的收束，视觉上高于逐牌解读） */
+body.theme-west .exp-summary{
+  margin-top:var(--space-md);
+  background:rgba(200,164,92,.07);
+  border:1px solid rgba(200,164,92,.35);
+  border-radius:10px;
+  padding:14px 18px;
+  opacity:0;transform:translateY(10px);
+  transition:opacity .7s ease,transform .7s ease;
+}
+body.theme-west .exp-summary.show{opacity:1;transform:none;}
+body.theme-west .exp-summary .exp-label{
+  color:var(--gold-light);border-left-color:var(--gold-light);
+  font-size:.72rem;letter-spacing:.14em;
+}
+body.theme-west .exp-summary .q-quote{
+  font-family:var(--font-serif);font-size:.78rem;line-height:1.6;
+  color:var(--gold-light);margin-bottom:8px;
+}
+body.theme-west .exp-summary .q-overview{
+  font-family:var(--font-serif);font-size:.8rem;line-height:1.7;color:var(--text-dim);
+  margin-bottom:6px;
+}
+body.theme-west .exp-summary .q-arcs{
+  font-family:var(--font-serif);font-size:.8rem;line-height:1.7;color:var(--text-dim);
+  margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed rgba(200,164,92,.35);
+}
+body.theme-west .exp-summary .q-verdict{
+  font-family:var(--font-serif);font-size:.82rem;line-height:1.72;color:var(--text);
+  margin-bottom:8px;
+}
+body.theme-west .exp-summary .q-action{
+  font-family:var(--font-serif);font-size:.8rem;line-height:1.7;color:var(--gold-light);
+  margin-bottom:8px;
+}
+body.theme-west .exp-summary .q-action b{
+  font-family:var(--font-decor);font-size:.68rem;letter-spacing:.12em;
+  margin-right:8px;color:var(--gold-dim);
+}
+body.theme-west .exp-summary .q-note{
+  font-family:var(--font-serif);font-size:.68rem;line-height:1.6;font-style:italic;
+  color:var(--text-dim);opacity:.8;
+}
+@media (prefers-reduced-motion: reduce){
+  body.theme-west .exp-summary{opacity:1;transform:none;transition:none;}
+}
+
 /* =========================================================
    沉浸式结果布局：左卡牌 / 右牌义（占星猫桌布淡出后浮现）
    ========================================================= */

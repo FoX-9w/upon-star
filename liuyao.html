@@ -36,6 +36,15 @@
     .question-wrap input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,164,92,.18);}
     .question-intro .q-lead{font-family:var(--font-serif);font-size:.92rem;line-height:1.7;color:var(--text-dim);}
 
+    /* ===== 总体总结（结果收尾） ===== */
+    .result-summary{background:rgba(200,164,92,.07);border-color:rgba(200,164,92,.4);}
+    .result-summary .q-quote{font-family:var(--font-serif);color:var(--gold-light);font-size:.95rem;margin:0 0 var(--space-xs);}
+    .result-summary .q-overview{font-family:var(--font-serif);color:var(--text-dim);line-height:1.8;font-size:.92rem;margin:0 0 6px;}
+    .result-summary .q-verdict{font-family:var(--font-serif);color:var(--text);line-height:1.85;font-size:.95rem;margin:0 0 8px;padding-top:8px;border-top:1px dashed rgba(200,164,92,.35);}
+    .result-summary .q-action{font-family:var(--font-serif);color:var(--gold-light);line-height:1.8;font-size:.92rem;margin:0 0 8px;}
+    .result-summary .q-action b{font-family:var(--font-decor);font-size:.72rem;letter-spacing:.14em;margin-right:8px;color:var(--gold-dim);}
+    .result-summary .q-note{font-family:var(--font-serif);font-style:italic;color:var(--text-dim);opacity:.8;font-size:.74rem;line-height:1.6;margin:0;}
+
     /* ===== 摇卦台 ===== */
     .toss-stage{max-width:640px;margin:var(--space-lg) auto 0;text-align:center;}
     .coin-row{display:flex;justify-content:center;gap:20px;margin-bottom:var(--space-md);min-height:104px;align-items:center;}
@@ -223,7 +232,7 @@
     <p class="disclaimer">本平台内容仅用于文化研究与心理探索参考，不构成任何专业建议。所有推演计算均在您的设备本地完成，我们不会存储你的个人数据，也不写入 Cookie。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
   </footer>
 
-  <script src="assets/question-classify.js?v=20261008a"></script>
+  <script src="assets/question-classify.js?v=20261010a"></script>
   <script src="assets/common-questions.js?v=20260914g"></script>
   <script src="assets/cards/yijing-data.js?v=20260914g"></script>
   <script src="assets/cards/yijing-baihua.js?v=20260914g"></script>
@@ -429,10 +438,36 @@
         resultBlocks.appendChild(buildGuaBlock('变卦', changedGua, true, qInfo.cat));
       }
 
+      // 总体总结（结果收尾）
+      var sumBlock = buildSummaryBlock(qInfo, mainGua, changedGua, hasChange, dyn.length);
+      if(sumBlock) resultBlocks.appendChild(sumBlock);
+
       actionsEl.hidden = false;
       metaNote.textContent = '六爻成卦 · 主卦「' + mainGua.name + '」'
         + (hasChange ? ' · 变卦「' + changedGua.name + '」' : ' · 无动爻')
         + (q ? ' · 提问：「' + q + '」' : '');
+    }
+
+    // 总体总结（结果收尾：回扣提问 + 卦象概览 + 收束语 + 行动建议）
+    function buildSummaryBlock(qInfo, mainGua, changedGua, hasChange, dynCount){
+      var SG = window.QUESTION_SUMMARY;
+      if(!SG) return null;
+      var cat = (qInfo.cat && QUESTION_CONTEXTS[qInfo.cat]) ? qInfo.cat : 'decision';
+      var sg = SG[cat];
+      if(!sg) return null;
+      var tone = hasChange ? 'rev' : 'up';
+      var overview = '本卦「' + mainGua.name + '」' + (hasChange
+        ? ('动变为「' + changedGua.name + '」，共 ' + dynCount + ' 个动爻——卦象提示局面正在转换。')
+        : '，无动爻——卦象平稳，事情按当前态势自然推进。');
+      var wrap = document.createElement('div');
+      wrap.className = 'result-block result-summary';
+      wrap.innerHTML = '<h3>总体总结</h3>'
+        + (qInfo.display ? '<div class="q-quote">「' + escapeHtml(qInfo.display) + '」</div>' : '')
+        + '<p class="q-overview">' + escapeHtml(overview) + '</p>'
+        + '<p class="q-verdict">' + escapeHtml(sg[tone]) + '</p>'
+        + '<p class="q-action"><b>建议</b>' + escapeHtml(sg.action) + '</p>'
+        + '<p class="q-note">以上为文化视角的整理与提醒，不构成命运定论，具体决定请结合你的现实情况。</p>';
+      return wrap;
     }
 
     function buildQuestionIntro(qInfo){

@@ -80,6 +80,15 @@
     .q-answer .q-cat-tag{display:inline-block;margin-right:8px;padding:1px 9px;border-radius:999px;
       background:rgba(200,164,92,.18);color:var(--gold-light);font-size:.74rem;letter-spacing:.06em;vertical-align:middle;}
 
+    /* ===== 总体总结（结果收尾） ===== */
+    .result-summary{background:rgba(200,164,92,.07);border-color:rgba(200,164,92,.4);}
+    .result-summary .q-quote{font-family:var(--font-serif);color:var(--gold-light);font-size:.95rem;margin:0 0 var(--space-xs);}
+    .result-summary .q-overview{font-family:var(--font-serif);color:var(--text-dim);line-height:1.8;font-size:.92rem;margin:0 0 6px;}
+    .result-summary .q-verdict{font-family:var(--font-serif);color:var(--text);line-height:1.85;font-size:.95rem;margin:0 0 8px;padding-top:8px;border-top:1px dashed rgba(200,164,92,.35);}
+    .result-summary .q-action{font-family:var(--font-serif);color:var(--gold-light);line-height:1.8;font-size:.92rem;margin:0 0 8px;}
+    .result-summary .q-action b{font-family:var(--font-decor);font-size:.72rem;letter-spacing:.14em;margin-right:8px;color:var(--gold-dim);}
+    .result-summary .q-note{font-family:var(--font-serif);font-style:italic;color:var(--text-dim);opacity:.8;font-size:.74rem;line-height:1.6;margin:0;}
+
     .reading-actions{text-align:center;margin-top:var(--space-lg);}
     .meta-note{text-align:center;color:var(--text-dim);font-size:.76rem;margin-top:var(--space-sm);font-family:var(--font-serif);font-style:italic;}
 
@@ -176,7 +185,7 @@
     <p class="disclaimer">本平台内容仅用于文化研究与心理探索参考，不构成任何专业建议。所有推演计算均在您的设备本地完成，我们不会存储你的个人数据，也不写入 Cookie。<br>内容交流与反馈微信：<strong>uponstar_wx</strong><br>本页内容不构成命运定论，亦不构成医疗、心理、法律或财务等专业建议；如遇现实困境，请寻求专业帮助。</p>
   </footer>
 
-  <script src="assets/question-classify.js?v=20261008a"></script>
+  <script src="assets/question-classify.js?v=20261010a"></script>
   <script src="assets/common-questions.js?v=20260914g"></script>
   <script src="assets/cards/lunar-engine.js?v=20260914g"></script>
   <script src="assets/cards/xiaoliuren-data.js?v=20261009a"></script>
@@ -358,6 +367,10 @@
         + (catText ? '<div class="q-cat"><span class="q-cat-tag">' + escapeHtml(palace.name) + ' · ' + escapeHtml(ctx ? ctx.label : '') + '</span>' + escapeHtml(catText) + '</div>' : '');
       resultBlocks.appendChild(qa);
 
+      // 总体总结（结果收尾）
+      var sum = buildSummaryBlock(q, palace, idxs);
+      if(sum) resultBlocks.appendChild(sum);
+
       actionsEl.hidden = false;
       metaNote.textContent = '起课于 公历 ' + lunar.cYear + '.' + lunar.cMonth + '.' + lunar.cDay
         + ' · 农历 ' + lunar.IMonthCn + lunar.IDayCn + ' · ' + SC_NAME[sc] + '时'
@@ -366,6 +379,28 @@
 
       var rsec = document.getElementById('reading');
       if(rsec && rsec.scrollIntoView) rsec.scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+
+    // 总体总结（结果收尾：三宫串联 + 收束语 + 行动建议）
+    function buildSummaryBlock(q, palace, idxs){
+      var SG = window.QUESTION_SUMMARY;
+      if(!SG) return null;
+      var cat = (CAT_CONTEXTS[q.cat]) ? q.cat : 'decision';
+      var sg = SG[cat];
+      if(!sg) return null;
+      var tone = palace.luck === '吉' ? 'up' : 'rev';
+      var overview = '时宫落于「' + palace.name + '」（' + palace.luck + '），三宫路径为 '
+        + PAL[idxs[0]] + ' → ' + PAL[idxs[1]] + ' → ' + PAL[idxs[2]]
+        + '——月宫看背景，日宫看过程，时宫看落点，整条线就是你问这件事的走势。';
+      var wrap = document.createElement('div');
+      wrap.className = 'result-block result-summary';
+      wrap.innerHTML = '<h3>总体总结</h3>'
+        + '<div class="q-quote">「' + escapeHtml(q.display) + '」</div>'
+        + '<p class="q-overview">' + escapeHtml(overview) + '</p>'
+        + '<p class="q-verdict">' + escapeHtml(sg[tone]) + '</p>'
+        + '<p class="q-action"><b>建议</b>' + escapeHtml(sg.action) + '</p>'
+        + '<p class="q-note">以上为文化视角的整理与提醒，不构成命运定论，具体决定请结合你的现实情况。</p>';
+      return wrap;
     }
 
     function resetKe(){
