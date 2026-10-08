@@ -99,20 +99,26 @@
     }
     function buildDeckOrder(){ deckOrder = shuffleArray(DATA.cards.map(function(_,i){ return i; })); }
 
+    // 占位卡:无图或图片加载失败时的兜底(buildFront / buildCardVisual 共用)
+    function makePlaceholder(card){
+      var d = document.createElement('div');
+      d.className = 'ph-card';
+      d.innerHTML = '<div class="ph-name"></div><div class="ph-tag">图像生成中</div>';
+      d.querySelector('.ph-name').textContent = (card.nameCn || '') + ' ' + (card.name || '');
+      return d;
+    }
+
     // 建立正面内容：有图（art 或 img 非空）则 <img>，无图则占位卡
     function buildFront(card){
       if(card.art || (card.img && card.img.length > 0)){
         var f = document.createElement('img');
         f.alt = (card.name || '卡牌') + ' 正面';
         f.loading = 'lazy';
+        f.onerror = function(){ f.replaceWith(makePlaceholder(card)); };
         if(card.img && card.img.length > 0 && !card.art){ f.src = card.img; } // 雷诺曼：图即档案，立即载入
         return f;
       }
-      var d = document.createElement('div');
-      d.className = 'ph-card';
-      d.innerHTML = '<div class="ph-name"></div><div class="ph-tag">图像生成中</div>';
-      d.querySelector('.ph-name').textContent = (card.nameCn || '') + ' ' + (card.name || '');
-      return d;
+      return makePlaceholder(card);
     }
 
     // 依当前 ringAngle 计算并写入每张卡的 transform（保持萤幕正向）
@@ -335,12 +341,10 @@
         var setAR = function(){ if(im.naturalWidth && im.naturalHeight){ rc.style.aspectRatio = (im.naturalWidth/im.naturalHeight).toFixed(4); } };
         if(im.complete){ setAR(); }
         im.addEventListener('load', setAR);
+        im.addEventListener('error', function(){ im.replaceWith(makePlaceholder(card)); rc.style.aspectRatio = '2 / 3'; });
         rc.appendChild(im);
       } else {
-        var ph = document.createElement('div'); ph.className = 'ph-card';
-        ph.innerHTML = '<div class="ph-name"></div><div class="ph-tag">图像生成中</div>';
-        ph.querySelector('.ph-name').textContent = (card.nameCn || '') + ' ' + (card.name || '');
-        rc.appendChild(ph);
+        rc.appendChild(makePlaceholder(card));
         rc.style.aspectRatio = '2 / 3';
       }
 
