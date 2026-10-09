@@ -14,14 +14,17 @@
   'use strict';
 
   /* ---- 底座坐标系（画布 1767×1510（2026-10-09 裁掉右侧 523px 死白，原 2290 宽））----
-     2026-10-09 重绘 logo 后按新图重新标定：拱门内圈椭圆，柱间宽度 */
+     2026-10-09 重绘 logo 后按新图重新标定：拱门内圈椭圆，柱间宽度
+     2026-10-09d 轨道放大：rx 440→660 / ry 240→310，星轨掠过立柱外侧，
+       视觉上「绕门一周」而非「柱间小圈」（星层 z:2 在柱前，穿过不穿帮） */
   var VW = 1767, VH = 1510;
-  var ORBIT = { cx: 1145, cy: 710, rx: 440, ry: 240, rot: -8.8 };
+  var ORBIT = { cx: 1145, cy: 720, rx: 660, ry: 310, rot: -8.8 };
   var REST  = { x: 1145, y: 950 };            /* 星辰盒中心 = 静止位置 */
   var PHI   = ORBIT.rot * Math.PI / 180;
 
-  /* 流星俯冲起点（底座坐标偏移，相对 REST）：左上角画外。
-     比例经过放大，常见视口（桌面 1220px 舞台 / 手机 94vw）下都保证在屏外 */
+  /* 流星俯冲起点：页面左上角画外 (0,0)。
+     静态值只是兜底——boot 时按星辰实际落点的屏幕坐标反算（computeDive），
+     任何视口 / 任何舞台尺寸下起点都精确钉在页面左上角，尾迹角度同步反算 */
   var DIVE0 = { x: -1750, y: -2600 };
 
   function pt(th) {                            /* 椭圆参数 → 底座坐标 */
@@ -80,6 +83,24 @@
 
     var raf = 0, t0 = 0;
 
+    /* 俯冲起点按「页面左上角 (0,0)」实时反算：
+       星辰静止中心的屏幕坐标 / 缩放比 = 所需底座偏移；顺带把尾迹角度
+       （起点→落点的屏幕方位角）写进 --lo-tail-ang，供 CSS 尾迹指向起点 */
+    function computeDive() {
+      if (DIVE <= 0) return;
+      try {
+        var r = starG.getBoundingClientRect();
+        var k = (box.clientWidth || VW) / VW;
+        if (r.width > 0 && k > 0) {
+          var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+          DIVE0.x = -cx / k;
+          DIVE0.y = -cy / k;
+          starG.style.setProperty('--lo-tail-ang',
+            (Math.atan2(cy, cx) * 180 / Math.PI).toFixed(1) + 'deg');
+        }
+      } catch (e) {}
+    }
+
     function paint(dx, dy, sc) {
       var k = (box.clientWidth || VW) / VW;          /* 底座单位 → CSS px */
       starG.style.transform =
@@ -131,6 +152,7 @@
     /* 起幕：挂 .lo-play、摘下 .lo-armed、记下「已看过」；俯冲模式广播事件供画布流星同步 */
     function boot() {
       var de = document.documentElement;
+      computeDive();
       de.classList.remove('lo-armed');
       de.classList.add('lo-play');
       if (DIVE > 0) {

@@ -11,7 +11,7 @@
   <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
   <link rel="preload" as="image" href="assets/logo-mark.webp?v=20261009c" fetchpriority="high">
   <link rel="stylesheet" href="assets/base.css?v=20261009a">
-  <link rel="stylesheet" href="assets/logo-orbit.css?v=20261009c">
+  <link rel="stylesheet" href="assets/logo-orbit.css?v=20261009d">
   <script>
   /* 门厅页每次到访都播放公转（先清掉「已看过」标记再加载 logo-orbit.js）；
      禁用 JS / prefers-reduced-motion 时页面直接呈现静止终态。 */
@@ -66,17 +66,20 @@
   @keyframes inRay{from{transform:skewX(-8deg) translateX(-3vmin);opacity:.55;}
                    to{transform:skewX(-11deg) translateX(4vmin);opacity:.95;}}
 
-  /* ---------- 舞台：整页唯一主体（自适应放大，吃满视口） ---------- */
-  .in-stage{position:relative;z-index:2;width:min(1900px,97vw,94vh);}
+  /* ---------- 舞台：整页唯一主体（自适应放大，吃满视口）----------
+     2026-10-09d：94vh→108vh（画布高 0.8545×宽 → 舞台高 ≈92vh），
+     「探索」按钮改为绝对定位坐进拱门正中（门轴已居中，left:50% 即柱间） */
+  .in-stage{position:relative;z-index:2;width:min(1900px,97vw,108vh);}
 
-  /* ---------- 唯一入口：归位爆闪后浮现 ---------- */
-  .in-enter{position:relative;z-index:2;
+  /* ---------- 唯一入口：归位爆闪后浮现（绝对定位，坐在拱门柱间） ---------- */
+  .in-enter{position:absolute;left:50%;bottom:clamp(44px,7.5vh,90px);z-index:3;
+    transform:translateX(-50%);
     display:inline-flex;flex-direction:column;align-items:center;gap:4px;
     padding:14px 52px;border-radius:999px;
     border:1px solid var(--gold);background:transparent;color:var(--gold-light);
-    transition:background .25s,box-shadow .3s,transform .3s,color .25s;}
+    transition:background .25s,box-shadow .3s,color .25s;}
   .in-enter:hover{background:var(--gold);color:var(--on-accent);
-    box-shadow:0 0 34px rgba(200,164,92,.5);transform:translateY(-2px);}
+    box-shadow:0 0 34px rgba(200,164,92,.5);}
   .in-enter-cn{font-family:var(--font-sans);font-size:1.02rem;letter-spacing:.34em;line-height:1.3;}
   .in-enter-en{font-family:var(--font-decor);font-size:.56rem;letter-spacing:.3em;
     text-transform:uppercase;opacity:.66;line-height:1.2;}
@@ -88,8 +91,9 @@
   html.in-armed .in-enter{opacity:0;}
   html.in-armed.in-show .in-enter{animation:inReveal 1.5s cubic-bezier(.22,.61,.36,1) var(--lo-rest) both;}
   html.in-armed.in-show .in-stage{animation:inStageIn 1.2s ease both;}
-  @keyframes inReveal{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
-  @keyframes inStageIn{from{opacity:0;transform:scale(.985);}to{opacity:1;transform:none;}}
+  @keyframes inReveal{from{opacity:0;transform:translateX(-50%) translateY(12px);}
+                      to{opacity:1;transform:translateX(-50%);}}
+  @keyframes inStageIn{from{opacity:0;}to{opacity:1;}}
 
   /* 合规要求的常驻声明：极淡，不抢画面 */
   .in-legal{position:absolute;bottom:clamp(10px,1.8vh,18px);left:0;right:0;z-index:2;
@@ -97,20 +101,21 @@
     letter-spacing:.1em;color:var(--text-dim);opacity:.42;padding:0 16px;}
 
   /* 流星尾迹：仅在俯冲相位可见（时长读 --lo-dive，与 JS 同源）。
-     俯冲方向 = 屏幕上 (1750,2600) → 与水平夹角 56°，尾迹反向指向左上 */
-  .lo-tail{position:absolute;right:50%;top:50%;width:430%;height:16%;
+     俯冲起点 = 页面左上角 (0,0)（logo-orbit.js computeDive 反算），
+     尾迹角度 = 起点→落点的屏幕方位角，由 JS 写入 --lo-tail-ang，任何视口都指向来路 */
+  .lo-tail{position:absolute;right:50%;top:50%;width:560%;height:15%;
     z-index:0;transform-origin:right center;border-radius:999px;pointer-events:none;
-    background:linear-gradient(to left, rgba(222,238,255,.95), rgba(165,205,255,.38) 46%, transparent 82%);
-    filter:blur(1.5px);opacity:0;}
+    background:linear-gradient(to left, rgba(235,245,255,.98), rgba(180,214,255,.45) 42%, rgba(150,196,255,.12) 68%, transparent 86%);
+    filter:blur(1.2px);opacity:0;}
   html.lo-play .lo-tail{animation:loDiveTail var(--lo-dive) cubic-bezier(.2,.75,.45,1) both;}
   @keyframes loDiveTail{
-    0%{opacity:1;transform:translateY(-50%) rotate(56deg) scaleX(1);}
-    70%{opacity:.8;}
-    100%{opacity:0;transform:translateY(-50%) rotate(56deg) scaleX(.12);}}
+    0%{opacity:1;transform:translateY(-50%) rotate(var(--lo-tail-ang,45deg)) scaleX(1);}
+    70%{opacity:.75;}
+    100%{opacity:0;transform:translateY(-50%) rotate(var(--lo-tail-ang,45deg)) scaleX(.10);}}
 
   @media (max-width:640px){
-    .in-stage{width:min(100vw - 12px,92vh);}
-    .in-enter{padding:12px 42px;}
+    .in-stage{width:min(100vw - 12px,108vh);}
+    .in-enter{padding:12px 42px;bottom:clamp(38px,6vh,72px);}
   }
 
   @media (prefers-reduced-motion:reduce){
@@ -168,7 +173,7 @@
     <p class="in-legal">本平台内容仅供文化研究与心理探索参考，不构成命运定论。</p>
   </div>
 
-  <script src="assets/logo-orbit.js?v=20261009c"></script>
+  <script src="assets/logo-orbit.js?v=20261009d"></script>
   <script>
   /* ============================================================
      星尘粒子场 v2（只服务 intro 门厅；logo 与公转动效零改动）
@@ -189,10 +194,13 @@
     var stars = [];       // 远景闪烁星（不移动，只呼吸）
     var streams = [];     // 流光丝带粒子（带渐隐尾迹）
     var veils = [];       // 极光纱幕（大柔光斑漂移）
-    var streak = null;    // 当前流星
-    var streakCool = 3;
-    var diveReq = false;  // logo 俯冲同步：画布放大号流星伴飞
-    window.addEventListener('logoorbit:dive', function () { diveReq = true; });
+    var meteors = [];     // 流星群（可多发并行）
+    var meteorCool = 1.2;
+    var pending = [];     // 延迟生成的伴飞流星 {t, big}
+    // logo 俯冲同步：画布 1 大 2 小流星伴飞
+    window.addEventListener('logoorbit:dive', function () {
+      pending.push({ t: 0, big: 1 }, { t: .3 }, { t: .7 });
+    });
 
     function rand(a, b) { return a + Math.random() * (b - a); }
     function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -243,6 +251,15 @@
         hue: pick(['90,140,220', '120,170,240', '80,120,200'])
       };
     }
+    /* 普通流星：天顶随机入场，斜向滑落（大小/速度/尾长随机） */
+    function spawnMeteor() {
+      meteors.push({
+        x: rand(0.02, 0.96), y: rand(-0.06, 0.30),
+        vx: rand(0.08, 0.26) * (Math.random() < 0.5 ? -1 : 1),
+        vy: rand(0.30, 0.58), life: 0, ttl: rand(0.8, 1.5),
+        w: rand(1.1, 2.0), tail: rand(0.10, 0.20)
+      });
+    }
 
     function resize() {
       DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -253,7 +270,7 @@
       var area = W * H;
       var nDust = Math.max(80, Math.min(170, Math.round(area / 12000)));
       var nStar = Math.max(50, Math.min(110, Math.round(area / 16000)));
-      var nStream = Math.max(7, Math.min(16, Math.round(area / 110000)));
+      var nStream = Math.max(16, Math.min(34, Math.round(area / 55000)));
       if (dust.length > nDust) dust.length = nDust;
       while (dust.length < nDust) dust.push(makeDust(true));
       if (stars.length > nStar) stars.length = nStar;
@@ -342,36 +359,41 @@
         drawGlow(hx.x, hx.y, st.w * 4.5, st.hue, 0.55 * fade);
       }
 
-      /* 流星：logo 俯冲时伴飞一发大号；平时冷却后随机触发 */
-      streakCool -= dt;
-      if (!streak && diveReq) {
-        streak = { x: -0.04, y: -0.06, vx: 0.34, vy: 0.50, life: 0, ttl: 1.25 };
-        diveReq = false;
-      } else if (!streak && streakCool <= 0) {
-        streak = {
-          x: rand(0.15, 0.85), y: rand(-0.05, 0.28),
-          vx: rand(0.10, 0.22) * (Math.random() < 0.5 ? -1 : 1),
-          vy: rand(0.34, 0.55), life: 0, ttl: rand(0.9, 1.5)
-        };
-      }
-      if (streak) {
-        streak.life += dt;
-        streak.x += streak.vx * dt; streak.y += streak.vy * dt;
-        var sk = streak.life / streak.ttl;
-        if (sk >= 1 || streak.y > 0.9) { streak = null; streakCool = rand(2.4, 5.5); }
-        else {
-          var sx = streak.x * W, sy = streak.y * H;
-          var sp = Math.hypot(streak.vx, streak.vy);
-          var tail = 0.16 * W;
-          var ex = sx - streak.vx / sp * tail, ey = sy - streak.vy / sp * tail;
-          var sf = Math.sin(Math.PI * sk);
-          var lg = ctx.createLinearGradient(sx, sy, ex, ey);
-          lg.addColorStop(0, 'rgba(210,232,255,' + (0.85 * sf).toFixed(3) + ')');
-          lg.addColorStop(1, 'rgba(150,196,255,0)');
-          ctx.strokeStyle = lg; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
-          ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
-          drawGlow(sx, sy, 7, '200,224,255', 0.9 * sf);
+      /* 流星群：logo 俯冲时 1 大 2 小伴飞；平时冷却更短、常 1~2 发并行 */
+      for (var pi = pending.length - 1; pi >= 0; pi--) {
+        pending[pi].t -= dt;
+        if (pending[pi].t <= 0) {
+          if (pending[pi].big) {
+            meteors.push({ x: -0.05, y: -0.04, vx: 0.36, vy: 0.52, life: 0, ttl: 1.3, w: 2.6, tail: 0.24 });
+          } else {
+            spawnMeteor();
+          }
+          pending.splice(pi, 1);
         }
+      }
+      meteorCool -= dt;
+      if (meteorCool <= 0) {
+        spawnMeteor();
+        if (Math.random() < 0.4) spawnMeteor();
+        meteorCool = rand(0.9, 2.4);
+      }
+      for (var m = meteors.length - 1; m >= 0; m--) {
+        var st = meteors[m];
+        st.life += dt;
+        st.x += st.vx * dt; st.y += st.vy * dt;
+        var sk = st.life / st.ttl;
+        if (sk >= 1 || st.y > 0.95) { meteors.splice(m, 1); continue; }
+        var sx = st.x * W, sy = st.y * H;
+        var sp = Math.hypot(st.vx, st.vy);
+        var tail = st.tail * W;
+        var ex = sx - st.vx / sp * tail, ey = sy - st.vy / sp * tail;
+        var sf = Math.sin(Math.PI * sk);
+        var lg = ctx.createLinearGradient(sx, sy, ex, ey);
+        lg.addColorStop(0, 'rgba(214,236,255,' + (0.9 * sf).toFixed(3) + ')');
+        lg.addColorStop(1, 'rgba(150,196,255,0)');
+        ctx.strokeStyle = lg; ctx.lineWidth = st.w; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+        drawGlow(sx, sy, 5 + st.w * 2, '205,228,255', 0.9 * sf);
       }
 
       ctx.globalCompositeOperation = 'source-over';

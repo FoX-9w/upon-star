@@ -42,6 +42,14 @@
 .lo-stage{position:relative;width:100%;}
 .lo-box{position:relative;aspect-ratio:1767/1510;}
 
+/* ---------- 门轴居中（2026-10-09d）----------
+   底座画布右裁后，门轴（柱心/星心 x≈1140）落在画布 64.5% 处而非正中，
+   整体内容左移 14.5% 画布宽，让门轴回到舞台几何中心：
+   · overlay / mark 全幅元素 → margin-left 平移（% 相对 .lo-box 宽 = 画布宽）
+   · 星辰层 left 同步减 14.5%，REST 相对关系不变，JS 偏移零改动 */
+.lo-overlay,.lo-mark{margin-left:-14.5%;}
+.lo-star-g{left:36.718%;}   /* 51.218% − 14.5% */
+
 /* 起幕前先藏起来（终态见下方 .lo-play 的 keyframes） */
 html.lo-armed:not(.lo-play) .lo-box{opacity:0;}
 /* 兜底：万一 logo-orbit.js 没跑起来，3.5s 后无论如何把画面亮出来 */
@@ -63,8 +71,8 @@ html.lo-armed:not(.lo-play) .lo-box{animation:loSafety 0s linear 3.5s forwards;}
   animation:loEye 5s ease-in-out infinite;}
 @keyframes loEye{0%,100%{opacity:.20;}50%{opacity:.62;}}
 
-/* 星辰层（整块可动：光晕 + 星体 + 归位爆闪） */
-.lo-star-g{position:absolute;left:51.218%;top:47.020%;width:27.166%;
+/* 星辰层（整块可动：光晕 + 星体 + 归位爆闪）；left 已含门轴居中偏移，见上方 2026-10-09d 注 */
+.lo-star-g{position:absolute;top:47.020%;width:27.166%;
   z-index:2;transform-origin:center;will-change:transform;}
 .lo-star{position:relative;z-index:2;display:block;width:100%;height:auto;
   user-select:none;-webkit-user-drag:none;}
