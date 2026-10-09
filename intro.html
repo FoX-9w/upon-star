@@ -101,6 +101,25 @@
     text-align:center;font-family:var(--font-sans);font-size:.62rem;
     letter-spacing:.1em;color:var(--text-dim);opacity:.42;padding:0 16px;}
 
+  /* ---------- 全视之眼：夜色眼睑睁闭，呼吸节律 ----------
+     上下睑从眼窝上下缘向中线合拢（闭 ≈1.4s）→ 稍驻 → 缓缓睁开，
+     7.5s 一息；闭合即空眼窝（夜色同底），合缝一道极细金线 */
+  .lo-lids{position:absolute;inset:0;width:100%;height:100%;z-index:1;
+    margin-left:-14.5%;pointer-events:none;overflow:visible;}
+  .lo-lid{transform-box:fill-box;}
+  .lo-lid-top{transform-origin:50% 0%;animation:loLidTop 7.5s ease-in-out infinite;}
+  .lo-lid-bot{transform-origin:50% 100%;animation:loLidBot 7.5s ease-in-out infinite;}
+  @keyframes loLidTop{0%,34%{transform:scaleY(0);}
+                      50%,56%{transform:scaleY(1);}
+                      72%,100%{transform:scaleY(0);}}
+  @keyframes loLidBot{0%,38%{transform:scaleY(0);}
+                      50%,56%{transform:scaleY(1);}
+                      70%,100%{transform:scaleY(0);}}
+  .lo-lash{opacity:0;animation:loLash 7.5s ease-in-out infinite;}
+  @keyframes loLash{0%,44%{opacity:0;}
+                    50%,56%{opacity:.5;}
+                    68%,100%{opacity:0;}}
+
   /* 流星尾迹：仅在俯冲相位可见（时长读 --lo-dive，与 JS 同源）。
      俯冲起点 = 页面左上角 (0,0)（logo-orbit.js computeDive 反算），
      尾迹角度 = 起点→落点的屏幕方位角，由 JS 写入 --lo-tail-ang，任何视口都指向来路。
@@ -125,6 +144,7 @@
     html.in-armed.in-show .in-enter,html.in-armed.in-show .in-stage{animation:none;}
     .in-rays{display:none;}
     #inDust{display:none;}
+    .lo-lids{display:none;}
     .lo-tail{display:none;}
   }
   </style>
@@ -157,6 +177,25 @@
 
         <img class="lo-mark" src="assets/logo-mark.webp?v=20261009c" width="1767" height="1510"
              alt="Upon Star 标志：白色拱门与立柱，拱顶一只全视之眼，红丝带写着 Wish upon a Star 环绕成环">
+
+        <!-- 全视之眼眼睑：夜色合拢睁闭（在 mark 之上、星辰之下；正常态 scaleY(0) 不可见） -->
+        <svg class="lo-lids" viewBox="0 0 1767 1510" aria-hidden="true">
+          <defs>
+            <radialGradient id="loLidGrad" cx="50%" cy="50%" r="68%">
+              <stop offset="0%" stop-color="#0d0f1a"/>
+              <stop offset="76%" stop-color="#12141f"/>
+              <stop offset="100%" stop-color="#1b1e2e"/>
+            </radialGradient>
+            <filter id="loLidBlur" x="-20%" y="-40%" width="140%" height="180%">
+              <feGaussianBlur stdDeviation="2.5"/>
+            </filter>
+          </defs>
+          <g filter="url(#loLidBlur)">
+            <path class="lo-lid lo-lid-top" d="M 1047 117 A 86 39 0 0 1 1219 117 Z" fill="url(#loLidGrad)"/>
+            <path class="lo-lid lo-lid-bot" d="M 1047 117 A 86 39 0 0 0 1219 117 Z" fill="url(#loLidGrad)"/>
+            <path class="lo-lash" d="M 1064 118 Q 1133 139 1202 118" fill="none" stroke="#c8a45c" stroke-width="4.5" stroke-linecap="round"/>
+          </g>
+        </svg>
 
         <div class="lo-star-g" data-lo-star aria-hidden="true">
           <span class="lo-star-flash"></span>
@@ -199,6 +238,17 @@
     var meteors = [];     // 流星群（可多发并行）
     var meteorCool = 1.2;
     var pending = [];     // 延迟生成的伴飞流星 {t, big}
+    /* 北斗七星：固定构形 + 呼吸闪烁（勺形，柄朝左下；天枢 Dubhe 为橙巨星取暖金） */
+    var DIP = [
+      { x: 0.00, y: 0.98, hue: '186,214,255' },   // 摇光 Alkaid
+      { x: 0.20, y: 0.72, hue: '186,214,255' },   // 开阳 Mizar
+      { x: 0.42, y: 0.55, hue: '210,228,255' },   // 玉衡 Alioth
+      { x: 0.62, y: 0.42, hue: '186,214,255' },   // 天权 Megrez
+      { x: 0.68, y: 0.88, hue: '150,196,255' },   // 天玑 Phecda
+      { x: 1.00, y: 0.80, hue: '150,196,255' },   // 天璇 Merak
+      { x: 1.06, y: 0.30, hue: '224,180,110' }    // 天枢 Dubhe（暖金）
+    ];
+    var dipper = [], dipBox = null;
     // logo 俯冲同步：画布 1 大 2 小流星伴飞
     window.addEventListener('logoorbit:dive', function () {
       pending.push({ t: 0, big: 1 }, { t: .3 }, { t: .7 });
@@ -280,6 +330,18 @@
       if (streams.length > nStream) streams.length = nStream;
       while (streams.length < nStream) streams.push(makeStream());
       if (!veils.length) { veils.push(makeVeil(), makeVeil()); }
+
+      /* 北斗：构形框钉在左上天区（避开拱门主体），resize 重排 */
+      if (!dipper.length) {
+        for (var di = 0; di < DIP.length; di++) {
+          dipper.push({
+            r: rand(1.7, 2.6), ph: rand(0, Math.PI * 2),
+            sp: rand(0.35, 0.75), a: rand(0.5, 0.85)
+          });
+        }
+      }
+      var bw = Math.max(120, Math.min(0.22 * W, 340));
+      dipBox = { x: Math.max(14, 0.035 * W), y: 0.10 * H, w: bw, h: bw * 0.64 };
     }
 
     function drawGlow(x, y, r, hue, a) {
@@ -304,6 +366,32 @@
         var s = stars[i];
         var a = s.a * (0.45 + 0.55 * (0.5 + 0.5 * Math.sin(t * s.sp + s.ph)));
         drawGlow(s.x * W, s.y * H, s.r * 3.2, s.hue, a);
+      }
+
+      /* 北斗七星：慢呼吸 + 细碎闪，构形连线程控在极低透明度 */
+      if (dipBox) {
+        var pts = [];
+        for (var di = 0; di < DIP.length; di++) {
+          var d7 = dipper[di], d0 = DIP[di];
+          var dxp = dipBox.x + d0.x * dipBox.w, dyp = dipBox.y + d0.y * dipBox.h;
+          var br = 0.5 + 0.5 * Math.sin(t * d7.sp + d7.ph);          // 慢呼吸
+          var shimmer = 0.9 + 0.1 * Math.sin(t * 2.6 + d7.ph * 2);   // 细碎闪
+          var da = d7.a * (0.38 + 0.62 * br) * shimmer;
+          drawGlow(dxp, dyp, d7.r * 4.4, d0.hue, da);
+          drawGlow(dxp, dyp, d7.r * 1.5, d0.hue, Math.min(1, da * 1.9));
+          pts.push({ x: dxp, y: dyp, b: br });
+        }
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = 'rgba(170,205,250,0.10)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (var li = 0; li < pts.length; li++) {
+          if (li === 0) ctx.moveTo(pts[li].x, pts[li].y);
+          else ctx.lineTo(pts[li].x, pts[li].y);
+        }
+        ctx.lineTo(pts[3].x, pts[3].y);   // 天枢→天权 合勺口
+        ctx.stroke();
+        ctx.globalCompositeOperation = 'lighter';
       }
 
       /* 极光纱幕：大柔光斑横向漂移，顶部为主 */
