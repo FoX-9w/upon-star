@@ -9,9 +9,9 @@
   <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" as="image" href="assets/logo-mark.webp?v=20260914g" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/logo-mark.webp?v=20261009a" fetchpriority="high">
   <link rel="stylesheet" href="assets/base.css?v=20260914g">
-  <link rel="stylesheet" href="assets/logo-orbit.css?v=20260914g">
+  <link rel="stylesheet" href="assets/logo-orbit.css?v=20261009a">
   <script>
   /* 门厅页每次到访都播放公转（先清掉「已看过」标记再加载 logo-orbit.js）；
      禁用 JS / prefers-reduced-motion 时页面直接呈现静止终态。 */
@@ -27,13 +27,14 @@
      ============================================================ */
 
   /* ---------- 电影感节奏：本页覆盖模块默认节拍 ----------
-     t0 .90 + hook .80×2 + dur 6.00 = end 8.50，自洽 */
+     dive 1.35 + t0 .90 + hook .80×2 + dur 6.00 = end 9.85，自洽 */
   :root{
+    --lo-dive: 1.35s;
     --lo-t0:   .90s;
     --lo-hook: .80s;
     --lo-dur:  6.00s;
-    --lo-end:  8.50s;
-    --lo-rest: 9.30s;
+    --lo-end:  9.85s;
+    --lo-rest: 10.70s;
   }
 
   html,body{height:100%;}
@@ -81,19 +82,31 @@
     text-transform:uppercase;opacity:.66;line-height:1.2;}
 
   /* 入场门控：html.in-armed 时先藏入口；in-show 挂上后按 --lo-rest 延迟浮现。
-     JS 失效 → 无 in-armed → 入口直接可见（静止终态），不白屏 */
+     JS 失效 → 无 in-armed → 入口直接可见（静止终态），不白屏。
+     兜底规则放在 in-show 之前：两规则同特异性，后声明的 in-show 优先 */
+  html.in-armed .in-enter{animation:inReveal 1.5s ease 12s forwards;}
   html.in-armed .in-enter{opacity:0;}
   html.in-armed.in-show .in-enter{animation:inReveal 1.5s cubic-bezier(.22,.61,.36,1) var(--lo-rest) both;}
   html.in-armed.in-show .in-stage{animation:inStageIn 1.2s ease both;}
   @keyframes inReveal{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
   @keyframes inStageIn{from{opacity:0;transform:scale(.985);}to{opacity:1;transform:none;}}
-  /* 兜底：12s 后无论如何把入口交出来 */
-  html.in-armed .in-enter{animation:inReveal 1.5s ease 12s forwards;}
 
   /* 合规要求的常驻声明：极淡，不抢画面 */
   .in-legal{position:absolute;bottom:clamp(10px,1.8vh,18px);left:0;right:0;z-index:2;
     text-align:center;font-family:var(--font-sans);font-size:.62rem;
     letter-spacing:.1em;color:var(--text-dim);opacity:.42;padding:0 16px;}
+
+  /* 流星尾迹：仅在俯冲相位可见（时长读 --lo-dive，与 JS 同源）。
+     俯冲方向 = 屏幕上 (1750,2600) → 与水平夹角 56°，尾迹反向指向左上 */
+  .lo-tail{position:absolute;right:50%;top:50%;width:430%;height:16%;
+    z-index:0;transform-origin:right center;border-radius:999px;pointer-events:none;
+    background:linear-gradient(to left, rgba(222,238,255,.95), rgba(165,205,255,.38) 46%, transparent 82%);
+    filter:blur(1.5px);opacity:0;}
+  html.lo-play .lo-tail{animation:loDiveTail var(--lo-dive) cubic-bezier(.2,.75,.45,1) both;}
+  @keyframes loDiveTail{
+    0%{opacity:1;transform:translateY(-50%) rotate(56deg) scaleX(1);}
+    70%{opacity:.8;}
+    100%{opacity:0;transform:translateY(-50%) rotate(56deg) scaleX(.12);}}
 
   @media (max-width:640px){
     .in-stage{width:min(100vw - 24px,72vh);}
@@ -105,6 +118,7 @@
     html.in-armed.in-show .in-enter,html.in-armed.in-show .in-stage{animation:none;}
     .in-rays{display:none;}
     #inDust{display:none;}
+    .lo-tail{display:none;}
   }
   </style>
   <link rel="canonical" href="https://upon-star.com/intro.html">
@@ -130,15 +144,16 @@
           </defs>
           <g class="lo-orbit-g"><path class="lo-orbit-line" data-lo-orbit d=""/></g>
           <g class="lo-eye-g">
-            <circle class="lo-eyeglow" cx="1140" cy="106" r="92" fill="url(#loHaloGrad)"/>
+            <circle class="lo-eyeglow" cx="1135" cy="114" r="92" fill="url(#loHaloGrad)"/>
           </g>
         </svg>
 
-        <img class="lo-mark" src="assets/logo-mark.webp?v=20260914g" width="2290" height="1510"
+        <img class="lo-mark" src="assets/logo-mark.webp?v=20261009a" width="2290" height="1510"
              alt="Upon Star 标志：白色拱门与立柱，拱顶一只全视之眼，红丝带写着 Wish upon a Star 环绕成环">
 
         <div class="lo-star-g" data-lo-star aria-hidden="true">
           <span class="lo-star-flash"></span>
+          <span class="lo-tail"></span>
           <span class="lo-star-halo"></span>
           <img class="lo-star" src="assets/logo-star.webp?v=20260914g" width="480" height="480" alt="">
         </div>
@@ -153,7 +168,7 @@
     <p class="in-legal">本平台内容仅供文化研究与心理探索参考，不构成命运定论。</p>
   </div>
 
-  <script src="assets/logo-orbit.js?v=20260914g"></script>
+  <script src="assets/logo-orbit.js?v=20261009a"></script>
   <script>
   /* ============================================================
      星尘粒子场 v2（只服务 intro 门厅；logo 与公转动效零改动）
@@ -176,6 +191,8 @@
     var veils = [];       // 极光纱幕（大柔光斑漂移）
     var streak = null;    // 当前流星
     var streakCool = 3;
+    var diveReq = false;  // logo 俯冲同步：画布放大号流星伴飞
+    window.addEventListener('logoorbit:dive', function () { diveReq = true; });
 
     function rand(a, b) { return a + Math.random() * (b - a); }
     function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -325,9 +342,12 @@
         drawGlow(hx.x, hx.y, st.w * 4.5, st.hue, 0.55 * fade);
       }
 
-      /* 流星：冷却后随机触发 */
+      /* 流星：logo 俯冲时伴飞一发大号；平时冷却后随机触发 */
       streakCool -= dt;
-      if (!streak && streakCool <= 0) {
+      if (!streak && diveReq) {
+        streak = { x: -0.04, y: -0.06, vx: 0.34, vy: 0.50, life: 0, ttl: 1.25 };
+        diveReq = false;
+      } else if (!streak && streakCool <= 0) {
         streak = {
           x: rand(0.15, 0.85), y: rand(-0.05, 0.28),
           vx: rand(0.10, 0.22) * (Math.random() < 0.5 ? -1 : 1),

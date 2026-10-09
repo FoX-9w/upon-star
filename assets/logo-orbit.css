@@ -64,7 +64,7 @@ html.lo-armed:not(.lo-play) .lo-box{animation:loSafety 0s linear 3.5s forwards;}
 @keyframes loEye{0%,100%{opacity:.20;}50%{opacity:.62;}}
 
 /* 星辰层（整块可动：光晕 + 星体 + 归位爆闪） */
-.lo-star-g{position:absolute;left:38.864%;top:44.437%;width:20.961%;
+.lo-star-g{position:absolute;left:39.519%;top:47.020%;width:20.961%;
   z-index:2;transform-origin:center;will-change:transform;}
 .lo-star{position:relative;z-index:2;display:block;width:100%;height:auto;
   user-select:none;-webkit-user-drag:none;}

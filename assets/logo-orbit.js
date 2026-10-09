@@ -13,11 +13,16 @@
 (function () {
   'use strict';
 
-  /* ---- 底座坐标系（画布 2290×1510）---- */
+  /* ---- 底座坐标系（画布 2290×1510）----
+     2026-10-09 重绘 logo 后按新图重新标定：拱门内圈椭圆，柱间宽度 */
   var VW = 2290, VH = 1510;
-  var ORBIT = { cx: 1132.5, cy: 729.5, rx: 941, ry: 196, rot: -8.8 };
-  var REST  = { x: 1130, y: 911 };            /* 星辰盒中心 = 静止位置 */
+  var ORBIT = { cx: 1145, cy: 710, rx: 440, ry: 240, rot: -8.8 };
+  var REST  = { x: 1145, y: 950 };            /* 星辰盒中心 = 静止位置 */
   var PHI   = ORBIT.rot * Math.PI / 180;
+
+  /* 流星俯冲起点（底座坐标偏移，相对 REST）：左上角画外。
+     比例经过放大，常见视口（桌面 1220px 舞台 / 手机 94vw）下都保证在屏外 */
+  var DIVE0 = { x: -1750, y: -2600 };
 
   function pt(th) {                            /* 椭圆参数 → 底座坐标 */
     var x = ORBIT.rx * Math.cos(th), y = ORBIT.ry * Math.sin(th);
@@ -70,7 +75,8 @@
     var T0   = sec(cs, '--lo-t0',   .50);
     var HOOK = sec(cs, '--lo-hook', .50);
     var DUR  = sec(cs, '--lo-dur', 3.20);
-    var END  = T0 + HOOK * 2 + DUR;
+    var DIVE = sec(cs, '--lo-dive', 0);        /* >0 时先流星俯冲入场（intro 专属） */
+    var END  = DIVE + T0 + HOOK * 2 + DUR;
 
     var raf = 0, t0 = 0;
 
@@ -84,17 +90,21 @@
       if (!t0) t0 = now;
       var t = (now - t0) / 1000, dx = 0, dy = 0, sc = 1;
 
-      if (t < T0) {                                  /* 未起 */
+      if (DIVE > 0 && t < DIVE) {                    /* 流星俯冲：左上画外 → 中央归位 */
+        var p = Math.min(1, t / DIVE);
+        var u = 1 - Math.pow(1 - p, 3);              /* ease-out：冲进来减速落定 */
+        paint(DIVE0.x * (1 - u), DIVE0.y * (1 - u), 1.30 - .30 * u);
+      } else if (t < DIVE + T0) {                    /* 落定稍歇 */
         paint(0, 0, 1);
-      } else if (t < T0 + HOOK) {                    /* 离位：中心 → 接驳点 */
-        var u = ease((t - T0) / HOOK);
+      } else if (t < DIVE + T0 + HOOK) {             /* 离位：中心 → 接驳点 */
+        var u = ease((t - DIVE - T0) / HOOK);
         paint(offX * u, offY * u, 1 + .10 * Math.sin(Math.PI * u));
-      } else if (t < T0 + HOOK + DUR) {              /* 公转整整一周 */
-        var uu = ease((t - T0 - HOOK) / DUR);
+      } else if (t < DIVE + T0 + HOOK + DUR) {       /* 公转整整一周 */
+        var uu = ease((t - DIVE - T0 - HOOK) / DUR);
         var q = pt(TH0 + uu * Math.PI * 2);
         paint(q.x - REST.x, q.y - REST.y, 1);
       } else if (t < END) {                          /* 归返：接驳点 → 中心 */
-        var u2 = ease((t - T0 - HOOK - DUR) / HOOK);
+        var u2 = ease((t - DIVE - T0 - HOOK - DUR) / HOOK);
         paint(offX * (1 - u2), offY * (1 - u2), 1 + .14 * Math.sin(Math.PI * u2));
       } else {                                       /* 落定 */
         paint(0, 0, 1);
@@ -118,11 +128,14 @@
       return END;
     }
 
-    /* 起幕：挂 .lo-play、摘下 .lo-armed、记下「已看过」 */
+    /* 起幕：挂 .lo-play、摘下 .lo-armed、记下「已看过」；俯冲模式广播事件供画布流星同步 */
     function boot() {
       var de = document.documentElement;
       de.classList.remove('lo-armed');
       de.classList.add('lo-play');
+      if (DIVE > 0) {
+        try { document.dispatchEvent(new CustomEvent('logoorbit:dive', { detail: { dur: DIVE } })); } catch (e) {}
+      }
       try { sessionStorage.setItem('loIntro', '1'); } catch (e) {}
       play();
     }

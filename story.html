@@ -11,7 +11,7 @@
   <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" as="image" href="assets/logo-mark.webp?v=20260914g" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/logo-mark.webp?v=20261009a" fetchpriority="high">
   <link rel="stylesheet" href="assets/base.css?v=20260914g">
   <style>
   /* ============================================================
@@ -83,7 +83,7 @@
   @keyframes osEye{0%,100%{opacity:.20;}50%{opacity:.62;}}
 
   /* 星辰层（整块可动：光晕 + 星体） */
-  .os-star-g{position:absolute;left:38.864%;top:44.437%;width:20.961%;
+  .os-star-g{position:absolute;left:39.519%;top:47.020%;width:20.961%;
     z-index:2;transform-origin:center;will-change:transform;}
   .os-star{position:relative;z-index:2;display:block;width:100%;height:auto;
     user-select:none;-webkit-user-drag:none;}
@@ -307,7 +307,7 @@
             </g>
           </svg>
 
-          <img class="os-mark" src="assets/logo-mark.webp?v=20260914g" width="2290" height="1510"
+          <img class="os-mark" src="assets/logo-mark.webp?v=20261009a" width="2290" height="1510"
                alt="Upon Star 标志：白色拱门与立柱，拱顶一只全视之眼，红丝带写着 Wish upon a Star 环绕成环">
 
           <!-- 中央 8 芒星：单独一层，沿轨道公转一圈后回到中心 -->
@@ -614,8 +614,8 @@
 
     /* ---- 底座坐标系（画布 2290×1510）---- */
     var VW = 2290, VH = 1510;
-    var ORBIT = { cx: 1132.5, cy: 729.5, rx: 941, ry: 196, rot: -8.8 };
-    var REST  = { x: 1130, y: 911 };          /* 星辰盒中心 = 静止位置 */
+    var ORBIT = { cx: 1145, cy: 710, rx: 440, ry: 240, rot: -8.8 };
+    var REST  = { x: 1145, y: 950 };          /* 星辰盒中心 = 静止位置 */
     var PHI   = ORBIT.rot * Math.PI / 180;
 
     function pt(th){
