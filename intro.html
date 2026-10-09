@@ -101,24 +101,37 @@
     text-align:center;font-family:var(--font-sans);font-size:.62rem;
     letter-spacing:.1em;color:var(--text-dim);opacity:.42;padding:0 16px;}
 
-  /* ---------- 全视之眼：夜色眼睑睁闭，呼吸节律 ----------
-     上下睑从眼窝上下缘向中线合拢（闭 ≈1.4s）→ 稍驻 → 缓缓睁开，
-     7.5s 一息；闭合即空眼窝（夜色同底），合缝一道极细金线 */
+  /* ---------- 丝带飘动：波动副本的湍流位移 + 羽化遮罩 ----------
+     遮罩只开丝带区（x≈24%–72%，y≈30%–100%，羽化边），
+     立柱（17–24% / 76–83%）与拱肩不受扰动；滤镜不支持时副本无位移=静止 */
+  .lo-mark-wave{
+    filter:url(#ribbonWave);
+    -webkit-mask-image:linear-gradient(90deg,transparent 24%,#000 31%,#000 64%,transparent 72%),
+                       linear-gradient(180deg,transparent 26%,#000 37%,#000 93%,transparent 99%);
+    -webkit-mask-composite:source-in;
+    mask-image:linear-gradient(90deg,transparent 24%,#000 31%,#000 64%,transparent 72%),
+               linear-gradient(180deg,transparent 26%,#000 37%,#000 93%,transparent 99%);
+    mask-composite:intersect;
+  }
+
+  /* ---------- 全视之眼：仿人眨眼 ----------
+     5.6s 一次快眨：上睑先行、下睑滞后约 30ms（真人眼睑时差），
+     合拢 ≈140ms → 短驻 ≈90ms → 睁开 ≈130ms；闭合即空眼窝，合缝一道金线 */
   .lo-lids{position:absolute;inset:0;width:100%;height:100%;z-index:1;
     margin-left:-14.5%;pointer-events:none;overflow:visible;}
   .lo-lid{transform-box:fill-box;}
-  .lo-lid-top{transform-origin:50% 0%;animation:loLidTop 7.5s ease-in-out infinite;}
-  .lo-lid-bot{transform-origin:50% 100%;animation:loLidBot 7.5s ease-in-out infinite;}
-  @keyframes loLidTop{0%,34%{transform:scaleY(0);}
-                      50%,56%{transform:scaleY(1);}
-                      72%,100%{transform:scaleY(0);}}
-  @keyframes loLidBot{0%,38%{transform:scaleY(0);}
-                      50%,56%{transform:scaleY(1);}
-                      70%,100%{transform:scaleY(0);}}
-  .lo-lash{opacity:0;animation:loLash 7.5s ease-in-out infinite;}
-  @keyframes loLash{0%,44%{opacity:0;}
-                    50%,56%{opacity:.5;}
-                    68%,100%{opacity:0;}}
+  .lo-lid-top{transform-origin:50% 0%;animation:loLidTop 5.6s ease-in-out infinite;}
+  .lo-lid-bot{transform-origin:50% 100%;animation:loLidBot 5.6s ease-in-out infinite;}
+  @keyframes loLidTop{0%,91%{transform:scaleY(0);}
+                      93.5%,94.6%{transform:scaleY(1);}
+                      96.8%,100%{transform:scaleY(0);}}
+  @keyframes loLidBot{0%,91.6%{transform:scaleY(0);}
+                      94.1%,95.2%{transform:scaleY(1);}
+                      97.4%,100%{transform:scaleY(0);}}
+  .lo-lash{opacity:0;animation:loLash 5.6s ease-in-out infinite;}
+  @keyframes loLash{0%,92.4%{opacity:0;}
+                    93.4%,95%{opacity:.5;}
+                    96.6%,100%{opacity:0;}}
 
   /* 流星尾迹：仅在俯冲相位可见（时长读 --lo-dive，与 JS 同源）。
      俯冲起点 = 页面左上角 (0,0)（logo-orbit.js computeDive 反算），
@@ -145,6 +158,7 @@
     .in-rays{display:none;}
     #inDust{display:none;}
     .lo-lids{display:none;}
+    .lo-mark-wave{display:none;}
     .lo-tail{display:none;}
   }
   </style>
@@ -152,6 +166,17 @@
 </head>
 <body>
   <div class="sacred-light" aria-hidden="true"></div>
+
+  <!-- 丝带飘动滤镜：湍流噪声缓慢形变，位移幅度 ±13px（仅作用 .lo-mark-wave） -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="ribbonWave" x="-6%" y="-6%" width="112%" height="112%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.011 0.026" numOctaves="2" seed="7" result="noise">
+        <animate attributeName="baseFrequency" dur="9s" repeatCount="indefinite"
+                 values="0.011 0.026;0.014 0.034;0.011 0.026"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="13" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </svg>
 
   <div class="in-scene" id="inScene">
     <!-- 流光粒子场：在 logo 层后方铺满全屏（深蓝星尘 + 上浮光点 + 偶发流星） -->
@@ -177,6 +202,9 @@
 
         <img class="lo-mark" src="assets/logo-mark.webp?v=20261009c" width="1767" height="1510"
              alt="Upon Star 标志：白色拱门与立柱，拱顶一只全视之眼，红丝带写着 Wish upon a Star 环绕成环">
+
+        <!-- 丝带飘动：同图波动副本，湍流位移 + 羽化遮罩限定丝带区（柱/拱不受影响） -->
+        <img class="lo-mark lo-mark-wave" src="assets/logo-mark.webp?v=20261009c" width="1767" height="1510" aria-hidden="true">
 
         <!-- 全视之眼眼睑：夜色合拢睁闭（在 mark 之上、星辰之下；正常态 scaleY(0) 不可见） -->
         <svg class="lo-lids" viewBox="0 0 1767 1510" aria-hidden="true">
@@ -249,6 +277,22 @@
       { x: 1.06, y: 0.30, hue: '224,180,110' }    // 天枢 Dubhe（暖金）
     ];
     var dipper = [], dipBox = null;
+    /* 十二星座：简化构形散布两侧天区（s=构形框宽占视口比），第 i 座相位差 π/6 → 交替呼吸 */
+    var ZOD = [
+      { x: .045, y: .285, s: .085, p: [[.05, .35], [.4, .5], [.72, .42], [.95, .75]] },              // 白羊
+      { x: .125, y: .075, s: .105, p: [[.08, .3], [.32, .52], [.5, .64], [.68, .5], [.92, .18]] },   // 金牛
+      { x: .845, y: .06,  s: .105, p: [[.15, .15], [.25, .5], [.3, .9], [.75, .1], [.7, .5], [.65, .88]] }, // 双子
+      { x: .93,  y: .265, s: .08,  p: [[.5, .1], [.45, .5], [.15, .85], [.85, .85]] },               // 巨蟹
+      { x: .03,  y: .585, s: .1,   p: [[.9, .35], [.7, .2], [.5, .15], [.35, .3], [.4, .55], [.1, .75]] }, // 狮子
+      { x: .945, y: .52,  s: .09,  p: [[.1, .3], [.4, .5], [.7, .3], [.85, .7], [.45, .85]] },       // 室女
+      { x: .045, y: .84,  s: .085, p: [[.15, .35], [.85, .35], [.5, .85]] },                         // 天秤
+      { x: .9,   y: .8,   s: .095, p: [[.05, .2], [.3, .35], [.5, .55], [.55, .8], [.78, .9], [.97, .68]] }, // 天蝎
+      { x: .315, y: .055, s: .095, p: [[.1, .6], [.35, .45], [.6, .5], [.82, .3], [.55, .88], [.85, .78]] }, // 人马
+      { x: .635, y: .045, s: .085, p: [[.1, .8], [.45, .2], [.8, .5], [.92, .85]] },                 // 摩羯
+      { x: .795, y: .385, s: .09,  p: [[.05, .35], [.3, .5], [.55, .35], [.75, .6], [.95, .45]] },   // 宝瓶
+      { x: .165, y: .43,  s: .09,  p: [[.05, .8], [.35, .6], [.6, .45], [.88, .2], [.92, .58], [.62, .86]] } // 双鱼
+    ];
+    var zods = [];
     // logo 俯冲同步：画布 1 大 2 小流星伴飞
     window.addEventListener('logoorbit:dive', function () {
       pending.push({ t: 0, big: 1 }, { t: .3 }, { t: .7 });
@@ -273,7 +317,7 @@
     }
     function makeStar() {
       return {
-        x: rand(0, 1), y: rand(0, 0.92),
+        x: rand(0, 1), y: rand(-0.02, 0.58),   // 上移：天空区更满（下半留给星尘/丝带）
         r: rand(0.4, 1.1),
         ph: rand(0, Math.PI * 2), sp: rand(0.5, 1.6),
         a: rand(0.12, 0.5),
@@ -321,7 +365,7 @@
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       var area = W * H;
       var nDust = Math.max(80, Math.min(170, Math.round(area / 12000)));
-      var nStar = Math.max(50, Math.min(110, Math.round(area / 16000)));
+      var nStar = Math.max(64, Math.min(130, Math.round(area / 13000)));
       var nStream = Math.max(16, Math.min(34, Math.round(area / 55000)));
       if (dust.length > nDust) dust.length = nDust;
       while (dust.length < nDust) dust.push(makeDust(true));
@@ -342,6 +386,21 @@
       }
       var bw = Math.max(120, Math.min(0.22 * W, 340));
       dipBox = { x: Math.max(14, 0.035 * W), y: 0.10 * H, w: bw, h: bw * 0.64 };
+
+      /* 十二星座：每座一套星点参数，相位 = 序号×π/6（交替呼吸），resize 只排位置 */
+      if (!zods.length) {
+        for (var zi = 0; zi < ZOD.length; zi++) {
+          var grp = [];
+          for (var pi = 0; pi < ZOD[zi].p.length; pi++) {
+            grp.push({
+              r: rand(0.9, 1.55), a: rand(0.3, 0.58),
+              sp: rand(0.4, 0.9), ph: zi * Math.PI / 6 + rand(-0.15, 0.15),
+              hue: (zi === 1 || zi === 7) && pi === 0 ? WARM : pick(COOL)
+            });
+          }
+          zods.push(grp);
+        }
+      }
     }
 
     function drawGlow(x, y, r, hue, a) {
@@ -392,6 +451,32 @@
         ctx.lineTo(pts[3].x, pts[3].y);   // 天枢→天权 合勺口
         ctx.stroke();
         ctx.globalCompositeOperation = 'lighter';
+      }
+
+      /* 十二星座：散布两侧天区，相位轮转交替呼吸；连线极淡只助辨形 */
+      if (zods.length) {
+        for (var zg = 0; zg < ZOD.length; zg++) {
+          var box = ZOD[zg];
+          var zw = Math.max(70, Math.min(box.s * W, 150)), zh = zw * 0.7;
+          var gpts = [];
+          for (var zi2 = 0; zi2 < box.p.length; zi2++) {
+            var gz = zods[zg][zi2], gp = box.p[zi2];
+            var zxp = box.x * W + gp[0] * zw, zyp = box.y * H + gp[1] * zh;
+            var gbr = 0.5 + 0.5 * Math.sin(t * gz.sp + gz.ph);
+            drawGlow(zxp, zyp, gz.r * 3.4, gz.hue, gz.a * (0.35 + 0.65 * gbr));
+            gpts.push({ x: zxp, y: zyp });
+          }
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.strokeStyle = 'rgba(170,205,250,0.06)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          for (var li2 = 0; li2 < gpts.length; li2++) {
+            if (li2 === 0) ctx.moveTo(gpts[li2].x, gpts[li2].y);
+            else ctx.lineTo(gpts[li2].x, gpts[li2].y);
+          }
+          ctx.stroke();
+          ctx.globalCompositeOperation = 'lighter';
+        }
       }
 
       /* 极光纱幕：大柔光斑横向漂移，顶部为主 */
