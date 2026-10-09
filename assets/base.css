@@ -323,72 +323,71 @@ body.theme-east .category-hero::before{
 body.theme-east .feature-card .ico{color:var(--gold);}
 body.theme-east .tag--east{background:var(--accent-soft);color:var(--tag-text);}
 
-/* ---------- 西方·梦幻薰衣草（晨雾花园 · 极淡薰衣草紫→淡粉 · 毛玻璃 · 淡金描边） ---------- */
+/* ---------- 西方·博物馆暗夜（深夜蓝黑 · 展柜深玻璃 · 稀缺金细线 · 古典神秘） ---------- */
 body.theme-west{
-  --bg:#F5E8F0;                                   /* 备用实色：淡粉（变量文本兜底） */
-  --surface:rgba(255,255,255,0.55);               /* 半透明白 · 毛玻璃 */
-  --surface-2:rgba(255,255,255,0.72);
-  --gold:#C85A7A;                                 /* 主金 → 玫瑰粉（强调色） */
-  --gold-light:#D98AA3;                           /* 柔玫瑰（hover/链接/次级强调） */
-  --gold-dim:#C9B68C;                             /* 淡金（装饰文字） */
-  --accent:#C85A7A;                               /* 玫瑰粉 */
-  --accent-soft:rgba(200,90,122,.14);             /* 玫瑰淡染（标签/选中） */
-  --tag-text:#B14A6B;                             /* 深玫瑰（标签文字，浅底可读） */
-  --line:rgba(232,213,168,0.6);                   /* 极细淡金线 #E8D5A8 */
-  --west:#A07BB8;                                 /* 淡薰衣草（slot 标签） */
-  --text:#5A5066;                                 /* 柔雾紫灰（非纯黑） */
-  --text-dim:#8A8194;                             /* 雾灰 */
-  --on-accent:#FBF4F8;                            /* 玫瑰填充上的浅色文字 */
+  --bg:#0b0d16;                                   /* 备用实色：深夜蓝黑 */
+  --surface:rgba(18,17,24,0.55);                  /* 展柜深玻璃 */
+  --surface-2:rgba(26,25,34,0.72);
+  --gold:#c8a45c;                                 /* 稀缺金（标题/激活态/细线） */
+  --gold-light:#e0c078;
+  --gold-dim:#8a7040;
+  --accent:#c8a45c;
+  --accent-soft:rgba(200,164,92,.14);
+  --tag-text:#e0c078;
+  --line:rgba(200,164,92,0.25);                   /* 极细金线 */
+  --west:#7a93bd;                                 /* 月色蓝（slot 标签点缀） */
+  --text:#e8e4dc;
+  --text-dim:#9a938a;
+  --on-accent:#0b0d16;                            /* 金底上的深色文字 */
 }
-/* 背景：极淡薰衣草紫 → 淡粉 柔和渐变 + 晨雾光晕（fixed 满屏） */
+/* 背景：深夜蓝黑 + 天顶一泓深蓝隐入玄黑（呼应门厅夜幕，fixed 满屏） */
 body.theme-west{
   background:
-    radial-gradient(120% 90% at 16% -8%, rgba(255,255,255,.55), transparent 55%),
-    radial-gradient(90% 70% at 88% 6%, rgba(231,214,240,.45), transparent 60%),
-    radial-gradient(80% 80% at 50% 120%, rgba(245,220,232,.55), transparent 60%),
-    linear-gradient(165deg, #F8F5FA 0%, #F5E8F0 55%, #F3E6EF 100%);
+    radial-gradient(120% 55% at 50% -8%, rgba(46,64,110,.32), transparent 62%),
+    radial-gradient(90% 42% at 82% 4%, rgba(38,52,92,.20), transparent 60%),
+    linear-gradient(165deg, #0d0f1a 0%, #0a0b12 55%, #08080d 100%);
   background-attachment:fixed;
   min-height:100vh;
 }
-/* 毛玻璃卡片 */
+/* 展柜卡片 */
 body.theme-west .card,
 body.theme-west .feature-card,
 body.theme-west .panel{
-  backdrop-filter:blur(14px) saturate(1.12);
-  -webkit-backdrop-filter:blur(14px) saturate(1.12);
-  box-shadow:0 8px 30px rgba(150,120,160,.14);
+  backdrop-filter:blur(14px) saturate(1.05);
+  -webkit-backdrop-filter:blur(14px) saturate(1.05);
+  box-shadow:0 8px 30px rgba(0,0,0,.42);
 }
 body.theme-west a.feature-card:hover{
-  box-shadow:0 12px 40px rgba(150,120,160,.22);
+  box-shadow:0 12px 40px rgba(200,164,92,.14);
 }
-/* 顶部导航：淡金玻璃 */
+/* 顶部导航：暗夜玻璃 + 金细线 */
 body.theme-west .site-nav{
-  background:rgba(255,255,255,.5);
-  backdrop-filter:blur(12px) saturate(1.1);
-  -webkit-backdrop-filter:blur(12px) saturate(1.1);
+  background:rgba(12,12,18,.62);
+  backdrop-filter:blur(12px) saturate(1.05);
+  -webkit-backdrop-filter:blur(12px) saturate(1.05);
   border-bottom:1px solid var(--line);
 }
 body.theme-west .site-nav .brand{color:var(--text);}
 body.theme-west .nav-tabs a{color:var(--text-dim);border:1px solid var(--line);}
 body.theme-west .nav-tabs a.active{color:var(--on-accent);background:var(--gold);border-color:var(--gold);}
-body.theme-west .daily-seal{border:1px solid var(--gold);color:var(--gold-light);background:radial-gradient(circle, rgba(200,90,122,.12), transparent);}
-/* 页脚：淡粉玻璃 */
+body.theme-west .daily-seal{border:1px solid var(--gold);color:var(--gold-light);background:radial-gradient(circle, rgba(200,164,92,.12), transparent);}
+/* 页脚：夜幕渐隐 */
 body.theme-west .site-footer{
-  background:linear-gradient(180deg,transparent,rgba(245,232,240,.55));
+  background:linear-gradient(180deg,transparent,rgba(10,10,16,.6));
   border-top:1px solid var(--line);
 }
 body.theme-west .site-footer .links a{color:var(--text-dim);}
 body.theme-west .site-footer .links a:hover{color:var(--gold-light);}
-/* 晨雾光晕（取代原深蓝神圣光） */
+/* 星尘光晕（深蓝夜幕版） */
 body.theme-west .sacred-light{
   background:
-    radial-gradient(120% 80% at 50% -10%, rgba(255,255,255,.5), transparent 60%),
-    radial-gradient(70% 60% at 82% 112%, rgba(231,200,224,.32), transparent 60%),
-    radial-gradient(60% 50% at 12% 60%, rgba(214,200,236,.28), transparent 60%);
+    radial-gradient(120% 80% at 50% -10%, rgba(56,78,130,.20), transparent 60%),
+    radial-gradient(70% 60% at 82% 112%, rgba(40,54,96,.24), transparent 60%),
+    radial-gradient(60% 50% at 12% 60%, rgba(200,164,92,.05), transparent 60%);
   animation:lightPulse 9s ease-in-out infinite;
 }
 body.theme-west .category-hero::before{
-  background:radial-gradient(ellipse at 50% 130%, rgba(200,160,224,.30), transparent 60%);
+  background:radial-gradient(ellipse at 50% 130%, rgba(70,95,150,.22), transparent 60%);
 }
 body.theme-west .feature-card .ico{color:var(--gold);}
 body.theme-west .tag--west{background:var(--accent-soft);color:var(--tag-text);}

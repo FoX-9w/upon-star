@@ -1,0 +1,12 @@
+.git
+.workbuddy
+*.bak
+__*.js
+__*.html
+__compliance-report.txt
+PIVOT-*.md
+HANDOFF.md
+ICP-*.md
+*.md
+!agent/**/*.md
+node_modules

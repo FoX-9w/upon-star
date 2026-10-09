@@ -1,67 +1,71 @@
 /* =========================================================
-   Upon Star — 西方·梦幻薰衣草 工具页补充样式
-   目的：将塔罗 / 雷诺曼 内联 <style> 中的硬色（深底）覆写为
-   晨雾花园的淡粉紫毛玻璃；本文件须在各工具页 inline <style> 之后引入。
+   Upon Star — 西方·博物馆暗夜 工具页补充样式
+   目的：将塔罗 / 雷诺曼 内联 <style> 中的硬色调谐为
+   「博物馆级暗夜」——深夜蓝黑底 + 展柜式深玻璃 + 稀缺金细线，
+   呼应门厅星尘粒子与品牌金；克制、秩序、古典、神秘。
+   本文件须在各工具页 inline <style> 之后引入。
    仅作用于 body.theme-west，不影响其他主题。
    ========================================================= */
 
-/* 西方阅读文字压深：浅玻璃底上 --text-dim(#8A8194) 偏浅、对比不足，加深以保可读 */
+/* 全页氛围由 base.css theme-west 段的夜幕渐变承担 */
 body.theme-west{
-  --text:#403a48;
-  --text-dim:#665f73;
+  --text:#e8e4dc;
+  --text-dim:#9a938a;
 }
 
-/* 牌堆容器：淡粉玻璃（覆盖 rgba(8,8,14,.5)） */
+/* 牌堆容器：展柜深玻璃（覆盖 rgba(8,8,14,.5)） */
 body.theme-west .deck-grid{
-  background:rgba(255,255,255,.34);
-  backdrop-filter:blur(12px) saturate(1.1);
-  -webkit-backdrop-filter:blur(12px) saturate(1.1);
+  background:rgba(18,17,24,.55);
+  border:1px solid rgba(200,164,92,.16);
+  backdrop-filter:blur(12px) saturate(1.05);
+  -webkit-backdrop-filter:blur(12px) saturate(1.05);
 }
 
-/* 占位卡：由深渐变换为淡粉紫雾（覆盖 rgba(8,8,14,.6)） */
+/* 占位卡：暗夜雾面（覆盖 rgba(8,8,14,.6)） */
 body.theme-west .ph-card{
-  background:linear-gradient(160deg, rgba(200,90,122,.10), rgba(160,123,184,.12));
+  background:linear-gradient(160deg, rgba(60,72,110,.16), rgba(30,30,40,.22));
 }
 body.theme-west .ph-card .ph-name{color:var(--gold-light);}
 body.theme-west .ph-card .ph-tag{color:var(--text-dim);}
 
-/* 翻开卡牌 / 卡面：毛玻璃 + 淡阴影 */
+/* 翻开卡牌 / 卡面：深玻璃 + 沉静阴影 */
 body.theme-west .read-card{
-  backdrop-filter:blur(10px) saturate(1.1);
-  -webkit-backdrop-filter:blur(10px) saturate(1.1);
-  box-shadow:0 10px 30px rgba(150,120,160,.18);
+  backdrop-filter:blur(10px) saturate(1.05);
+  -webkit-backdrop-filter:blur(10px) saturate(1.05);
+  box-shadow:0 10px 30px rgba(0,0,0,.45);
 }
 body.theme-west .deck-card .face{
-  backdrop-filter:blur(10px) saturate(1.1);
-  -webkit-backdrop-filter:blur(10px) saturate(1.1);
+  backdrop-filter:blur(10px) saturate(1.05);
+  -webkit-backdrop-filter:blur(10px) saturate(1.05);
 }
 
-/* 输入框 / 牌阵切换 / 逆位开关：毛玻璃 */
+/* 输入框 / 牌阵切换 / 逆位开关：深玻璃 */
 body.theme-west .question-wrap input,
 body.theme-west .spread-tabs,
 body.theme-west .reverse-toggle{
-  backdrop-filter:blur(10px) saturate(1.1);
-  -webkit-backdrop-filter:blur(10px) saturate(1.1);
+  backdrop-filter:blur(10px) saturate(1.05);
+  -webkit-backdrop-filter:blur(10px) saturate(1.05);
 }
 body.theme-west .question-wrap input:focus{
   border-color:var(--gold);
-  box-shadow:0 0 0 3px rgba(200,90,122,.18);
+  box-shadow:0 0 0 3px rgba(200,164,92,.16);
 }
 
-/* 深度解读区：淡金玻璃（覆盖 rgba(200,164,92,.06)） */
+/* 深度解读区：暗金展柜（覆盖 rgba(200,164,92,.06)） */
 body.theme-west .premium-zone{
-  background:rgba(255,255,255,.42);
-  backdrop-filter:blur(12px) saturate(1.1);
-  -webkit-backdrop-filter:blur(12px) saturate(1.1);
-  box-shadow:0 8px 30px rgba(150,120,160,.14);
+  background:rgba(20,19,22,.58);
+  border:1px solid rgba(200,164,92,.22);
+  backdrop-filter:blur(12px) saturate(1.05);
+  -webkit-backdrop-filter:blur(12px) saturate(1.05);
+  box-shadow:0 8px 30px rgba(0,0,0,.4);
 }
-body.theme-west .premium-cta .pc-qr{border:2px solid var(--gold);box-shadow:0 4px 20px rgba(200,90,122,.18);}
+body.theme-west .premium-cta .pc-qr{border:2px solid var(--gold);box-shadow:0 4px 20px rgba(0,0,0,.45);}
 
-/* 选牌高亮描边由金转玫瑰，柔化阴影 */
+/* 选牌高亮：金细线 + 微光 */
 body.theme-west .deck-card.flipped{
-  box-shadow:0 0 0 2px var(--gold),0 8px 24px rgba(200,90,122,.22);
+  box-shadow:0 0 0 2px var(--gold),0 8px 24px rgba(200,164,92,.18);
 }
-body.theme-west .read-card{border:1px solid var(--gold);}
+body.theme-west .read-card{border:1px solid rgba(200,164,92,.5);}
 
 /* slot 释义区文字（已用变量，这里仅补一点呼吸感） */
 body.theme-west .slot-caption{color:var(--text);}
@@ -84,8 +88,8 @@ body.theme-west .exp-label{
   line-height:1.25;
 }
 body.theme-west .exp-github .exp-label{
-  color:#5f7aa6;
-  border-left-color:#5f7aa6;
+  color:#7a93bd;
+  border-left-color:#7a93bd;
 }
 body.theme-west .exp-body{font-size:.8rem;line-height:1.62;}
 body.theme-west .exp-github-body{margin-top:0;}
@@ -96,7 +100,7 @@ body.theme-west .exp-github-body .se-v{opacity:.88;}
 body.theme-west .exp-github-body .se-kw{margin-top:4px;opacity:.72;font-family:var(--font-decor);letter-spacing:.04em;}
 
 /* =========================================================
-   西方桌布舞台（占星猫式洗牌 / 切牌）— 梦幻薰衣草皮肤
+   西方桌布舞台（占星猫式洗牌 / 切牌）— 博物馆暗夜皮肤
    ========================================================= */
 body.theme-west .tc-mount{
   display:flex;justify-content:center;align-items:center;
@@ -107,33 +111,33 @@ body.theme-west .tc-stage{
 }
 body.theme-west .tc-svg{
   position:absolute;inset:0;width:100%;height:100%;display:block;
-  filter:drop-shadow(0 6px 24px rgba(160,123,184,.18));
+  filter:drop-shadow(0 6px 24px rgba(0,0,0,.5));
 }
 body.theme-west .tc-fly{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:5;}
 body.theme-west .tc-card{
   position:absolute;left:50%;top:50%;width:62px;height:92px;margin:0;
-  border-radius:8px;border:1px solid rgba(232,213,168,.7);
-  background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(245,232,240,.92));
-  box-shadow:0 6px 16px rgba(160,123,184,.28);
+  border-radius:8px;border:1px solid rgba(224,192,120,.45);
+  background:linear-gradient(160deg,#1c1b22,#131218);
+  box-shadow:0 6px 16px rgba(0,0,0,.5);
   transform:translate(-50%,-50%);will-change:transform,opacity;
 }
 body.theme-west .tc-card-inner{
-  position:absolute;inset:5px;border-radius:5px;border:1px solid rgba(200,90,122,.18);
-  background:radial-gradient(circle at 50% 38%,rgba(160,123,184,.20),transparent 70%);
+  position:absolute;inset:5px;border-radius:5px;border:1px solid rgba(200,164,92,.25);
+  background:radial-gradient(circle at 50% 38%,rgba(110,140,200,.14),transparent 70%);
 }
 body.theme-west .tc-deck{
   position:absolute;left:50%;bottom:5%;transform:translateX(-50%);
   width:112px;height:154px;padding:0;cursor:pointer;z-index:6;
-  border-radius:12px;border:1px solid rgba(232,213,168,.85);
-  background:linear-gradient(160deg,rgba(255,255,255,.92),rgba(245,232,240,.96));
-  box-shadow:0 10px 26px rgba(160,123,184,.34);
+  border-radius:12px;border:1px solid rgba(224,192,120,.55);
+  background:linear-gradient(160deg,#1e1d25,#141319);
+  box-shadow:0 10px 26px rgba(0,0,0,.55);
   transition:box-shadow .25s,transform .25s;
 }
-body.theme-west .tc-deck:hover{box-shadow:0 14px 32px rgba(200,90,122,.40);}
+body.theme-west .tc-deck:hover{box-shadow:0 14px 32px rgba(200,164,92,.28);}
 body.theme-west .tc-deck:active{transform:translateX(-50%) scale(.97);}
 body.theme-west .tc-deck-face{
-  position:absolute;inset:7px;border-radius:7px;border:1px solid rgba(200,90,122,.22);
-  background:radial-gradient(circle at 50% 40%,rgba(160,123,184,.22),transparent 72%);
+  position:absolute;inset:7px;border-radius:7px;border:1px solid rgba(200,164,92,.28);
+  background:radial-gradient(circle at 50% 40%,rgba(110,140,200,.16),transparent 72%);
 }
 body.theme-west .tc-deck-face:nth-child(2){transform:translateY(5px) scale(.95);opacity:.72;}
 body.theme-west .tc-deck-face:nth-child(3){transform:translateY(10px) scale(.90);opacity:.50;}
@@ -150,10 +154,10 @@ body.theme-west .tc-hint{
 body.theme-west .tc-switch{
   position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   z-index:8;display:flex;gap:0;padding:4px;
-  background:rgba(255,255,255,.50);
-  backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);
-  border:1px solid rgba(232,213,168,.9);border-radius:999px;
-  box-shadow:0 8px 26px rgba(160,123,184,.34);
+  background:rgba(16,15,20,.72);
+  backdrop-filter:blur(10px) saturate(1.05);-webkit-backdrop-filter:blur(10px) saturate(1.05);
+  border:1px solid rgba(200,164,92,.4);border-radius:999px;
+  box-shadow:0 8px 26px rgba(0,0,0,.5);
 }
 body.theme-west .tc-seg{
   border:0;background:transparent;cursor:pointer;
@@ -163,7 +167,7 @@ body.theme-west .tc-seg{
 }
 body.theme-west .tc-seg.is-active{
   background:var(--gold);color:var(--on-accent);
-  box-shadow:0 4px 14px rgba(200,90,122,.30);
+  box-shadow:0 4px 14px rgba(200,164,92,.28);
 }
 body.theme-west .tc-seg:not(.is-active):hover{color:var(--gold-light);}
 
@@ -196,10 +200,10 @@ body.theme-west .celtic-staff .slot .slot-label{writing-mode:horizontal-tc;}
    ========================================================= */
 body.theme-west .deck-switch{
   display:inline-flex;gap:6px;padding:5px;
-  border:1px solid var(--line);border-radius:999px;
-  background:rgba(255,255,255,.34);
-  backdrop-filter:blur(10px) saturate(1.1);
-  -webkit-backdrop-filter:blur(10px) saturate(1.1);
+  border:1px solid rgba(200,164,92,.4);border-radius:999px;
+  background:rgba(16,15,20,.72);
+  backdrop-filter:blur(10px) saturate(1.05);
+  -webkit-backdrop-filter:blur(10px) saturate(1.05);
 }
 body.theme-west .deck-switch button{
   border:0;background:transparent;color:var(--text-dim);
@@ -208,7 +212,7 @@ body.theme-west .deck-switch button{
 }
 body.theme-west .deck-switch button.active{
   background:var(--gold);color:var(--on-accent);
-  box-shadow:0 4px 14px rgba(200,90,122,.30);
+  box-shadow:0 4px 14px rgba(200,164,92,.28);
 }
 body.theme-west .deck-switch button:not(.active):hover{color:var(--gold-light);}
 
@@ -226,8 +230,8 @@ body.theme-west .div-nav-btn{
   cursor:pointer;transition:.25s;
 }
 body.theme-west .div-nav-btn:hover{
-  background:rgba(200,90,122,.14);
-  box-shadow:0 0 20px rgba(200,90,122,.18);
+  background:rgba(200,164,92,.12);
+  box-shadow:0 0 20px rgba(200,164,92,.16);
 }
 body.theme-west .share-toast{
   position:fixed;left:50%;bottom:32px;
@@ -257,8 +261,8 @@ body.theme-west .question-select{
   background-size:6px 6px,6px 6px;background-repeat:no-repeat;
 }
 body.theme-west .question-select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,164,92,.18);}
-body.theme-west .question-select option{background:#FBF1F6;color:#5A5066;}
-body.theme-west .question-select option:checked{background:var(--accent-soft);color:var(--tag-text);}
+body.theme-west .question-select option{background:#16151a;color:#d8d2c8;}
+body.theme-west .question-select option:checked{background:#2a2418;color:#e0c078;}
 
 /* 结果区：你的提问领域提示条 */
 body.theme-west .reading-question{
@@ -269,9 +273,9 @@ body.theme-west .reading-question{
   background:rgba(200,164,92,.08);
 }
 
-/* 问题导向解读区块（薰衣草色，呼应西方主题） */
+/* 问题导向解读区块（月色蓝，暗夜中的清冷点缀） */
 body.theme-west .exp-block.exp-question .exp-label{
-  color:#d2c2f4;border-left-color:#d2c2f4;
+  color:#9db4d8;border-left-color:#9db4d8;
 }
 body.theme-west .exp-question .q-quote{
   font-family:var(--font-serif);font-size:.78rem;line-height:1.6;
@@ -279,11 +283,11 @@ body.theme-west .exp-question .q-quote{
 }
 body.theme-west .exp-question .q-lead{
   font-family:var(--font-decor);font-size:.74rem;letter-spacing:.06em;
-  color:#d2c2f4;margin-bottom:4px;
+  color:#9db4d8;margin-bottom:4px;
 }
 body.theme-west .exp-question .q-guide{
   font-family:var(--font-serif);font-size:.76rem;line-height:1.7;color:var(--text-dim);
-  margin-top:6px;padding-top:6px;border-top:1px dashed rgba(210,194,244,.3);
+  margin-top:6px;padding-top:6px;border-top:1px dashed rgba(157,180,216,.3);
 }
 body.theme-west .exp-question .q-body{
   font-family:var(--font-serif);font-size:.8rem;line-height:1.66;color:var(--text-dim);
@@ -341,10 +345,10 @@ body.theme-west .exp-summary .q-note{
    ========================================================= */
 body.theme-west .shuffle-mode{
   display:flex;width:max-content;margin:0 auto var(--space-sm);
-  border:1px solid rgba(232,213,168,.9);border-radius:999px;overflow:hidden;
-  background:rgba(255,255,255,.50);
-  backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);
-  box-shadow:0 8px 26px rgba(160,123,184,.34);
+  border:1px solid rgba(200,164,92,.4);border-radius:999px;overflow:hidden;
+  background:rgba(16,15,20,.72);
+  backdrop-filter:blur(10px) saturate(1.05);-webkit-backdrop-filter:blur(10px) saturate(1.05);
+  box-shadow:0 8px 26px rgba(0,0,0,.5);
 }
 body.theme-west .shuffle-mode button{
   appearance:none;border:0;background:transparent;cursor:pointer;
@@ -353,7 +357,7 @@ body.theme-west .shuffle-mode button{
 }
 body.theme-west .shuffle-mode button.active{
   background:var(--gold);color:var(--on-accent);
-  box-shadow:0 4px 14px rgba(200,90,122,.30);
+  box-shadow:0 4px 14px rgba(200,164,92,.28);
   text-shadow:none;
 }
 body.theme-west .shuffle-mode button:focus-visible{outline:2px solid var(--gold);outline-offset:-3px;}
