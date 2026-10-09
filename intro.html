@@ -103,22 +103,17 @@
 
   /* 流星尾迹：仅在俯冲相位可见（时长读 --lo-dive，与 JS 同源）。
      俯冲起点 = 页面左上角 (0,0)（logo-orbit.js computeDive 反算），
-     尾迹角度 = 起点→落点的屏幕方位角，由 JS 写入 --lo-tail-ang，任何视口都指向来路 */
-  .lo-tail{position:absolute;right:50%;top:50%;width:780%;height:12%;
+     尾迹角度 = 起点→落点的屏幕方位角，由 JS 写入 --lo-tail-ang，任何视口都指向来路。
+     2026-10-09f：撤公转彗尾（过于浮夸），俯冲尾翼退回克制版 430% */
+  .lo-tail{position:absolute;right:50%;top:50%;width:430%;height:16%;
     z-index:0;transform-origin:right center;border-radius:999px;pointer-events:none;
-    background:linear-gradient(to left, rgba(235,245,255,.98), rgba(180,214,255,.42) 34%, rgba(150,196,255,.10) 62%, transparent 84%);
-    filter:blur(1.2px);opacity:0;}
+    background:linear-gradient(to left, rgba(222,238,255,.95), rgba(165,205,255,.38) 46%, transparent 82%);
+    filter:blur(1.5px);opacity:0;}
   html.lo-play .lo-tail{animation:loDiveTail var(--lo-dive) cubic-bezier(.2,.75,.45,1) both;}
   @keyframes loDiveTail{
     0%{opacity:1;transform:translateY(-50%) rotate(var(--lo-tail-ang,45deg)) scaleX(1);}
-    70%{opacity:.75;}
-    100%{opacity:0;transform:translateY(-50%) rotate(var(--lo-tail-ang,45deg)) scaleX(.10);}}
-
-  /* 公转彗尾：JS 每帧按运动方向取向、速度控制亮度（匀速段常亮，落定熄灭） */
-  .lo-comet{position:absolute;right:50%;top:50%;width:640%;height:11%;
-    z-index:0;transform-origin:right center;border-radius:999px;pointer-events:none;
-    background:linear-gradient(to left, rgba(238,247,255,.95), rgba(185,216,255,.38) 36%, rgba(150,196,255,.10) 62%, transparent 82%);
-    filter:blur(1.6px);opacity:0;will-change:transform,opacity;}
+    70%{opacity:.8;}
+    100%{opacity:0;transform:translateY(-50%) rotate(var(--lo-tail-ang,45deg)) scaleX(.12);}}
 
   @media (max-width:640px){
     .in-stage{width:min(100vw - 12px,108vh);}
@@ -130,7 +125,7 @@
     html.in-armed.in-show .in-enter,html.in-armed.in-show .in-stage{animation:none;}
     .in-rays{display:none;}
     #inDust{display:none;}
-    .lo-tail,.lo-comet{display:none;}
+    .lo-tail{display:none;}
   }
   </style>
   <link rel="canonical" href="https://upon-star.com/intro.html">
@@ -166,7 +161,6 @@
         <div class="lo-star-g" data-lo-star aria-hidden="true">
           <span class="lo-star-flash"></span>
           <span class="lo-tail"></span>
-          <span class="lo-comet"></span>
           <span class="lo-star-halo"></span>
           <img class="lo-star" src="assets/logo-star.webp?v=20261009b" width="480" height="480" alt="">
         </div>
