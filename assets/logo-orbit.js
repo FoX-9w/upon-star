@@ -53,7 +53,9 @@
     var starG   = root.querySelector('[data-lo-star]');
     var orbitEl = root.querySelector('[data-lo-orbit]');
     var mark    = root.querySelector('.lo-mark');
+    var comet   = root.querySelector('.lo-comet');   /* 公转彗尾（可选，intro 专属） */
     if (!starG || !box) return null;
+    var lastPX = null, lastPY = null;                /* 上一帧位置（彗尾取向用） */
 
     /* 轨道引导线：两段半椭圆，与运动同一参数 */
     var A = pt(0), B = pt(Math.PI);
@@ -103,8 +105,26 @@
 
     function paint(dx, dy, sc) {
       var k = (box.clientWidth || VW) / VW;          /* 底座单位 → CSS px */
+      var px = dx * k, py = dy * k;
       starG.style.transform =
-        'translate(' + (dx * k).toFixed(2) + 'px,' + (dy * k).toFixed(2) + 'px) scale(' + sc.toFixed(4) + ')';
+        'translate(' + px.toFixed(2) + 'px,' + py.toFixed(2) + 'px) scale(' + sc.toFixed(4) + ')';
+      /* 彗尾：按帧间位移实时取向，速度越快越亮——公转全程拖尾，流星感 */
+      if (comet) {
+        if (lastPX === null) {
+          comet.style.opacity = 0;
+        } else {
+          var vx = px - lastPX, vy = py - lastPY;
+          var sp = Math.hypot(vx, vy);
+          if (sp > 0.2) {
+            comet.style.transform =
+              'translateY(-50%) rotate(' + (Math.atan2(vy, vx) * 180 / Math.PI).toFixed(1) + 'deg)';
+            comet.style.opacity = Math.min(0.8, sp * 0.16).toFixed(2);
+          } else {
+            comet.style.opacity = 0;
+          }
+        }
+        lastPX = px; lastPY = py;
+      }
     }
 
     function frame(now) {
@@ -120,9 +140,12 @@
       } else if (t < DIVE + T0 + HOOK) {             /* 离位：中心 → 接驳点 */
         var u = ease((t - DIVE - T0) / HOOK);
         paint(offX * u, offY * u, 1 + .10 * Math.sin(Math.PI * u));
-      } else if (t < DIVE + T0 + HOOK + DUR) {       /* 公转整整一周 */
-        var uu = ease((t - DIVE - T0 - HOOK) / DUR);
-        var q = pt(TH0 + uu * Math.PI * 2);
+      } else if (t < DIVE + T0 + HOOK + DUR) {       /* 公转整整一周：匀速滑行+微呼吸，不停不顿 */
+        var uo = (t - DIVE - T0 - HOOK) / DUR;
+        /* 匀速为主，叠 2 个周期的极轻速度呼吸（±4.5%，位移连续），
+           手绘星轨的「活」感而非机械匀速；起止点呼吸导数不为零但仅 ±8%，肉眼无感 */
+        var th = TH0 + uo * Math.PI * 2 + 0.045 * Math.sin(uo * Math.PI * 4 + 0.8);
+        var q = pt(th);
         paint(q.x - REST.x, q.y - REST.y, 1);
       } else if (t < END) {                          /* 归返：接驳点 → 中心 */
         var u2 = ease((t - DIVE - T0 - HOOK - DUR) / HOOK);
@@ -142,6 +165,7 @@
 
     function play() {
       t0 = 0;
+      lastPX = null;                                 /* 丢弃陈旧基线，彗尾首帧不闪错向 */
       if (raf) window.cancelAnimationFrame(raf);
       raf = window.requestAnimationFrame(frame);
       /* 兜底：即使 rAF 被节流，也在行程结束后把星辰钉回中心 */

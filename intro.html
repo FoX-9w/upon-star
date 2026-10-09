@@ -11,7 +11,7 @@
   <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
   <link rel="preload" as="image" href="assets/logo-mark.webp?v=20261009c" fetchpriority="high">
   <link rel="stylesheet" href="assets/base.css?v=20261009a">
-  <link rel="stylesheet" href="assets/logo-orbit.css?v=20261009d">
+  <link rel="stylesheet" href="assets/logo-orbit.css?v=20261009e">
   <script>
   /* 门厅页每次到访都播放公转（先清掉「已看过」标记再加载 logo-orbit.js）；
      禁用 JS / prefers-reduced-motion 时页面直接呈现静止终态。 */
@@ -27,14 +27,15 @@
      ============================================================ */
 
   /* ---------- 电影感节奏：本页覆盖模块默认节拍 ----------
-     dive 1.35 + t0 .90 + hook .80×2 + dur 6.00 = end 9.85，自洽 */
+     2026-10-09e：t0 .90→.18（去掉落定死停）、公转改匀速+微呼吸（logo-orbit.js），
+     dive 1.35 + t0 .18 + hook .45×2 + dur 6.20 = end 8.63，自洽 */
   :root{
     --lo-dive: 1.35s;
-    --lo-t0:   .90s;
-    --lo-hook: .80s;
-    --lo-dur:  6.00s;
-    --lo-end:  9.85s;
-    --lo-rest: 10.70s;
+    --lo-t0:   .18s;
+    --lo-hook: .45s;
+    --lo-dur:  6.20s;
+    --lo-end:  8.63s;
+    --lo-rest: 9.40s;
   }
 
   html,body{height:100%;}
@@ -103,15 +104,21 @@
   /* 流星尾迹：仅在俯冲相位可见（时长读 --lo-dive，与 JS 同源）。
      俯冲起点 = 页面左上角 (0,0)（logo-orbit.js computeDive 反算），
      尾迹角度 = 起点→落点的屏幕方位角，由 JS 写入 --lo-tail-ang，任何视口都指向来路 */
-  .lo-tail{position:absolute;right:50%;top:50%;width:560%;height:15%;
+  .lo-tail{position:absolute;right:50%;top:50%;width:780%;height:12%;
     z-index:0;transform-origin:right center;border-radius:999px;pointer-events:none;
-    background:linear-gradient(to left, rgba(235,245,255,.98), rgba(180,214,255,.45) 42%, rgba(150,196,255,.12) 68%, transparent 86%);
+    background:linear-gradient(to left, rgba(235,245,255,.98), rgba(180,214,255,.42) 34%, rgba(150,196,255,.10) 62%, transparent 84%);
     filter:blur(1.2px);opacity:0;}
   html.lo-play .lo-tail{animation:loDiveTail var(--lo-dive) cubic-bezier(.2,.75,.45,1) both;}
   @keyframes loDiveTail{
     0%{opacity:1;transform:translateY(-50%) rotate(var(--lo-tail-ang,45deg)) scaleX(1);}
     70%{opacity:.75;}
     100%{opacity:0;transform:translateY(-50%) rotate(var(--lo-tail-ang,45deg)) scaleX(.10);}}
+
+  /* 公转彗尾：JS 每帧按运动方向取向、速度控制亮度（匀速段常亮，落定熄灭） */
+  .lo-comet{position:absolute;right:50%;top:50%;width:640%;height:11%;
+    z-index:0;transform-origin:right center;border-radius:999px;pointer-events:none;
+    background:linear-gradient(to left, rgba(238,247,255,.95), rgba(185,216,255,.38) 36%, rgba(150,196,255,.10) 62%, transparent 82%);
+    filter:blur(1.6px);opacity:0;will-change:transform,opacity;}
 
   @media (max-width:640px){
     .in-stage{width:min(100vw - 12px,108vh);}
@@ -123,7 +130,7 @@
     html.in-armed.in-show .in-enter,html.in-armed.in-show .in-stage{animation:none;}
     .in-rays{display:none;}
     #inDust{display:none;}
-    .lo-tail{display:none;}
+    .lo-tail,.lo-comet{display:none;}
   }
   </style>
   <link rel="canonical" href="https://upon-star.com/intro.html">
@@ -159,6 +166,7 @@
         <div class="lo-star-g" data-lo-star aria-hidden="true">
           <span class="lo-star-flash"></span>
           <span class="lo-tail"></span>
+          <span class="lo-comet"></span>
           <span class="lo-star-halo"></span>
           <img class="lo-star" src="assets/logo-star.webp?v=20261009b" width="480" height="480" alt="">
         </div>
@@ -173,7 +181,7 @@
     <p class="in-legal">本平台内容仅供文化研究与心理探索参考，不构成命运定论。</p>
   </div>
 
-  <script src="assets/logo-orbit.js?v=20261009d"></script>
+  <script src="assets/logo-orbit.js?v=20261009e"></script>
   <script>
   /* ============================================================
      星尘粒子场 v2（只服务 intro 门厅；logo 与公转动效零改动）
