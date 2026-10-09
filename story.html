@@ -11,14 +11,14 @@
   <link rel="preload" href="_shared/fonts/Italiana-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" as="image" href="assets/logo-mark.webp?v=20261009a" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/logo-mark.webp?v=20261009c" fetchpriority="high">
   <link rel="stylesheet" href="assets/base.css?v=20260914g">
   <style>
   /* ============================================================
      我的故事（独立成页）—— 首屏 8 芒星公转 + 逐幕通往功能页
      · 素材：assets/logo-mark.webp（拱门/立柱/眼睛/丝带，星辰处已挖空）
              assets/logo-star.webp（中央 8 芒星，单独一层可动）
-     · 坐标一律用「底座坐标」，画布 2290×1510（= 原图 2290×1600 上移 24、左补 30）
+     · 坐标一律用「底座坐标」，画布 1767×1510（2026-10-09 裁掉右侧 523px 死白，原 2290 宽）（= 原图 2290×1600 上移 24、左补 30）
          星辰静止中心 (1130, 911) · 星辰盒 480×480 @ (890, 671)
          拱顶眼睛 (1140, 106)
          轨道椭圆 cx=1132.5 cy=729.5 rx=941 ry=196 倾角 −8.8°
@@ -63,8 +63,8 @@
   @keyframes osTwinkle{0%,100%{opacity:.16;}50%{opacity:.72;}}
 
   /* 舞台：宽高比与底座一致，轨道不会出画 */
-  .os-stage{position:relative;z-index:2;width:min(1200px,96vw,94vh);}
-  .os-stage-box{position:relative;aspect-ratio:2290/1510;}
+  .os-stage{position:relative;z-index:2;width:min(1900px,97vw,94vh);}
+  .os-stage-box{position:relative;aspect-ratio:1767/1510;}
 
   /* z 序：轨道线（0）在拱门之后——与原画里那条淡线一样从立柱后穿过；
      星辰（2）在前，是这场戏的主角 */
@@ -83,7 +83,7 @@
   @keyframes osEye{0%,100%{opacity:.20;}50%{opacity:.62;}}
 
   /* 星辰层（整块可动：光晕 + 星体） */
-  .os-star-g{position:absolute;left:39.519%;top:47.020%;width:20.961%;
+  .os-star-g{position:absolute;left:51.218%;top:47.020%;width:27.166%;
     z-index:2;transform-origin:center;will-change:transform;}
   .os-star{position:relative;z-index:2;display:block;width:100%;height:auto;
     user-select:none;-webkit-user-drag:none;}
@@ -293,7 +293,7 @@
       <div class="os-stage">
         <div class="os-stage-box" id="osBox">
           <!-- 轨道线由脚本用与运动同一份参数生成：见 JS 的 ORBIT -->
-          <svg class="os-overlay" viewBox="0 0 2290 1510" aria-hidden="true">
+          <svg class="os-overlay" viewBox="0 0 1767 1510" aria-hidden="true">
             <defs>
               <radialGradient id="osHaloGrad">
                 <stop offset="0%" stop-color="#e0c078" stop-opacity=".8"/>
@@ -307,14 +307,14 @@
             </g>
           </svg>
 
-          <img class="os-mark" src="assets/logo-mark.webp?v=20261009a" width="2290" height="1510"
+          <img class="os-mark" src="assets/logo-mark.webp?v=20261009c" width="1767" height="1510"
                alt="Upon Star 标志：白色拱门与立柱，拱顶一只全视之眼，红丝带写着 Wish upon a Star 环绕成环">
 
           <!-- 中央 8 芒星：单独一层，沿轨道公转一圈后回到中心 -->
           <div class="os-star-g" id="osStarG" aria-hidden="true">
             <span class="os-star-flash"></span>
             <span class="os-star-halo"></span>
-            <img class="os-star" src="assets/logo-star.webp?v=20260914g" width="480" height="480" alt="">
+            <img class="os-star" src="assets/logo-star.webp?v=20261009b" width="480" height="480" alt="">
           </div>
         </div>
       </div>
@@ -612,8 +612,8 @@
   (function(){
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* ---- 底座坐标系（画布 2290×1510）---- */
-    var VW = 2290, VH = 1510;
+    /* ---- 底座坐标系（画布 1767×1510（2026-10-09 裁掉右侧 523px 死白，原 2290 宽））---- */
+    var VW = 1767, VH = 1510;
     var ORBIT = { cx: 1145, cy: 710, rx: 440, ry: 240, rot: -8.8 };
     var REST  = { x: 1145, y: 950 };          /* 星辰盒中心 = 静止位置 */
     var PHI   = ORBIT.rot * Math.PI / 180;

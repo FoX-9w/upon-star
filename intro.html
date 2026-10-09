@@ -9,9 +9,9 @@
   <link rel="preload" href="_shared/fonts/CrimsonPro-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="_shared/fonts/Outfit-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
   <link rel="preload" href="_shared/fonts/PoiretOne-Regular.ttf?v=20260914g" as="font" type="font/ttf" crossorigin>
-  <link rel="preload" as="image" href="assets/logo-mark.webp?v=20261009a" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/logo-mark.webp?v=20261009c" fetchpriority="high">
   <link rel="stylesheet" href="assets/base.css?v=20260914g">
-  <link rel="stylesheet" href="assets/logo-orbit.css?v=20261009a">
+  <link rel="stylesheet" href="assets/logo-orbit.css?v=20261009c">
   <script>
   /* 门厅页每次到访都播放公转（先清掉「已看过」标记再加载 logo-orbit.js）；
      禁用 JS / prefers-reduced-motion 时页面直接呈现静止终态。 */
@@ -66,8 +66,8 @@
   @keyframes inRay{from{transform:skewX(-8deg) translateX(-3vmin);opacity:.55;}
                    to{transform:skewX(-11deg) translateX(4vmin);opacity:.95;}}
 
-  /* ---------- 舞台：整页唯一主体 ---------- */
-  .in-stage{position:relative;z-index:2;width:min(1220px,94vw,86vh);}
+  /* ---------- 舞台：整页唯一主体（自适应放大，吃满视口） ---------- */
+  .in-stage{position:relative;z-index:2;width:min(1900px,97vw,94vh);}
 
   /* ---------- 唯一入口：归位爆闪后浮现 ---------- */
   .in-enter{position:relative;z-index:2;
@@ -109,7 +109,7 @@
     100%{opacity:0;transform:translateY(-50%) rotate(56deg) scaleX(.12);}}
 
   @media (max-width:640px){
-    .in-stage{width:min(100vw - 24px,72vh);}
+    .in-stage{width:min(100vw - 12px,92vh);}
     .in-enter{padding:12px 42px;}
   }
 
@@ -134,7 +134,7 @@
     <!-- 徽标舞台：整页唯一主体。结构与坐标契约见 assets/logo-orbit.css -->
     <div class="lo-stage in-stage" data-lo>
       <div class="lo-box">
-        <svg class="lo-overlay" viewBox="0 0 2290 1510" aria-hidden="true">
+        <svg class="lo-overlay" viewBox="0 0 1767 1510" aria-hidden="true">
           <defs>
             <radialGradient id="loHaloGrad">
               <stop offset="0%" stop-color="#e0c078" stop-opacity=".8"/>
@@ -148,14 +148,14 @@
           </g>
         </svg>
 
-        <img class="lo-mark" src="assets/logo-mark.webp?v=20261009a" width="2290" height="1510"
+        <img class="lo-mark" src="assets/logo-mark.webp?v=20261009c" width="1767" height="1510"
              alt="Upon Star 标志：白色拱门与立柱，拱顶一只全视之眼，红丝带写着 Wish upon a Star 环绕成环">
 
         <div class="lo-star-g" data-lo-star aria-hidden="true">
           <span class="lo-star-flash"></span>
           <span class="lo-tail"></span>
           <span class="lo-star-halo"></span>
-          <img class="lo-star" src="assets/logo-star.webp?v=20260914g" width="480" height="480" alt="">
+          <img class="lo-star" src="assets/logo-star.webp?v=20261009b" width="480" height="480" alt="">
         </div>
       </div>
     </div>
@@ -168,7 +168,7 @@
     <p class="in-legal">本平台内容仅供文化研究与心理探索参考，不构成命运定论。</p>
   </div>
 
-  <script src="assets/logo-orbit.js?v=20261009a"></script>
+  <script src="assets/logo-orbit.js?v=20261009c"></script>
   <script>
   /* ============================================================
      星尘粒子场 v2（只服务 intro 门厅；logo 与公转动效零改动）

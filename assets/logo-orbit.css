@@ -10,10 +10,10 @@
            └ .lo-star-g[data-lo-star] 中央 8 芒星，独立一层可动（z:2）
 
    素材：
-     assets/logo-mark.webp  2290×1510  透明底座（星辰位置挖空，零残留）
+     assets/logo-mark.webp  1767×1510  透明底座（2026-10-09 裁右侧白边）
      assets/logo-star.webp   480×480   中央 8 芒星
 
-   坐标系 = 底座坐标（画布 2290×1510）：
+   坐标系 = 底座坐标（画布 1767×1510）：
      静止星心 (1130, 911) · 星辰盒 480×480 @ (890, 671)
      拱顶眼睛 (1140, 106)
      轨道椭圆 cx=1132.5 cy=729.5 rx=941 ry=196 倾角 −8.8°
@@ -40,7 +40,7 @@
 }
 
 .lo-stage{position:relative;width:100%;}
-.lo-box{position:relative;aspect-ratio:2290/1510;}
+.lo-box{position:relative;aspect-ratio:1767/1510;}
 
 /* 起幕前先藏起来（终态见下方 .lo-play 的 keyframes） */
 html.lo-armed:not(.lo-play) .lo-box{opacity:0;}
@@ -64,7 +64,7 @@ html.lo-armed:not(.lo-play) .lo-box{animation:loSafety 0s linear 3.5s forwards;}
 @keyframes loEye{0%,100%{opacity:.20;}50%{opacity:.62;}}
 
 /* 星辰层（整块可动：光晕 + 星体 + 归位爆闪） */
-.lo-star-g{position:absolute;left:39.519%;top:47.020%;width:20.961%;
+.lo-star-g{position:absolute;left:51.218%;top:47.020%;width:27.166%;
   z-index:2;transform-origin:center;will-change:transform;}
 .lo-star{position:relative;z-index:2;display:block;width:100%;height:auto;
   user-select:none;-webkit-user-drag:none;}
