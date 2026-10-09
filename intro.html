@@ -45,6 +45,25 @@
   /* 极淡的四角晕，把视线收进中央 */
   .in-scene::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
     box-shadow:inset 0 0 26vmin rgba(0,0,0,.72);}
+  /* 深蓝夜幕：顶部一泓深蓝渐隐，呼应启幕视频的深海蓝光 */
+  .in-scene::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(120% 62% at 50% -14%, rgba(38,72,138,.34), rgba(20,40,86,.14) 46%, transparent 72%),
+      radial-gradient(60% 34% at 50% -6%, rgba(120,170,235,.12), transparent 70%);}
+
+  /* ---------- 星尘画布：logo 层后方，整片流光粒子场 ---------- */
+  #inDust{position:fixed;inset:0;z-index:1;pointer-events:none;display:block;}
+
+  /* 顶部天光：两道极淡光柱缓慢摆动（视频里的 god rays） */
+  .in-rays{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;opacity:.5;}
+  .in-rays i{position:absolute;top:-12%;width:16vmin;height:70vh;
+    background:linear-gradient(180deg, rgba(190,215,255,.10), rgba(160,190,240,.035) 42%, transparent 78%);
+    transform:skewX(-8deg);filter:blur(6px);}
+  .in-rays i:nth-child(1){left:24%;animation:inRay 11s ease-in-out infinite alternate;}
+  .in-rays i:nth-child(2){left:52%;width:9vmin;animation:inRay 14s ease-in-out -5s infinite alternate-reverse;}
+  .in-rays i:nth-child(3){left:68%;width:5vmin;animation:inRay 17s ease-in-out -9s infinite alternate;}
+  @keyframes inRay{from{transform:skewX(-8deg) translateX(-3vmin);opacity:.55;}
+                   to{transform:skewX(-11deg) translateX(4vmin);opacity:.95;}}
 
   /* ---------- 舞台：整页唯一主体 ---------- */
   .in-stage{position:relative;z-index:2;width:min(1220px,94vw,86vh);}
@@ -84,6 +103,8 @@
   @media (prefers-reduced-motion:reduce){
     html.in-armed .in-enter{opacity:1;animation:none;}
     html.in-armed.in-show .in-enter,html.in-armed.in-show .in-stage{animation:none;}
+    .in-rays{display:none;}
+    #inDust{display:none;}
   }
   </style>
   <link rel="canonical" href="https://upon-star.com/intro.html">
@@ -92,6 +113,10 @@
   <div class="sacred-light" aria-hidden="true"></div>
 
   <div class="in-scene" id="inScene">
+    <!-- 流光粒子场：在 logo 层后方铺满全屏（深蓝星尘 + 上浮光点 + 偶发流星） -->
+    <div class="in-rays" aria-hidden="true"><i></i><i></i><i></i></div>
+    <canvas id="inDust" aria-hidden="true"></canvas>
+
     <!-- 徽标舞台：整页唯一主体。结构与坐标契约见 assets/logo-orbit.css -->
     <div class="lo-stage in-stage" data-lo>
       <div class="lo-box">
@@ -129,6 +154,127 @@
   </div>
 
   <script src="assets/logo-orbit.js?v=20260914g"></script>
+  <script>
+  /* ============================================================
+     星尘粒子场（只服务 intro 门厅；logo 与公转动效零改动）
+     视觉取自启幕参考视频：黑底 + 深蓝夜幕 + 缓慢上浮的发光粒子
+     + 偶尔一道流星轨迹（呼应 Wish upon a Star）。
+     约束：单画布 · DPR≤2 · 页签隐藏即暂停 · reduced-motion 不启动
+     ============================================================ */
+  (function () {
+    'use strict';
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var cv = document.getElementById('inDust');
+    if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d');
+    var W = 0, H = 0, DPR = 1;
+
+    /* 粒子池：暖金（呼应品牌金）+ 冷蓝白（视频主色），金色占少数 */
+    var dust = [];
+    var DUST_N = 0;
+    var streak = null;          // 当前流星
+    var streakCool = 0;         // 流星冷却帧
+
+    function rand(a, b) { return a + Math.random() * (b - a); }
+
+    function makeDust(seedY) {
+      var gold = Math.random() < 0.18;
+      return {
+        x: rand(0, 1), y: seedY ? rand(0, 1) : 1.06,
+        r: rand(0.6, 2.1),                       // 逻辑半径（px）
+        vy: rand(0.010, 0.032),                  // 上升速度（屏高占比/秒）
+        sway: rand(0.4, 1.6), swayPh: rand(0, Math.PI * 2), swaySp: rand(0.12, 0.45),
+        a: rand(0.18, 0.6),
+        gold: gold,
+        hue: gold ? '224,180,110' : (Math.random() < 0.5 ? '186,214,255' : '150,196,255')
+      };
+    }
+
+    function makeStreak() {
+      // 从上方斜落的流星：起点多在顶部 1/3，尾迹向下
+      var x0 = rand(0.15, 0.85), y0 = rand(-0.05, 0.28);
+      return {
+        x: x0, y: y0,
+        vx: rand(0.10, 0.22) * (Math.random() < 0.5 ? -1 : 1),
+        vy: rand(0.34, 0.55),
+        len: rand(0.10, 0.2),                     // 尾长（屏宽占比）
+        life: 0, ttl: rand(0.9, 1.5)              // 秒
+      };
+    }
+
+    function resize() {
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth; H = window.innerHeight;
+      cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+      cv.style.width = W + 'px'; cv.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      DUST_N = Math.max(70, Math.min(150, Math.round(W * H / 14000)));
+      if (dust.length > DUST_N) dust.length = DUST_N;
+      while (dust.length < DUST_N) dust.push(makeDust(true));
+    }
+
+    var last = 0;
+    function frame(ts) {
+      if (document.hidden) { last = ts; requestAnimationFrame(frame); return; }
+      var dt = Math.min(0.05, (ts - last) / 1000 || 0.016); last = ts;
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalCompositeOperation = 'lighter';
+
+      var t = ts / 1000;
+      for (var i = 0; i < dust.length; i++) {
+        var p = dust[i];
+        p.y -= p.vy * dt;
+        var x = (p.x + Math.sin(t * p.swaySp + p.swayPh) * 0.004 * p.sway) * W;
+        var y = p.y * H;
+        if (y < -12) { dust[i] = makeDust(false); continue; }
+        // 呼吸感：alpha 随时间轻颤
+        var a = p.a * (0.72 + 0.28 * Math.sin(t * 1.7 + p.swayPh * 3));
+        var r = p.r;
+        var g = ctx.createRadialGradient(x, y, 0, x, y, r * 4);
+        g.addColorStop(0, 'rgba(' + p.hue + ',' + a.toFixed(3) + ')');
+        g.addColorStop(0.4, 'rgba(' + p.hue + ',' + (a * 0.35).toFixed(3) + ')');
+        g.addColorStop(1, 'rgba(' + p.hue + ',0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(x, y, r * 4, 0, 6.2832); ctx.fill();
+      }
+
+      // 流星：冷却结束后随机触发
+      streakCool -= dt;
+      if (!streak && streakCool <= 0) { streak = makeStreak(); }
+      if (streak) {
+        streak.life += dt;
+        streak.x += streak.vx * dt; streak.y += streak.vy * dt;
+        var k = streak.life / streak.ttl;
+        if (k >= 1 || streak.y * H > H * 0.9) { streak = null; streakCool = rand(2.4, 5.5); }
+        else {
+          var sx = streak.x * W, sy = streak.y * H;
+          var tail = streak.len * W;
+          var ex = sx - streak.vx / Math.hypot(streak.vx, streak.vy) * tail;
+          var ey = sy - streak.vy / Math.hypot(streak.vx, streak.vy) * tail;
+          var fade = Math.sin(Math.PI * k);              // 淡入淡出
+          var lg = ctx.createLinearGradient(sx, sy, ex, ey);
+          lg.addColorStop(0, 'rgba(210,232,255,' + (0.85 * fade).toFixed(3) + ')');
+          lg.addColorStop(1, 'rgba(150,196,255,0)');
+          ctx.strokeStyle = lg; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+          // 头部亮核
+          var hg = ctx.createRadialGradient(sx, sy, 0, sx, sy, 7);
+          hg.addColorStop(0, 'rgba(235,245,255,' + (0.9 * fade).toFixed(3) + ')');
+          hg.addColorStop(1, 'rgba(160,200,255,0)');
+          ctx.fillStyle = hg;
+          ctx.beginPath(); ctx.arc(sx, sy, 7, 0, 6.2832); ctx.fill();
+        }
+      }
+
+      ctx.globalCompositeOperation = 'source-over';
+      requestAnimationFrame(frame);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    requestAnimationFrame(frame);
+  })();
+  </script>
   <script>
   (function () {
     'use strict';
